@@ -1,0 +1,10 @@
+{"id": "q1", "category": "math", "question": "1+1 等于多少？只回答数字。", "expected": "2", "metric": "exact"}
+{"id": "q2", "category": "math", "question": "12 乘以 12 等于多少？只回答数字。", "expected": "144", "metric": "exact"}
+{"id": "q3", "category": "fact", "question": "中国的首都是哪个城市？只回答城市名。", "expected": "北京", "metric": "contains"}
+{"id": "q4", "category": "fact", "question": "Python 由谁发明？只回答人名。", "expected": "Guido van Rossum", "metric": "contains"}
+{"id": "q5", "category": "fact", "question": "HTTP 默认端口号是多少？只回答数字。", "expected": "80", "metric": "exact"}
+{"id": "q6", "category": "format", "question": "返回一个 JSON：{\"name\":\"alice\",\"age\":30}，不要加任何说明。", "expected": "{\"name\":\"alice\",\"age\":30}", "metric": "json_equal"}
+{"id": "q7", "category": "format", "question": "返回北京的邮政编码（6位数字），只回答数字。", "expected": "100000", "metric": "regex:^\\d{6}$"}
+{"id": "q8", "category": "open", "question": "用一句话解释什么是递归。", "expected_keywords": ["函数", "自身|自己"], "metric": "keywords"}
+{"id": "q9", "category": "open", "question": "请简要解释 HTTPS 比 HTTP 安全在哪里。", "expected_keywords": ["加密|TLS|SSL", "证书|身份|中间人"], "metric": "keywords"}
+{"id": "q10", "category": "judge", "question": "为什么程序员更喜欢用 Linux 做开发？", "rubric": "答案应该提到至少两点：开源/自由、命令行/工具链、性能、与服务器一致 中的任意两点。语言通顺、没有事实性错误。", "metric": "llm_judge"}

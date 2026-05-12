@@ -1,0 +1,64 @@
+# Secrets — 每个 demo 自己的 API_KEY 等
+.env
+.env.local
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.Python
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS / AI assistant
+.vscode/
+.idea/
+.claude/
+.cursor/
+.aider*
+.DS_Store
+*.swp
+
+# Test / lint caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock.bak
+
+# Go
+vendor/
+*.exe
+*.test
+*.out
+
+# Generated artifacts
+11-fine-tuning-demo/python/adapters/
+11-fine-tuning-demo/python/data/raw_samples.jsonl
+11-fine-tuning-demo/python/data/train.jsonl
+11-fine-tuning-demo/python/data/valid.jsonl
+11-fine-tuning-demo/python/data/test.jsonl
+11-fine-tuning-demo/python/compare_results.json
+08-evaluation-demo/python/results/
+07-caching-demo/python/cache_data/
+12-hybrid-search-demo/index/
+04-mcp-demo/test_workspace/
+04-mcp-demo/*/test_workspace/
+
+# Misc Python build / profile / notebook artifacts
+*.pkl
+*.prof
+coverage.xml
+.ipynb_checkpoints/
+build/
+dist/
