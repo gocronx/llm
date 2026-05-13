@@ -4,22 +4,23 @@
 
 ## 环境配置
 
-每个 demo 目录需要一个 `.env` 文件。`.env` 已在 `.gitignore` 里，自己建：
+每个 demo 目录都自带一个 `.env.example` 模板。`.env` 进了 `.gitignore`，所以**复制**模板而不是直接修改：
 
 ```bash
-API_BASE_URL=http://localhost:8000/v1
-API_KEY=your_api_key_here
-MODEL_ID=Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit
+cd 01-llm-function-call-demo
+cp .env.example .env
+# 编辑 .env，把 API_KEY=REPLACE_WITH_YOUR_KEY 改成你自己的
 ```
 
-少数 demo 需要额外变量：
+标准变量是 `API_BASE_URL` / `API_KEY` / `MODEL_ID`。少数 demo 需要额外变量：
 
 | demo | 额外变量 |
 |------|---------|
 | `08-evaluation-demo` | `JUDGE_MODEL_ID` |
-| `11-fine-tuning-demo` | `BASE_MODEL`、`ADAPTER_PATH` |
+| `11-fine-tuning-demo` | `BASE_MODEL`、`ADAPTER_PATH`（无 MODEL_ID）|
+| `15-a2a-protocol-demo` | `AGENT_TOKEN`（agent 间 bearer 认证）+ 3 个端口 |
 
-切云端 API（OpenAI/Anthropic）改 `API_BASE_URL` 和 `API_KEY` 即可。
+切云端 API（OpenAI / Anthropic）改 `API_BASE_URL` 和 `API_KEY` 即可。
 
 ## 推荐学习顺序
 
@@ -39,8 +40,9 @@ MODEL_ID=Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit
 | 12 | [hybrid-search-demo](12-hybrid-search-demo) | ⭐⭐⭐ | GREP + 向量检索（小项目不用） |
 | 13 | [prompt-engineering-demo](13-prompt-engineering-demo) | ⭐⭐ | Prompt 工程（价值在下降） |
 | 14 | [skill-loader-demo](14-skill-loader-demo) | ⭐⭐⭐⭐ | Skill 概念实现（按请求动态加载指令） |
+| 15 | [a2a-protocol-demo](15-a2a-protocol-demo) | ⭐⭐⭐⭐ | Agent-to-Agent 协议（多进程 agent 互通）|
 
-01-08 是核心，建议按顺序过一遍。09-10 看 Agent 兴趣。11-14 按需。
+01-08 是核心，建议按顺序过一遍。09-10 看 Agent 兴趣。11-15 按需。
 
 ## 快速开始
 
