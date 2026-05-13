@@ -38,8 +38,9 @@ MODEL_ID=Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit
 | 11 | [fine-tuning-demo](11-fine-tuning-demo) | ⭐⭐⭐ | LoRA 微调（场景受限） |
 | 12 | [hybrid-search-demo](12-hybrid-search-demo) | ⭐⭐⭐ | GREP + 向量检索（小项目不用） |
 | 13 | [prompt-engineering-demo](13-prompt-engineering-demo) | ⭐⭐ | Prompt 工程（价值在下降） |
+| 14 | [skill-loader-demo](14-skill-loader-demo) | ⭐⭐⭐⭐ | Skill 概念实现（按请求动态加载指令） |
 
-01-08 是核心，建议按顺序过一遍。09-10 看 Agent 兴趣。11-13 按需。
+01-08 是核心，建议按顺序过一遍。09-10 看 Agent 兴趣。11-14 按需。
 
 ## 快速开始
 
