@@ -6,6 +6,45 @@
 
 **三语言实现：Python ✅、Go ✅、Rust ✅**
 
+## 协作流程
+
+以 demo 里的"软件开发团队"为例：
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant O as Coordinator<br/>(调度器)
+    participant PM as 产品经理 Agent
+    participant Arch as 架构师 Agent
+    participant Dev as 开发 Agent
+    participant QA as 测试 Agent
+
+    U->>O: 需求："做一个 TODO 应用"
+
+    O->>PM: 拆解用户故事
+    PM-->>O: 用户故事 + 验收标准
+
+    O->>Arch: 设计技术方案
+    Arch-->>O: 架构图 + 技术选型
+
+    par 并行执行
+        O->>Dev: 实现核心功能
+        Dev-->>O: 代码
+    and
+        O->>QA: 编写测试用例
+        QA-->>O: 测试脚本
+    end
+
+    O->>QA: 用测试跑代码
+    QA-->>O: 测试报告 / 失败列表
+
+    Note over O: 失败则回到 Dev 改代码<br/>(可能反复几轮)
+
+    O-->>U: 完整交付物
+```
+
+本质：每个 Agent = 一次带特定 system prompt 的 LLM 调用。Coordinator 负责**串接顺序、传递上下文、处理失败回环**。
+
 ---
 
 ## 什么是 Multi-Agent

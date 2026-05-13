@@ -6,6 +6,36 @@ MCP 是 Anthropic 推出的标准协议，让 LLM 能够以标准化的方式连
 
 **三语言实现：Python、Go、Rust**
 
+## 协议流程
+
+```mermaid
+sequenceDiagram
+    participant C as MCP Client<br/>(LLM 应用)
+    participant S as MCP Server
+    participant R as 后端资源<br/>(文件/DB/API)
+
+    Note over C,S: 1. 握手
+    C->>S: initialize<br/>(协议版本、能力声明)
+    S-->>C: capabilities<br/>(支持的工具类型)
+
+    Note over C,S: 2. 发现工具
+    C->>S: tools/list
+    S-->>C: 工具清单<br/>[read_file, write_file, ...]
+
+    Note over C,S: 3. 调用工具
+    C->>S: tools/call<br/>read_file("a.txt")
+    S->>R: 读取 a.txt
+    R-->>S: 文件内容
+    S-->>C: 工具结果
+
+    Note over C: 4. 把结果喂给 LLM<br/>生成下一步回答
+```
+
+和直接写 Function Call 的差别：
+- 工具定义在 **Server** 端，多个 Client 应用复用同一份
+- Server 进程独立运行，可独立升级、独立部署
+- 协议统一 → 不同语言的 Client 都能用同一个 Server
+
 ---
 
 ## 什么是 MCP

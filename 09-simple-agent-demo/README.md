@@ -2,6 +2,40 @@
 
 基于 Function Call 构建的 AI Agent，支持自主决策、多步执行、记忆管理。
 
+## ReAct 执行循环
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as Agent (调度)
+    participant L as LLM
+    participant T as 工具集
+    participant M as 记忆
+
+    U->>A: 任务<br/>"帮我审查这个 PR"
+    A->>M: 写入任务
+    A->>L: messages + tools
+
+    loop 直到 LLM 说"done"或达到 max_iter
+        L-->>A: tool_call<br/>(下一步要做什么)
+        A->>T: 执行工具
+        T-->>A: 工具结果
+        A->>M: 把结果加进记忆
+        A->>L: messages + 全部历史
+    end
+
+    L-->>A: 最终回答<br/>(stop_reason: end_turn)
+    A-->>U: 总结结果
+```
+
+和 Function Call 的核心差别：
+
+- **Function Call**：应用决定调用顺序，LLM 只填参数
+- **Agent**：LLM 决定调用什么、调用几次、什么时候停止
+- 记忆贯穿整个循环——每轮 LLM 都看到完整历史，才能"接着上一步想"
+
+需要兜底机制：`max_iter` 上限（防止死循环）、错误降级（工具失败时给 LLM 看错误，让它换方案）。
+
 ## Agent 是什么？
 
 **Agent = Function Call + 自主决策 + 记忆管理**

@@ -6,6 +6,28 @@
 
 **三语言实现：Python ✅、Go（待实现）、Rust（待实现）**
 
+## 四种策略的取舍
+
+```mermaid
+flowchart LR
+    M[完整历史] -->|每轮都全发| Cost1[成本随轮数线性增长<br/>超长后超 context limit]
+    W[滑动窗口] -->|只发最近 N 轮| Cost2[成本稳定<br/>但忘旧事]
+    S[摘要压缩] -->|旧轮压缩成 1 条摘要| Cost3[成本稳定 + 保留要点<br/>但摘要本身要花 LLM 调用]
+    T[Token 上限] -->|达上限就截断/摘要| Cost4[硬性兜底<br/>最贴近生产]
+
+    classDef good fill:#d4edda,stroke:#155724
+    classDef bad fill:#f8d7da,stroke:#721c24
+    class Cost3,Cost4 good
+    class Cost1 bad
+```
+
+四种各有适用场景：
+
+- **完整历史**：原型阶段、对话短、不在乎成本
+- **滑动窗口**：客服话术（旧轮上下文真的不重要）
+- **摘要**：长会话、要"记住"关键事实
+- **Token 上限**：上面三种的组合策略，生产环境主力
+
 ---
 
 ## 什么是对话记忆管理

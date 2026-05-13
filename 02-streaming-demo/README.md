@@ -4,6 +4,38 @@
 
 **三语言实现：Python、Go、Rust**
 
+## 工作流程
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as 应用
+    participant L as LLM 服务
+
+    rect rgb(245, 230, 230)
+        Note over U,L: 非流式：等全部生成完才返回
+        U->>A: 提问
+        A->>L: POST /chat/completions
+        Note over L: 生成 500 tokens (约 8s)
+        L-->>A: 完整响应
+        A-->>U: 一次性显示
+    end
+
+    rect rgb(230, 245, 230)
+        Note over U,L: 流式：边生成边返回（SSE）
+        U->>A: 提问
+        A->>L: POST + stream:true
+        L-->>A: data: {"delta":"你"} (0.3s)
+        A-->>U: 显示 "你"
+        L-->>A: data: {"delta":"好"} (0.4s)
+        A-->>U: 显示 "你好"
+        Note over L,A: 每生成一个 token<br/>推一次 SSE event
+        L-->>A: data: [DONE]
+    end
+```
+
+关键差别：**首字延迟**从 5-10 秒降到 0.3-1 秒。总耗时差不多，但用户**感知**完全不同。
+
 ## 为什么需要 Streaming
 
 ### 用户体验对比

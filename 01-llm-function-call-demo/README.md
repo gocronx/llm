@@ -2,6 +2,30 @@
 
 Function Call（函数调用）多语言完整演示项目。
 
+## 工作流程
+
+```mermaid
+sequenceDiagram
+    participant U as 用户
+    participant A as 应用
+    participant L as LLM
+    participant T as 本地工具
+
+    U->>A: 自然语言请求<br/>("北京天气怎么样")
+    A->>L: messages + tools 定义
+    L-->>A: tool_calls<br/>get_weather("北京")
+    A->>T: 执行 get_weather("北京")
+    T-->>A: {temp: 15, condition: "晴"}
+    A->>L: messages + tool_result
+    L-->>A: 最终自然语言回答
+    A-->>U: "北京今天 15°C，晴"
+```
+
+关键点：
+- LLM 不直接执行函数，只**决定要调用哪个函数 + 用什么参数**
+- 应用层负责真正执行，并把结果回传给 LLM 做总结
+- 一轮请求里可能多次往返（LLM 觉得还要查别的工具时）
+
 ## 📁 项目结构
 
 ```

@@ -6,6 +6,36 @@
 
 **三语言实现：Python ✅、Go（待实现）、Rust（待实现）**
 
+## 决策流程
+
+```mermaid
+flowchart TD
+    R[请求 LLM API] --> S{响应状态?}
+    S -->|2xx 成功| OK[返回结果]
+    S -->|4xx 客户端错误| FAIL[直接失败<br/>重试无意义]
+    S -->|429 限流 / 5xx / 超时| CB{断路器状态?}
+
+    CB -->|OPEN| FB[走降级策略<br/>缓存 / 备用模型 / 默认值]
+    CB -->|CLOSED 或 HALF_OPEN| RT{已重试 N 次?}
+
+    RT -->|否| WAIT[指数退避 + Jitter]
+    WAIT --> R
+    RT -->|是| MARK[标记失败<br/>断路器计数 +1] --> FB
+
+    classDef ok fill:#d4edda,stroke:#155724
+    classDef bad fill:#f8d7da,stroke:#721c24
+    classDef warn fill:#fff3cd,stroke:#856404
+    class OK ok
+    class FAIL,FB bad
+    class WAIT,MARK warn
+```
+
+三层防御逐级兜底：
+
+- **重试**：处理临时性故障（限流、瞬时网络抖动）
+- **断路器**：防止持续失败时雪崩——连续失败 N 次后**暂停发起请求一段时间**
+- **降级**：所有手段都失败时返回备用结果（缓存、规则回答、占位提示）
+
 ---
 
 ## 什么是错误处理
