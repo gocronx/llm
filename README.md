@@ -67,3 +67,7 @@ python python/demo.py
 - 语言：Python（全部）、Go / Rust（部分 demo 有对应实现）
 - 模型：本地 MLX、或任意 OpenAI 兼容 API
 - 仅需 `requests` / `python-dotenv` / `colorama` 之类轻量依赖
+
+## License
+
+MIT — 详见 [LICENSE](LICENSE)。
