@@ -1,0 +1,20 @@
+{"id": "q1", "prompt": "用一句话解释什么是 HTTP。"}
+{"id": "q2", "prompt": "1+1 等于几？"}
+{"id": "q3", "prompt": "Python 列表和元组的主要区别？一句话。"}
+{"id": "q4", "prompt": "TCP 和 UDP 的核心差异？一句话。"}
+{"id": "q5", "prompt": "什么是 SQL 注入？一句话。"}
+{"id": "q6", "prompt": "Docker 和虚拟机的区别？一句话。"}
+{"id": "q7", "prompt": "什么是 RESTful API？一句话。"}
+{"id": "q8", "prompt": "Git rebase 和 merge 的区别？一句话。"}
+{"id": "q9", "prompt": "什么是 OAuth 2.0？一句话。"}
+{"id": "q10", "prompt": "Redis 主要解决什么问题？一句话。"}
+{"id": "q11", "prompt": "什么是哈希表？一句话。"}
+{"id": "q12", "prompt": "数据库索引的原理？一句话。"}
+{"id": "q13", "prompt": "什么是死锁？一句话。"}
+{"id": "q14", "prompt": "TLS 解决什么问题？一句话。"}
+{"id": "q15", "prompt": "什么是依赖注入？一句话。"}
+{"id": "q16", "prompt": "Pub/Sub 模式的核心？一句话。"}
+{"id": "q17", "prompt": "什么是 CAP 定理？一句话。"}
+{"id": "q18", "prompt": "Kafka 和 RabbitMQ 的主要区别？一句话。"}
+{"id": "q19", "prompt": "什么是 idempotent？一句话。"}
+{"id": "q20", "prompt": "DNS 解析的过程？一句话。"}
