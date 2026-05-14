@@ -54,6 +54,10 @@ vendor/
 12-hybrid-search-demo/index/
 04-mcp-demo/test_workspace/
 04-mcp-demo/*/test_workspace/
+17-cron-agent-demo/python/data/state.json
+18-tool-guardrails-demo/python/data/
+18-tool-guardrails-demo/python/logs/
+19-batch-runner-demo/python/results/
 
 # Misc Python build / profile / notebook artifacts
 *.pkl
