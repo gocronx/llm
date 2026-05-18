@@ -1,77 +1,43 @@
-"""
-快速测试脚本
-"""
+"""test.py —— 只验证一件事：LLM 在三类问题上调对了工具。"""
+from __future__ import annotations
 
 import os
-import requests
-import json
+
+import httpx
 from dotenv import load_dotenv
-from function_definitions import FUNCTION_DEFINITIONS
+from openai import OpenAI
 
-# 加载配置
+from tools import schemas
+
 load_dotenv()
-API_BASE_URL = os.getenv("API_BASE_URL")
-API_KEY = os.getenv("API_KEY")
-MODEL_ID = os.getenv("MODEL_ID")
+# trust_env=False 见 main.py 的注释（绕系统代理）
+_client = OpenAI(
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ.get("API_KEY", "not-needed"),
+    http_client=httpx.Client(trust_env=False, timeout=60.0),
+)
+_model = os.environ["MODEL_ID"]
+
+CASES = [
+    ("北京天气怎么样？", "get_weather"),
+    ("156 除以 12", "calculate"),
+    ("搜索笔记本相关的产品", "search_products"),
+]
 
 
-def test_function_call():
-    """测试 Function Call"""
-    
-    print("\n" + "="*60)
-    print("Function Call 测试")
-    print("="*60 + "\n")
-    
-    test_cases = [
-        ("天气查询", "北京天气怎么样？", "get_weather"),
-        ("数学计算", "156 除以 12", "calculate"),
-        ("数据库搜索", "帮我在数据库中搜索笔记本相关的产品", "search_database"),
-    ]
-    
-    results = []
-    
-    for name, question, expected in test_cases:
-        print(f"测试: {name}")
-        print(f"问题: {question}")
-        
-        response = requests.post(
-            f"{API_BASE_URL}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": MODEL_ID,
-                "messages": [{"role": "user", "content": question}],
-                "tools": [
-                    {"type": "function", "function": func}
-                    for func in FUNCTION_DEFINITIONS
-                ],
-                "max_tokens": 500
-            },
-            timeout=30
+def main() -> None:
+    passed = 0
+    for q, expected in CASES:
+        resp = _client.chat.completions.create(
+            model=_model, messages=[{"role": "user", "content": q}], tools=schemas()
         )
-        
-        if response.status_code == 200:
-            data = response.json()
-            tool_calls = data["choices"][0]["message"].get("tool_calls")
-            
-            if tool_calls:
-                func_name = tool_calls[0]["function"]["name"]
-                success = func_name == expected
-                print(f"结果: {'✓' if success else '✗'} 调用了 {func_name}\n")
-                results.append(success)
-            else:
-                print(f"结果: ✗ 未调用函数\n")
-                results.append(False)
-        else:
-            print(f"结果: ✗ API 错误\n")
-            results.append(False)
-    
-    print("="*60)
-    print(f"测试结果: {sum(results)}/{len(results)} 通过")
-    print("="*60 + "\n")
+        tcs = resp.choices[0].message.tool_calls or []
+        got = tcs[0].function.name if tcs else "(no tool call)"
+        ok = got == expected
+        passed += ok
+        print(f"{'✓' if ok else '✗'} {q!r:40s} expected={expected:18s} got={got}")
+    print(f"\n{passed}/{len(CASES)} passed")
 
 
 if __name__ == "__main__":
-    test_function_call()
+    main()

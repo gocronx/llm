@@ -1,8 +1,8 @@
-# LLM Function Call Demo
+# 01 · LLM Function Call Demo
 
-Function Call（函数调用）多语言完整演示项目。
+Function Call 三语言对照演示。LLM 不执行函数，只决定调哪个工具+用什么参数；应用层执行后把结果回灌给 LLM 总结。
 
-## 工作流程
+## 两轮交互
 
 ```mermaid
 sequenceDiagram
@@ -11,154 +11,91 @@ sequenceDiagram
     participant L as LLM
     participant T as 本地工具
 
-    U->>A: 自然语言请求<br/>("北京天气怎么样")
-    A->>L: messages + tools 定义
-    L-->>A: tool_calls<br/>get_weather("北京")
-    A->>T: 执行 get_weather("北京")
-    T-->>A: {temp: 15, condition: "晴"}
-    A->>L: messages + tool_result
-    L-->>A: 最终自然语言回答
-    A-->>U: "北京今天 15°C，晴"
+    U->>A: "北京天气怎么样"
+    A->>L: messages + tools schemas
+    L-->>A: tool_calls=[get_weather(city="北京")]
+    A->>T: get_weather("北京")
+    T-->>A: {"temperature": 25, "condition": "晴"}
+    A->>L: messages + assistant + tool result
+    L-->>A: "北京今天 25°C，晴"
+    A-->>U: 最终回答
 ```
 
-关键点：
-- LLM 不直接执行函数，只**决定要调用哪个函数 + 用什么参数**
-- 应用层负责真正执行，并把结果回传给 LLM 做总结
-- 一轮请求里可能多次往返（LLM 觉得还要查别的工具时）
+LLM 一次可能并行调多个工具 —— 应用要遍历所有 `tool_calls`，不能只取 `[0]`。
 
-## 📁 项目结构
+## 目录结构
 
 ```
-01-llm-function-call-demo/
-├── .env                    # 共享配置文件
-├── README.md              # 本文件
-├── python/                # Python 实现
-│   ├── demo.py
-│   ├── test.py
-│   ├── function_definitions.py
-│   └── requirements.txt
-├── go/                    # Go 实现
-│   ├── demo.go
-│   ├── test.go
-│   ├── functions.go
-│   └── go.mod
-├── rust/                  # Rust 实现
-│   ├── src/
-│   │   ├── main.rs       (demo)
-│   │   ├── test.rs
-│   │   └── functions.rs
-│   └── Cargo.toml
-├── docs/                  # 详细文档
-└── archive/               # 历史示例
+.
+├── .env             # API_BASE_URL / API_KEY / MODEL_ID
+├── python/          # Python 实现（client.py + tools.py + main.py + test.py）
+├── go/              # Go 实现（client.go + tools.go + main.go）
+├── rust/            # Rust 实现（client.rs + tools.rs + main.rs）
+└── docs/            # TUTORIAL / USAGE_GUIDE / LOCAL_MODELS_GUIDE
 ```
 
-## ⚙️ 配置环境变量
+每个语言目录里：
+- `client.*` —— 两轮 function-call 往返，**整文件可 cp 出去用**
+- `tools.*` —— 工具注册表（schema 和实现绑在一起，加新工具只改这里）
+- `main.*` —— demo 入口（默认跑 3 个场景；带 `verify` / `test` 子命令则验证 LLM 调对了工具）
 
-编辑 `.env` 文件，配置你的 API 信息：
+## 配置 `.env`
 
 ```bash
 API_BASE_URL=http://localhost:8000/v1
-API_KEY=Baron@123321
+API_KEY=...           # 本地 MLX 可填占位串
 MODEL_ID=Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit
 ```
 
----
+## 跑起来
 
-## 🐍 Python 版本
-
-### 安装依赖
+### Python
 
 ```bash
 cd python
 pip install -r requirements.txt
+python main.py        # demo
+python test.py        # 验证调对工具
 ```
 
-### 运行测试
-
-```bash
-python test.py
-```
-
-### 运行演示
-
-```bash
-python demo.py
-```
-
----
-
-## 🔷 Go 版本
-
-### 安装依赖
+### Go
 
 ```bash
 cd go
-go mod download
+go mod tidy
+go run .              # demo
+go run . verify       # 验证（注意是 `.` 不是 `main.go`）
 ```
 
-### 运行测试
-
-```bash
-go run test.go functions.go
-```
-
-### 运行演示
-
-```bash
-go run demo.go functions.go
-```
-
----
-
-## 🦀 Rust 版本
-
-### 运行演示
+### Rust
 
 ```bash
 cd rust
-cargo run --bin demo
+cargo run             # demo
+cargo run -- verify   # 验证
 ```
 
-### 运行测试
+## 三语言行数对比
 
-```bash
-cargo run --bin test
-```
+| 语言 | tools | client | main | 总计 |
+|---|---|---|---|---|
+| Python | 98 | 35 | 38 + test 43 | **214** |
+| Go | 164 | 54 | 94 | **312** |
+| Rust | 136 | 65 | 75 | **276** |
 
----
+## 三个示例工具
 
-## 📝 示例函数
+| 工具 | 用途 | 关键设计 |
+|---|---|---|
+| `get_weather` | 取城市天气 | `city` 必填，`unit` 默认 celsius |
+| `calculate` | 四则运算 | `op` 枚举 add/sub/mul/div，`div` 时显式拦 b=0 |
+| `search_products` | 产品搜索 | 暴露 `min_price`/`max_price` —— 让 LLM 自己把"500 元以上"翻译成 `min_price=500`，**不要在代码里 NLP** |
 
-所有语言版本都实现了相同的三个函数：
+## 常见坑（三语言通用）
 
-1. **get_weather** - 获取天气信息
-2. **calculate** - 数学计算
-3. **search_database** - 数据库搜索
+- ❌ **只取 `tool_calls[0]`** —— 现代模型并行调多工具会丢调用，必须 for-loop 全跑完
+- ❌ **assistant message 不回灌** —— 第二轮 LLM 看不到自己刚才决定调啥工具
+- ❌ **schema 和函数实现分两份名单** —— 加工具忘改一边是这类代码最常见的 bug，本 demo 用装饰器 / init / 结构体绑死
+- ⚠️ **macOS 系统代理 / `HTTP_PROXY` 把 localhost 走代理** —— Python 版用 `httpx.Client(trust_env=False)`，Go 版用 `Transport.Proxy = nil` 显式绕过
 
-## 📄 文件说明
-
-### 每个语言版本包含：
-
-- **demo** - 完整演示（包含函数执行和最终回答）
-- **test** - 快速测试（验证模型是否支持 Function Call）
-- **functions** - 函数定义和实现
-
-## 💡 核心概念
-
-### Function Call 流程
-
-```
-用户问题 → LLM 分析 → 决定调用函数 → 执行函数 → LLM 生成回答
-```
-
-### 两轮对话
-
-1. **第一轮**：发送用户问题 + 函数定义 → LLM 返回要调用的函数
-2. **第二轮**：发送函数执行结果 → LLM 生成自然语言回答
-
-## ✨ 特点
-
-- ✅ 多语言：Python、Go、Rust 三种实现
-- ✅ 简洁：只保留核心代码
-- ✅ 实用：直接可用的演示
-- ✅ 易扩展：轻松添加自定义函数
+详见每个语言子目录的 README。

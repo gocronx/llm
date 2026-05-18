@@ -1,184 +1,75 @@
-mod functions;
+//! main.rs —— demo 入口。
+//! 默认跑三个 demo 场景；`cargo run -- verify` 验证 LLM 在三类问题上调对了工具。
 
-use dotenv::dotenv;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+mod client;
+mod tools;
+
+use client::{run, Config};
+use serde_json::{json, Value};
 use std::env;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct Message {
-    role: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    content: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tool_calls: Option<Vec<ToolCall>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tool_call_id: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    name: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct ToolCall {
-    id: String,
-    #[serde(rename = "type")]
-    tool_type: String,
-    function: FunctionCall,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct FunctionCall {
-    name: String,
-    arguments: String,
-}
-
-#[derive(Debug, Serialize)]
-struct Tool {
-    #[serde(rename = "type")]
-    tool_type: String,
-    function: functions::FunctionDefinition,
-}
-
-#[derive(Debug, Serialize)]
-struct ChatRequest {
-    model: String,
-    messages: Vec<Message>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    tools: Option<Vec<Tool>>,
-    max_tokens: i32,
-}
-
-#[derive(Debug, Deserialize)]
-struct ChatResponse {
-    choices: Vec<Choice>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Choice {
-    message: Message,
-}
-
-fn call_llm(
-    messages: Vec<Message>,
-    functions: Option<Vec<functions::FunctionDefinition>>,
-) -> Result<ChatResponse, Box<dyn std::error::Error>> {
-    dotenv().ok();
-    let api_base_url = env::var("API_BASE_URL")?;
-    let api_key = env::var("API_KEY")?;
-    let model_id = env::var("MODEL_ID")?;
-
-    let tools = functions.map(|funcs| {
-        funcs
-            .into_iter()
-            .map(|f| Tool {
-                tool_type: "function".to_string(),
-                function: f,
-            })
-            .collect()
-    });
-
-    let request = ChatRequest {
-        model: model_id,
-        messages,
-        tools,
-        max_tokens: 1000,
+fn main() {
+    dotenv::from_filename("../.env").ok();
+    let cfg = Config {
+        base_url: env::var("API_BASE_URL").expect("API_BASE_URL not set"),
+        api_key: env::var("API_KEY").unwrap_or_else(|_| "not-needed".into()),
+        model: env::var("MODEL_ID").expect("MODEL_ID not set"),
     };
 
-    let response = ureq::post(&format!("{}/chat/completions", api_base_url))
-        .set("Authorization", &format!("Bearer {}", api_key))
-        .set("Content-Type", "application/json")
-        .timeout(std::time::Duration::from_secs(60))
-        .send_json(&request)?;
-
-    let chat_response: ChatResponse = response.into_json()?;
-    Ok(chat_response)
-}
-
-fn run_function_call(user_message: &str) {
-    println!("{}", "=".repeat(60));
-    println!("用户: {}", user_message);
-    println!("{}\n", "=".repeat(60));
-
-    let mut messages = vec![Message {
-        role: "user".to_string(),
-        content: Some(user_message.to_string()),
-        tool_calls: None,
-        tool_call_id: None,
-        name: None,
-    }];
-
-    // 第一次调用：让 LLM 决定是否调用函数
-    println!("→ 发送请求到 LLM...");
-    let response = match call_llm(messages.clone(), Some(functions::get_function_definitions())) {
-        Ok(r) => r,
-        Err(e) => {
-            println!("✗ API 调用失败: {}\n", e);
-            return;
-        }
-    };
-
-    let message = &response.choices[0].message;
-
-    if let Some(tool_calls) = &message.tool_calls {
-        if !tool_calls.is_empty() {
-            // LLM 决定调用函数
-            let tool_call = &tool_calls[0];
-            let func_name = &tool_call.function.name;
-            let func_args: Value = serde_json::from_str(&tool_call.function.arguments).unwrap();
-
-            println!("✓ LLM 调用函数: {}", func_name);
-            println!("  参数: {}\n", func_args);
-
-            // 执行函数
-            println!("→ 执行函数...");
-            let result = functions::execute_function(func_name, &func_args);
-            println!("✓ 函数返回: {}\n", result);
-
-            // 第二次调用：生成最终回答
-            messages.push(Message {
-                role: message.role.clone(),
-                content: message.content.clone(),
-                tool_calls: message.tool_calls.clone(),
-                tool_call_id: None,
-                name: None,
-            });
-            messages.push(Message {
-                role: "tool".to_string(),
-                content: Some(result),
-                tool_calls: None,
-                tool_call_id: Some(tool_call.id.clone()),
-                name: Some(func_name.clone()),
-            });
-
-            println!("→ 生成最终回答...");
-            match call_llm(messages, None) {
-                Ok(final_response) => {
-                    if let Some(answer) = &final_response.choices[0].message.content {
-                        println!("✓ 最终回答:\n{}\n", answer);
-                    }
-                }
-                Err(e) => {
-                    println!("✗ API 调用失败: {}\n", e);
-                }
-            }
-        }
+    let args: Vec<String> = env::args().collect();
+    if args.get(1).map(String::as_str) == Some("verify") {
+        verify(&cfg);
     } else {
-        // 直接回答
-        if let Some(content) = &message.content {
-            println!("✓ LLM 直接回答:\n{}\n", content);
+        demo(&cfg);
+    }
+}
+
+fn demo(cfg: &Config) {
+    for q in [
+        "北京今天天气怎么样？",
+        "156 除以 12 等于多少？",
+        "搜索价格在 500 元以上的产品",
+    ] {
+        println!(">>> {q}");
+        match run(cfg, q) {
+            Ok(ans) => println!("{ans}\n"),
+            Err(e) => println!("  ERROR: {e}\n"),
         }
     }
 }
 
-fn main() {
-    // 从上级目录加载 .env
-    dotenv::from_filename("../.env").ok();
+fn verify(cfg: &Config) {
+    let cases = [
+        ("北京天气怎么样？", "get_weather"),
+        ("156 除以 12", "calculate"),
+        ("搜索笔记本相关的产品", "search_products"),
+    ];
+    let mut passed = 0;
+    for (q, expected) in cases {
+        let resp: Result<Value, String> = ureq::post(&format!("{}/chat/completions", cfg.base_url))
+            .set("Authorization", &format!("Bearer {}", cfg.api_key))
+            .set("Content-Type", "application/json")
+            .timeout(std::time::Duration::from_secs(60))
+            .send_json(json!({
+                "model": cfg.model,
+                "messages": [{"role": "user", "content": q}],
+                "tools": tools::schemas(),
+            }))
+            .map_err(|e| e.to_string())
+            .and_then(|r| r.into_json::<Value>().map_err(|e| e.to_string()));
 
-    println!("\n{}", "=".repeat(60));
-    println!("Function Call Demo (Rust)");
-    println!("{}", "=".repeat(60));
-
-    run_function_call("北京今天天气怎么样？");
-    run_function_call("156 除以 12 等于多少？");
-    run_function_call("搜索价格在500元以上的产品");
+        let got = match &resp {
+            Err(e) => format!("ERROR: {e}"),
+            Ok(r) => r["choices"][0]["message"]["tool_calls"][0]["function"]["name"]
+                .as_str()
+                .unwrap_or("(no tool call)")
+                .to_string(),
+        };
+        let ok = got == expected;
+        if ok {
+            passed += 1;
+        }
+        println!("{} {q:30} expected={expected:18} got={got}", if ok { "✓" } else { "✗" });
+    }
+    println!("\n{}/{} passed", passed, cases.len());
 }
