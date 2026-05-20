@@ -66,6 +66,21 @@ cp .env.example .env
 | 19 | [batch-runner-demo](19-batch-runner-demo) | ⭐⭐⭐⭐ | 并发 + 重试 + 断点续跑的批量推理 |
 | 20 | [context-refs-demo](20-context-refs-demo) | ⭐⭐⭐⭐ | `@file.py` 引用语法（Cursor / Claude Code 风格）|
 
+### 长跑 Agent 治理（21-24）
+
+跑 5 轮的 ReAct 跟跑 50 轮的 Agent 是两回事。这一区从 nanobot / hermes-agent / PraisonAI 抽出真生产中长跑 Agent 的 4 类治理算法 —— `09-simple-agent-demo` 的进阶版。
+
+| # | demo | 价值 | 说明 |
+|---|------|------|------|
+| 21 | [context-governance](21-context-governance) | ⭐⭐⭐⭐⭐ | 5 步组合拳：orphan tool 清理 + backfill + microcompact + budget 截断 + snip history。源自 nanobot |
+| 22 | [llm-summary-compression](22-llm-summary-compression) | ⭐⭐⭐⭐ | LLM 自己把老 history 总结成结构化 markdown（类 Claude Code `/compact`）。源自 hermes-agent |
+| 23 | [subagent-orchestration](23-subagent-orchestration) | ⭐⭐⭐⭐ | 主 agent 并行 fan-out 多 subagent + isolated context + 真 LLM 实测加速假设 |
+| 24 | [tool-call-recovery](24-tool-call-recovery) | ⭐⭐⭐⭐ | 4 类 agent 死循环检测 + 错误喂回 LLM 自修；真 DuckDuckGo 联网搜索 |
+
+### LLM 推理内核（外链）
+
+不是用 LLM，是**实现 LLM**。RoPE / RMSNorm / 量化 / 采样 / 投机解码这类底层数学放在单独项目避免混淆：[**pythonProject/llm-internals**](../llm-internals/)（6 demo，numpy 教学版）。
+
 ### 怎么选
 
 - **新手入门**：按 01 → 08 顺序过，每个看 README + 跑一遍就行
@@ -73,6 +88,8 @@ cp .env.example .env
 - **想降本**：07（缓存）+ 16（模型路由），两层正交叠加
 - **跑评测 / 数据生成**：08 + 19，配合用
 - **写 IDE / 编辑器集成**：20（@-ref）+ 14（skill）+ 04（MCP）
+- **Agent 跑长了崩了**：21（5 步治理）→ 22（LLM 总结压缩）→ 24（错误恢复）；需多 agent 并行就上 23
+- **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / 量化 / 投机解码
 
 ## 快速开始
 
