@@ -1,0 +1,90 @@
+{
+  "events": [
+    {
+      "ts": "2026-05-14T10:58:09",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T10:58:09",
+      "job": "check_api",
+      "status": "up",
+      "http": 200,
+      "latency_ms": 9
+    },
+    {
+      "ts": "2026-05-14T10:58:39",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T10:59:09",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T10:59:09",
+      "job": "check_api",
+      "status": "up",
+      "http": 200,
+      "latency_ms": 6
+    },
+    {
+      "ts": "2026-05-14T10:59:39",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T10:59:56",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T10:59:56",
+      "job": "check_api",
+      "status": "up",
+      "http": 200,
+      "latency_ms": 12
+    },
+    {
+      "ts": "2026-05-14T11:00:26",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T11:00:56",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T11:00:56",
+      "job": "check_api",
+      "status": "up",
+      "http": 200,
+      "latency_ms": 3
+    },
+    {
+      "ts": "2026-05-14T11:01:26",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T11:01:56",
+      "job": "heartbeat",
+      "status": "alive"
+    },
+    {
+      "ts": "2026-05-14T11:01:56",
+      "job": "check_api",
+      "status": "up",
+      "http": 200,
+      "latency_ms": 6
+    }
+  ],
+  "last_heartbeat": "2026-05-14T11:01:56",
+  "last_summary": {
+    "ts": "2026-05-14T11:02:06",
+    "event_count": 5,
+    "summary": "Let me analyze the events:\n\n1. 2026-05-14T11:00:26 - heartbeat - alive\n2. 2026-05-14T11:00:56 - heartbeat - alive\n3. 2026-05-14T11:00:56 - check_api - up\n4. 2026-05-14T11:01:26 - heartbeat - alive\n5. 2026-05-14T11:01:56 - heartbeat - alive\n\nEvent count: 5 events total"
+  }
+}
