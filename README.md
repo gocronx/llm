@@ -1,15 +1,16 @@
 # LLM 开发实战项目集
 
-24 个独立 demo，按"目的"分到 4 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
+24 个独立 demo + 源码拆解，按"目的"分到 5 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
 
 ## 目录结构
 
 ```
 llm/
-├── core/         # 核心 LLM 工程能力 (8 个)
-├── agent/        # Agent 范式 + 长跑治理 (6 个)
-├── production/   # 生产工程化 (7 个)
-└── niche/        # 价值评估两极的话题 (3 个)
+├── core/           # 核心 LLM 工程能力 (8 个)
+├── agent/          # Agent 范式 + 长跑治理 (6 个)
+├── production/     # 生产工程化 (7 个)
+├── niche/          # 价值评估两极的话题 (3 个)
+└── case-studies/   # 真实开源项目源码拆解 + 最小复刻
 ```
 
 ## 环境配置
@@ -82,6 +83,18 @@ cp .env.example .env
 | 02 | [hybrid-search](niche/02-hybrid-search) | ⭐⭐⭐ | GREP + 向量检索（小项目不用） |
 | 03 | [prompt-engineering](niche/03-prompt-engineering) | ⭐⭐ | Prompt 工程（价值在下降） |
 
+### case-studies · 真实项目源码拆解
+
+跟前 4 个目录的角度相反 —— 不是"我要做 X 能力", 而是"某个开源项目凭什么这么好用". 拿一个项目, 定位到具体代码, 砍到 100-200 行的最小可跑复刻, 再总结能不能搬到自己项目里.
+
+每个 case 自带 4 个产物: `ANALYSIS.md` (源码 + 行号) / `PATTERNS.md` (设计模式抽象) / `BENCHMARK.md` (原版 vs 复刻差距) / `python/` (最小可跑 demo).
+
+| # | case | 拆的是 | 主要回答 |
+|---|------|-------|---------|
+| 01 | [hermes-skill-evolution](case-studies/01-hermes-skill-evolution) | hermes-agent | "越用越聪明" 是 fine-tune 还是上下文工程? |
+
+进一步说明见 [`case-studies/README.md`](case-studies/README.md).
+
 ### 怎么选
 
 - **新手入门**：按 `core/01 → 08` 顺序过，每个看 README + 跑一遍就行
@@ -91,6 +104,7 @@ cp .env.example .env
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
 - **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（错误恢复）；多 agent 并行上 `05-subagent-orchestration`
 - **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / 量化 / 投机解码
+- **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" 机制 (01)
 
 ## 快速开始
 
