@@ -92,6 +92,9 @@ cp .env.example .env
 | # | case | 拆的是 | 主要回答 |
 |---|------|-------|---------|
 | 01 | [hermes-skill-evolution](case-studies/01-hermes-skill-evolution) | hermes-agent | "越用越聪明" 是 fine-tune 还是上下文工程? |
+| 02 | [openhands-architecture](case-studies/02-openhands-architecture) | OpenHands | 351MB 平台级架构跟单进程 agent 差什么? LLM 特色在哪? |
+| 03 | [openhands-sandbox-isolation](case-studies/03-openhands-sandbox-isolation) | OpenHands | sandbox 子系统的抽象+状态机+多后端怎么实现+能不能抄? |
+| 04 | [openhands-event-callbacks](case-studies/04-openhands-event-callbacks) | OpenHands | 事件后挂副作用怎么不耦合? 可插拔 processor + 双维度过滤 |
 
 进一步说明见 [`case-studies/README.md`](case-studies/README.md).
 
@@ -104,7 +107,7 @@ cp .env.example .env
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
 - **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（错误恢复）；多 agent 并行上 `05-subagent-orchestration`
 - **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / 量化 / 投机解码
-- **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" 机制 (01)
+- **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04)
 
 ## 快速开始
 

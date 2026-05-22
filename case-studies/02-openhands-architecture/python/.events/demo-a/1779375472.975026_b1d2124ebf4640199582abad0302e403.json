@@ -1,0 +1,9 @@
+{
+  "kind": "assistant_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "```python\nfrom fastapi import FastAPI\n\napp = FastAPI()\n\n@app.get(\"/\")\ndef read_root():\n    username = \"ramen\"  # 用户名占位符\n    return {\"message\": f\"Hello, {username}! 🍜\"}\n\n@app.get(\"/hello/{name}\")\ndef hello(name: str):\n    # 也可以用 ramen 作为默认值\n    return {\"message\": f\"Hello, {name}!\", \"default_user\": \"ramen\"}\n```\n\n**运行方式：**\n```bash\npip install fastapi uvicorn\nuvicorn main:app --reload\n```\n\n**API 端点：**\n- `GET /` → `{\"message\": \"Hello, ramen! 🍜\"}`\n- `GET /hello/world` → `{\"message\": \"Hello, world!\", \"default_user\": \"ramen\"}`\n\n访问 `http://127.0.0.1:8000/` 或 Swagger UI `http://127.0.0.1:8000/docs`"
+  },
+  "event_id": "b1d2124ebf4640199582abad0302e403",
+  "timestamp": 1779375472.975026
+}

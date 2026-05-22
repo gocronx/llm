@@ -1,0 +1,9 @@
+{
+  "kind": "user_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "给我写个 flask hello world, 用我之前说的占位符"
+  },
+  "event_id": "6ac370fcc6b54c429621c11bf25313f9",
+  "timestamp": 1779375432.149067
+}

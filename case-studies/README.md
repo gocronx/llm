@@ -51,6 +51,9 @@ NN-<project>-<mechanism>/
 | # | case | 拆的是 | 主要回答 |
 |---|------|-------|---------|
 | 01 | [hermes-skill-evolution](01-hermes-skill-evolution) | hermes-agent | "越用越聪明" 到底是什么？模型变了还是上下文变了？ |
+| 02 | [openhands-architecture](02-openhands-architecture) | OpenHands | 351MB 平台级 AI 工程师跟单进程 CLI agent 差什么？LLM 特色在哪？|
+| 03 | [openhands-sandbox-isolation](03-openhands-sandbox-isolation) | OpenHands | sandbox 子系统怎么实现？抽象 + 状态机 + 多后端，能不能搬？ |
+| 04 | [openhands-event-callbacks](04-openhands-event-callbacks) | OpenHands | 事件后挂副作用怎么不耦合？可插拔 processor + 双维度过滤 + fire-and-forget |
 
 ## 用法建议
 

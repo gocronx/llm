@@ -1,0 +1,6 @@
+openai>=1.40.0
+httpx>=0.27.0
+python-dotenv>=1.0.0
+psutil>=5.9.0
+# 可选: 只有跑 --backend docker 时才需要. 不装的话 ProcessSandbox 仍能用.
+docker>=6.0.0

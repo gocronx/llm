@@ -1,0 +1,9 @@
+{
+  "kind": "user_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "再写一个 fastapi 版本, 同样用我说的占位符"
+  },
+  "event_id": "b751e3248cff4074bce4d1ef015a4b37",
+  "timestamp": 1779375453.063095
+}

@@ -1,0 +1,9 @@
+{
+  "kind": "user_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "记住我喜欢用 ramen 当用户名占位符"
+  },
+  "event_id": "ea206d3179af44e2b261f1e26cdcc201",
+  "timestamp": 1779375420.1792629
+}

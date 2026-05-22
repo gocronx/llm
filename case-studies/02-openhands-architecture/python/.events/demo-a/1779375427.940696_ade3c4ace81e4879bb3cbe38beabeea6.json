@@ -1,0 +1,9 @@
+{
+  "kind": "assistant_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "好的，已记住！以后需要用户名占位符时，我会用 **ramen** 🍜\n\n有什么需要帮忙的吗？"
+  },
+  "event_id": "ade3c4ace81e4879bb3cbe38beabeea6",
+  "timestamp": 1779375427.940696
+}

@@ -1,0 +1,9 @@
+{
+  "kind": "assistant_message",
+  "conversation_id": "demo-a",
+  "payload": {
+    "text": "```python\nfrom flask import Flask\n\napp = Flask(__name__)\n\n@app.route('/')\ndef hello():\n    username = \"ramen\"  # 用户名占位符\n    return f\"Hello, {username}! 🍜\"\n\nif __name__ == '__main__':\n    app.run(debug=True)\n```\n\n**运行方式：**\n```bash\npip install flask\npython app.py\n```\n\n访问 `http://127.0.0.1:5000/` 即可看到：`Hello, ramen! 🍜`"
+  },
+  "event_id": "cf64327043c248aebf0cbf7dca63bfc4",
+  "timestamp": 1779375446.907627
+}
