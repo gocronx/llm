@@ -54,6 +54,7 @@ NN-<project>-<mechanism>/
 | 02 | [openhands-architecture](02-openhands-architecture) | OpenHands | 351MB 平台级 AI 工程师跟单进程 CLI agent 差什么？LLM 特色在哪？|
 | 03 | [openhands-sandbox-isolation](03-openhands-sandbox-isolation) | OpenHands | sandbox 子系统怎么实现？抽象 + 状态机 + 多后端，能不能搬？ |
 | 04 | [openhands-event-callbacks](04-openhands-event-callbacks) | OpenHands | 事件后挂副作用怎么不耦合？可插拔 processor + 双维度过滤 + fire-and-forget |
+| 05 | [three-skill-philosophies](05-three-skill-philosophies) | hermes / zeroclaw / ironclaw | "AI 写 skill = 越用越聪明" 是对的吗？三种哲学（自产 / 采集 / 策展）选哪个 |
 
 ## 用法建议
 
