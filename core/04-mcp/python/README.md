@@ -14,14 +14,20 @@
 
 ## 数据流
 
-```
-main.py / test.py
-    └─ MCPBridge (在 client.py)
-         ├─ stdio_client 拉起 python server.py 子进程
-         ├─ initialize 握手
-         ├─ tools/list  →  转成 OpenAI tools schema
-         └─ for tool_call from LLM:
-              tools/call(name, args) → 拿到 result → 回灌 LLM
+```mermaid
+flowchart TD
+    A["main.py / test.py"]
+    B["MCPBridge（在 client.py）"]
+    C["stdio_client 拉起 python server.py 子进程"]
+    D["initialize 握手"]
+    E["tools/list → 转成 OpenAI tools schema"]
+    F["for tool_call from LLM:<br/>tools/call(name, args) → 拿到 result → 回灌 LLM"]
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    B --> F
 ```
 
 `server.py` 全程不打 stdout —— stdout 是给协议用的，print 一行 server 就崩。

@@ -59,12 +59,10 @@ freq_base=10000 时频率覆盖 `[1, 10000]` 三个数量级. DeepSeek 用 freq_
 
 YaRN 关键: 用两个阈值 `beta_fast` / `beta_slow` 切出三段:
 
-```
-   维度 i (按周期分):
-   |————— 高频段 ————|————— 过渡段 ————|————— 低频段 —————|
-         ext (外推)        平滑混合        interp (插值)
-   ↑                       ↑                              ↑
-   i = 0                corr_dims[low, high]          i = n_rot
+```mermaid
+flowchart LR
+    A["维度 i = 0<br/>高频段<br/>ext (外推)"] --> B["过渡段<br/>平滑混合<br/>corr_dims[low, high]"]
+    B --> C["低频段<br/>interp (插值)<br/>i = n_rot"]
 ```
 
 `ramp(i)` 在过渡段平滑从 1 (纯外推) 滑到 0 (纯插值). 配合 `mscale` 给 attention logit 做缩放修正 (防 softmax 太尖).

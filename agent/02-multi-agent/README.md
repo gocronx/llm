@@ -6,13 +6,19 @@
 
 ## 工作流模式
 
-```
-顺序（带依赖）                  并行（彼此独立）
-  writer                         writer  writer  writer
-    ↓ draft                        ↓       ↓       ↓
-  reviewer                        (并发)
-    ↓ review
-  editor (看到 draft + review)
+```mermaid
+flowchart TD
+    subgraph seq["顺序（带依赖）"]
+        direction TB
+        W1["writer"] -->|draft| RV["reviewer"]
+        RV -->|review| ED["editor<br/>（看到 draft + review）"]
+    end
+    subgraph par["并行（彼此独立）"]
+        direction TB
+        PW1["writer"] --> C["（并发）"]
+        PW2["writer"] --> C
+        PW3["writer"] --> C
+    end
 ```
 
 ## 目录

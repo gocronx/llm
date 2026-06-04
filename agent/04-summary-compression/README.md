@@ -23,30 +23,26 @@
 
 ## 压缩逻辑
 
-```
-   原 messages:
-   [system]
-   [user: "Task: refactor auth"]    ← first_user (任务定义, 保住)
-   [assistant + tool_calls]         ┐
-   [tool: ...]                      │
-   [assistant + tool_calls]         │  middle: 要被 LLM 总结的区域
-   [tool: ...]                      │
-   ...                              │
-   [assistant + tool_calls]         │
-   [tool: ...]                      ┘
-   [assistant: "I'll continue..."]   ┐
-   [user: "ok"]                     │  recent: 保留原文 (keep_recent_turns)
-   [assistant: "Now do X"]          │
-   [user: "Q?"]                     ┘
-
-   压缩后:
-   [system]
-   [user: "Task: refactor auth"]                                ← 不动
-   [system: "[Conversation summary, 18 prior msgs] ## Active Task ..."] ← 新增
-   [assistant: "I'll continue..."]                              ┐
-   [user: "ok"]                                                 │ 不动
-   [assistant: "Now do X"]                                      │
-   [user: "Q?"]                                                 ┘
+```mermaid
+flowchart LR
+    subgraph before["原 messages"]
+        direction TB
+        B0["[system]"]
+        B1["[user: &quot;Task: refactor auth&quot;]<br/>← first_user（任务定义，保住）"]
+        Bmid["middle（要被 LLM 总结的区域）：<br/>[assistant + tool_calls]<br/>[tool: ...]<br/>[assistant + tool_calls]<br/>[tool: ...]<br/>...<br/>[assistant + tool_calls]<br/>[tool: ...]"]
+        Brec["recent（保留原文 keep_recent_turns）：<br/>[assistant: &quot;I'll continue...&quot;]<br/>[user: &quot;ok&quot;]<br/>[assistant: &quot;Now do X&quot;]<br/>[user: &quot;Q?&quot;]"]
+        B0 --> B1 --> Bmid --> Brec
+    end
+    subgraph after["压缩后"]
+        direction TB
+        A0["[system]"]
+        A1["[user: &quot;Task: refactor auth&quot;] ← 不动"]
+        A2["[system: &quot;[Conversation summary, 18 prior msgs] ## Active Task ...&quot;] ← 新增"]
+        A3["[assistant: &quot;I'll continue...&quot;]<br/>[user: &quot;ok&quot;]<br/>[assistant: &quot;Now do X&quot;]<br/>[user: &quot;Q?&quot;] ← 不动"]
+        A0 --> A1 --> A2 --> A3
+    end
+    Bmid -. "LLM 总结" .-> A2
+    before --> after
 ```
 
 减少: 18 → 7 条 (~ 70% 压缩率, summary 约占 middle 的 5-15% token).

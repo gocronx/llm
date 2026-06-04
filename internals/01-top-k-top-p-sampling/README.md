@@ -9,28 +9,16 @@ LLM 推理的最后一步: 模型输出 V 维 logits (V 是词表大小, 通常 
 
 ## 采样管道
 
-```
-   V 维 logits
-       │
-       ├─ temperature ≤ 0 ─→ argmax  (确定性, 退化)
-       │
-       ▼
-   exp((logit - max) / T)         ← 数值稳定 softmax
-       │
-       ▼
-   取前 K 大 (argpartition)        ← top_k 减小搜索空间
-       │
-       ▼
-   归一化为概率 probs              ← Σ probs = 1
-       │
-       ▼
-   砍 probs[i] < probs[0] * min_p ← min_p (相对阈值, 跳过 i=0)
-       │
-       ▼
-   累积概率 ≥ top_p 即止           ← top_p 头部聚焦
-       │
-       ▼
-   CDF 采样 → token id
+```mermaid
+flowchart TD
+    A["V 维 logits"] --> B{"temperature ≤ 0 ?"}
+    B -- "是" --> Z["argmax (确定性, 退化)"]
+    B -- "否" --> C["exp((logit - max) / T)<br/>数值稳定 softmax"]
+    C --> D["取前 K 大 (argpartition)<br/>top_k 减小搜索空间"]
+    D --> E["归一化为概率 probs<br/>Σ probs = 1"]
+    E --> F["砍 probs[i] < probs[0] * min_p<br/>min_p (相对阈值, 跳过 i=0)"]
+    F --> G["累积概率 ≥ top_p 即止<br/>top_p 头部聚焦"]
+    G --> H["CDF 采样 → token id"]
 ```
 
 ## 三个旋钮的"温度计"直觉

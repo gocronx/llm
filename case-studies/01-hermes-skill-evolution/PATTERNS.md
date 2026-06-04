@@ -4,22 +4,11 @@
 
 ## 核心模式：Post-turn Reflection Loop
 
-```
-┌─────────────────────────────────────────────┐
-│ 主对话回合 = 用户感知到的"对话"               │
-│   user → agent[读 skill 索引] → 回答         │
-└──────────────────┬──────────────────────────┘
-                   │ (回答已发出)
-                   ▼
-        ┌─────────────────────┐
-        │ 异步：复盘 LLM 调用  │
-        │  - 读完整 transcript │
-        │  - 决定是否产 skill  │
-        │  - 写 markdown 到盘  │
-        └─────────────────────┘
-                   │
-                   ▼
-        下次启动 → 装载 skill → system prompt
+```mermaid
+flowchart TD
+    A["主对话回合 = 用户感知到的&quot;对话&quot;<br/>user → agent[读 skill 索引] → 回答"]
+    A -->|"（回答已发出）"| B["异步：复盘 LLM 调用<br/>· 读完整 transcript<br/>· 决定是否产 skill<br/>· 写 markdown 到盘"]
+    B --> C["下次启动 → 装载 skill → system prompt"]
 ```
 
 四个不可省的组件：

@@ -4,10 +4,13 @@ OpenHands 的 event_callback 把"事件后做事"做成了**通用副作用机�
 
 ## 模式 A · Plugin Processor 模式
 
-```
-事件流 ──► 派发器 ──► [Processor 1]
-                  ├─► [Processor 2]   (这些是订阅者, 互不知道彼此)
-                  └─► [Processor N]
+```mermaid
+flowchart LR
+    E["事件流"] --> D["派发器"]
+    D --> P1["[Processor 1]"]
+    D --> P2["[Processor 2]"]
+    D --> PN["[Processor N]"]
+    P2 -. "这些是订阅者，互不知道彼此" .- PN
 ```
 
 **核心做法**：
@@ -44,12 +47,13 @@ class EventCallbackProcessor(ABC):
 
 ## 模式 B · 双维度过滤注册表
 
-```
-注册 (conv_id, event_kind, processor)
-  ├─ (None, None, P)        ─► 所有对话所有事件
-  ├─ (None, 'MessageEvent', P) ─► 所有对话, 只消息事件
-  ├─ (conv1, None, P)        ─► conv1 的所有事件
-  └─ (conv1, 'MessageEvent', P) ─► conv1 的消息事件
+```mermaid
+flowchart LR
+    R["注册 (conv_id, event_kind, processor)"]
+    R --> R1["(None, None, P)"] --> T1["所有对话所有事件"]
+    R --> R2["(None, 'MessageEvent', P)"] --> T2["所有对话，只消息事件"]
+    R --> R3["(conv1, None, P)"] --> T3["conv1 的所有事件"]
+    R --> R4["(conv1, 'MessageEvent', P)"] --> T4["conv1 的消息事件"]
 ```
 
 **核心做法**：注册表里每条记录带两个独立的过滤维度，None 表示通配。
@@ -74,12 +78,10 @@ WHERE (conv_id IS NULL OR conv_id = :event_conv_id)
 
 ## 模式 C · 顺序事件 + 并发 Callback 的混合并发
 
-```
-事件 e1 ──► [P1, P2, P3] (并发 await gather)
-            ↓ 全部完成
-事件 e2 ──► [P1, P2, P3] (并发)
-            ↓
-事件 e3 ──► ...
+```mermaid
+flowchart TD
+    E1["事件 e1"] -->|"[P1, P2, P3]（并发 await gather）"| E2["事件 e2"]
+    E2 -->|"[P1, P2, P3]（并发）全部完成"| E3["事件 e3 → ..."]
 ```
 
 **核心做法**：
@@ -112,10 +114,10 @@ for event in events:                              # 事件串行
 
 ## 模式 D · Fire-and-forget + 持久化 audit log
 
-```
-主流程: 写事件 → asyncio.create_task(派发 callbacks) → 立即返回
-                          ↓
-        后台: 跑 callbacks → 每个 callback 的结果写 audit 表
+```mermaid
+flowchart TD
+    M["主流程：写事件 → asyncio.create_task(派发 callbacks) → 立即返回"]
+    M --> B["后台：跑 callbacks → 每个 callback 的结果写 audit 表"]
 ```
 
 **核心做法**：

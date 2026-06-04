@@ -11,22 +11,24 @@ LLM 推理引擎的"骨架": 把 model forward + sampling + stop condition 串�
 
 ## 主循环结构
 
-```
-   def generate(model, prompt, max_tokens, sample_fn, eos_token=None):
-       1. 初始化 KV cache
-       │
-       2. Prefill: model.prefill(prompt, cache)   ──┐
-          ↓                                       │
-          得到 prompt 末尾位置的 logits             │ TTFT
-                                                  │ (Time To First Token)
-       3. Decode loop:                            │
-          for step in range(max_tokens):          ─┘
-             token = sample_fn(logits)            ──┐
-             emit(token)                            │
-             check stop (eos / max / ctx full)      │ TPOT
-             logits = model.forward(token, cache)   │ (Time Per Output Token)
-                                                  ──┘
-       4. return generated, stats
+```mermaid
+flowchart TD
+    Sig["def generate(model, prompt, max_tokens, sample_fn, eos_token=None)"] --> A["1. 初始化 KV cache"]
+    subgraph TTFT["TTFT (Time To First Token)"]
+        B["2. Prefill: model.prefill(prompt, cache)<br/>得到 prompt 末尾位置的 logits"]
+    end
+    A --> B
+    B --> C
+    subgraph TPOT["TPOT (Time Per Output Token)"]
+        C["3. Decode loop: for step in range(max_tokens)"]
+        D["token = sample_fn(logits)"]
+        E["emit(token)"]
+        F["check stop (eos / max / ctx full)"]
+        G["logits = model.forward(token, cache)"]
+        C --> D --> E --> F --> G
+        G -. "下一步" .-> C
+    end
+    C --> H["4. return generated, stats"]
 ```
 
 ## Prefill vs Decode 的区别

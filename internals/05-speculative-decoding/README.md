@@ -20,23 +20,15 @@ LLM 自回归生成的核心瓶颈: **每生成 1 个 token 跑 1 次 full forwa
 
 每轮算法:
 
-```
-       Round k:
-       ┌────────────────────────────────────────────────────┐
-       │  1. Draft 顺序预测 K 个 token (K 次小 forward)       │
-       │     drafts = [d0, d1, d2, d3]                       │
-       │                                                    │
-       │  2. Target 一次 batched forward, 算 K 个位置的 argmax│
-       │     target_outputs = [t0, t1, t2, t3]               │
-       │                                                    │
-       │  3. 比对找第一个 mismatch:                          │
-       │     d0 == t0 ✓ accept                               │
-       │     d1 == t1 ✓ accept                               │
-       │     d2 != t2 ✗ reject from here                     │
-       │     → commit [d0, d1, t2], drop [d3]                │
-       │                                                    │
-       │  4. (全 accept 时) target 多算的 t4 当 bonus 收下     │
-       └────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph R["Round k"]
+        S1["1. Draft 顺序预测 K 个 token (K 次小 forward)<br/>drafts = [d0, d1, d2, d3]"]
+        S2["2. Target 一次 batched forward, 算 K 个位置的 argmax<br/>target_outputs = [t0, t1, t2, t3]"]
+        S3["3. 比对找第一个 mismatch:<br/>d0 == t0 ✓ accept<br/>d1 == t1 ✓ accept<br/>d2 != t2 ✗ reject from here<br/>→ commit [d0, d1, t2], drop [d3]"]
+        S4["4. (全 accept 时) target 多算的 t4 当 bonus 收下"]
+        S1 --> S2 --> S3 --> S4
+    end
 ```
 
 ### 关键: 为什么这是 **lossless**

@@ -144,17 +144,15 @@ resp = client.chat.completions.create(view)    # ← 喂治理后的 view 给模
 
 ## govern() 入口的顺序
 
-```
-              ┌──────────────────────────────────────────────────┐
-              │  每轮 LLM 调用前: view = govern(messages, ...)    │
-              ├──────────────────────────────────────────────────┤
-              │  1. drop_orphan_tool_results       清结构        │
-              │  2. backfill_missing_tool_results  补结构        │
-              │  3. microcompact                   压老果        │
-              │  4. apply_tool_result_budget       剪长果        │
-              │  5. snip_history                   兜总量        │
-              │  6. drop_orphan + backfill         snip 后再修结构│
-              └──────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    E["每轮 LLM 调用前：view = govern(messages, ...)"]
+    E --> S1["1. drop_orphan_tool_results — 清结构"]
+    S1 --> S2["2. backfill_missing_tool_results — 补结构"]
+    S2 --> S3["3. microcompact — 压老果"]
+    S3 --> S4["4. apply_tool_result_budget — 剪长果"]
+    S4 --> S5["5. snip_history — 兜总量"]
+    S5 --> S6["6. drop_orphan + backfill — snip 后再修结构"]
 ```
 
 **为什么是这个顺序**:

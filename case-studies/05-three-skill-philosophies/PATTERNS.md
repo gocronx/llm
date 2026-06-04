@@ -98,15 +98,16 @@ catalog 扫候选 → 评分 → 自动安装 → 装载
 
 最强的产品**混用三种**，按场景路由：
 
-```
-用户请求 → 命中已装 skill?
-            ├─ Yes → 用 (任一模式都装载过的)
-            └─ No  → 查 catalog (模式 B)
-                     ├─ 有高分匹配 → 自动安装 (模式 B)
-                     ├─ 有候选但分低 → 提示用户决策 (模式 C)
-                     └─ 无 → 后台复盘当前会话生成新 skill (模式 A)
-                              ↓
-                         可选: 用户允许的话, 提交回 catalog (反向贡献模式 B/C)
+```mermaid
+flowchart TD
+    REQ["用户请求"] --> HIT{"命中已装 skill？"}
+    HIT -->|"Yes"| USE["用（任一模式都装载过的）"]
+    HIT -->|"No"| CAT["查 catalog（模式 B）"]
+    CAT --> Q{"匹配情况"}
+    Q -->|"有高分匹配"| INST["自动安装（模式 B）"]
+    Q -->|"有候选但分低"| ASK["提示用户决策（模式 C）"]
+    Q -->|"无"| GEN["后台复盘当前会话生成新 skill（模式 A）"]
+    GEN --> CONTRIB["可选：用户允许的话，提交回 catalog（反向贡献模式 B/C）"]
 ```
 
 **zeroclaw 是离这个目标最近的**（SkillForge 已经做了 B，SkillImprover 写了 A 但没接，没有 WASM 沙盒做 C）。

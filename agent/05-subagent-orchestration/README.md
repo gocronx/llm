@@ -20,17 +20,16 @@
 
 ## Subagent 编排怎么解
 
-```
-   主 Agent (Orchestrator)
-   ├── delegate("researcher", "find competitors")    ──┐
-   ├── delegate("researcher", "find pricing")        ──┼─ asyncio.gather
-   ├── delegate("analyst", "summarize Q3 reports")   ──┘
-   └── 聚合 3 个 summary, 给用户最终答案
-
-   每个 subagent:
-   - 自己的 messages 历史 (跟其他 agent 隔离)
-   - 自己的 tools 限制 (researcher 只能 web_search, analyst 只能 read_file)
-   - 完成后**只返回 summary**, 不返回完整 messages
+```mermaid
+flowchart TD
+    M["主 Agent（Orchestrator）"]
+    M -->|"asyncio.gather"| D1["delegate(&quot;researcher&quot;, &quot;find competitors&quot;)"]
+    M -->|"asyncio.gather"| D2["delegate(&quot;researcher&quot;, &quot;find pricing&quot;)"]
+    M -->|"asyncio.gather"| D3["delegate(&quot;analyst&quot;, &quot;summarize Q3 reports&quot;)"]
+    D1 --> AGG["聚合 3 个 summary，给用户最终答案"]
+    D2 --> AGG
+    D3 --> AGG
+    NOTE["每个 subagent：<br/>· 自己的 messages 历史（跟其他 agent 隔离）<br/>· 自己的 tools 限制（researcher 只能 web_search，analyst 只能 read_file）<br/>· 完成后只返回 summary，不返回完整 messages"]
 ```
 
 | 解 | 怎么解 |
@@ -75,19 +74,11 @@ Subagent 完成后, 返回**结构化 result**:
 
 区别是这个工具的"工具体"是一个完整的 ReAct loop (子 agent), 返回时只给摘要:
 
-```
-   Main Agent ReAct loop:
-     while not done:
-       LLM(main_prompt + main_tools)
-       → tool: delegate_to_subagent("researcher", "search X")
-                  ↓
-                  Sub Agent ReAct loop (isolated context):
-                    while not done:
-                      LLM(sub_prompt + sub_tools)
-                      → tool: web_search(...)
-                    return summary  ←← 主 agent 只见这一行
-       ← summary
-       继续主 agent loop
+```mermaid
+flowchart TD
+    M1["Main Agent ReAct loop：<br/>while not done:<br/>　LLM(main_prompt + main_tools)"]
+    M1 -->|"tool: delegate_to_subagent(&quot;researcher&quot;, &quot;search X&quot;)"| S1["Sub Agent ReAct loop（isolated context）：<br/>while not done:<br/>　LLM(sub_prompt + sub_tools)<br/>　→ tool: web_search(...)"]
+    S1 -->|"return summary（主 agent 只见这一行）"| M2["← summary，继续主 agent loop"]
 ```
 
 ## 并行 vs 串行

@@ -25,12 +25,16 @@ OpenAI SDK 帮你把 HTTP 错误分门别类成 Python 异常，不用看 status
 
 ## Circuit Breaker 三态
 
-```
-closed (正常)
-  └─ 连续失败达到 threshold ─> open (拒绝请求)
-                                  └─ cooldown 过后 ─> half-open (放一次试探)
-                                                          ├─ 成功 -> closed
-                                                          └─ 失败 -> open
+```mermaid
+stateDiagram-v2
+    closed: closed（正常）
+    open: open（拒绝请求）
+    half_open: half-open（放一次试探）
+
+    closed --> open: 连续失败达到 threshold
+    open --> half_open: cooldown 过后
+    half_open --> closed: 成功
+    half_open --> open: 失败
 ```
 
 `Breaker.allow()` 是非阻塞判断 —— 不要 sleep，让调用方决定要不要 fallback。
