@@ -111,7 +111,7 @@ cp .env.example .env
 - **跑评测 / 数据生成**：`core/08-evaluation` + `production/06-batch-runner`，配合用
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
 - **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（错误恢复）；多 agent 并行上 `05-subagent-orchestration`
-- **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / 量化 / 投机解码
+- **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / RMSNorm+SwiGLU / FP8 量化 / 投机解码 / 生成主循环（6 个 numpy 单测 demo，建议从 06 主循环入手）
 - **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04) / 三种 skill 哲学对照 (05)
 
 ## 快速开始
