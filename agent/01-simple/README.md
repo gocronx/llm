@@ -96,3 +96,5 @@ python main.py    # 4 个多步任务
 - **预算崩** —— 总 token 超 context window, LLM 拒绝
 
 延伸读 [03-context-governance](../03-context-governance) —— 5 步治理组合拳, 让 ReAct 撑到 50+ 轮.
+
+<p align="center"><img src="assets/01-simple-illustrations/02-overview-card.png" width="420" alt="什么是 ReAct 知识卡"></p>

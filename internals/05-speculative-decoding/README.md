@@ -154,3 +154,5 @@ draft acc  lookahead  target_calls   draft_calls   accept_rate  wall_ms    speed
 | EOS 早停 | 不实现 (mock 模型无 EOS 概念) |
 
 核心算法 1:1 等价, 状态机骨架完整保留.
+
+<p align="center"><img src="assets/spec-illustrations/02-overview-card.png" width="420" alt="投机解码加速知识卡"></p>

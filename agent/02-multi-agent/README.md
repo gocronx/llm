@@ -53,3 +53,5 @@ cd rust && cargo run
 - ❌ **直接拼依赖** —— 不带 `[id]` 前缀，LLM 不知道哪段是哪个 step 的
 - ❌ **并行 step 之间有依赖** —— 拿不到上游产物（run_parallel 不解 DAG）
 - ⚠️ **Rust 按字节切中文** —— 半个字符崩 unwrap，要用 `chars().take()`
+
+<p align="center"><img src="assets/02-multi-agent-illustrations/02-overview-card.png" width="420" alt="多 Agent 协作知识卡"></p>

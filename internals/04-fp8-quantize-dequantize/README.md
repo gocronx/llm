@@ -145,3 +145,5 @@ python main.py    # 看 FP8 表非线性 + 误差分布
 | `int8_t qs[]` 紧凑存 | `np.int8` array |
 
 算法等价, 数值结果匹配 (subject to round-to-even tie 实现细节).
+
+<p align="center"><img src="assets/fp8-illustrations/02-overview-card.png" width="420" alt="FP8 八位量化知识卡"></p>

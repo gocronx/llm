@@ -31,3 +31,5 @@ python main.py    # 12 个场景
 - ❌ 路径不 resolve() → 软链接绕过
 - ❌ 速率按 tool 名 → 换名字就绕过
 - ⚠️ 正则拦不全 → 需要分层防御
+
+<p align="center"><img src="assets/tool-guardrails-illustrations/02-overview-card.png" width="420" alt="工具调用挡灾层知识卡"></p>

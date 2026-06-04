@@ -29,3 +29,5 @@ python main.py    # 5 个场景
 - ❌ 错误 silent 丢 → LLM 看不到用户引用了啥
 - ❌ 不 dedupe → 同文件嵌两遍
 - ❌ 没 MAX_BYTES → 大文件爆 context
+
+<p align="center"><img src="assets/context-refs-illustrations/02-overview-card.png" width="420" alt="Context 引用语法知识卡"></p>

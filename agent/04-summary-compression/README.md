@@ -174,3 +174,5 @@ python main.py    # 真调 LLM API, 输出 summary markdown
 | token estimator 用 tiktoken | chars/4 toy estimator |
 
 核心算法 (模板 + 切片 + cooldown) 1:1 保留, 砍掉的是 hermes 特有的 multi-model / multi-fallback 设施.
+
+<p align="center"><img src="assets/04-summary-illustrations/02-overview-card.png" width="420" alt="用 LLM 总结历史知识卡"></p>

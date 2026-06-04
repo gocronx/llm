@@ -170,3 +170,5 @@ python main.py    # 看流式输出 (sleep 0.05s/token 模拟 20 token/s)
 - **替换 sample_fn 为 G01 sample()**: top_k/top_p/temperature 都接进来
 - **替换 generate 为 G05 speculative_decode**: 加速 2-3×
 - **加 batch 维度**: 让 generate 接受多 prompt 并行, 跟 vLLM 的 continuous batching 看齐
+
+<p align="center"><img src="assets/genloop-illustrations/02-overview-card.png" width="420" alt="生成主循环骨架知识卡"></p>

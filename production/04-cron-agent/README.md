@@ -28,3 +28,5 @@ python main.py    # 跑 180s，Ctrl-C 优雅停
 - ❌ state 文件直接 open+write → crash 时半写
 - ❌ 让 LLM 推 trend → 小样本下编规律
 - ⚠️ 这是进程内调度；服务级用 systemd timer / k8s CronJob
+
+<p align="center"><img src="assets/cron-agent-illustrations/02-overview-card.png" width="420" alt="Cron 定时智能体知识卡"></p>

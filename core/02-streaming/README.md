@@ -82,3 +82,5 @@ cd rust && cargo run
 - ❌ **只看 `tool_calls[0]`** —— 模型可能并行调多个工具，按 index 全收
 - ❌ **`delta.content` 没判空** —— tool-call chunk 里 content 是 None/空，直接拼接会出 None 字符串
 - ⚠️ **流式不会让总耗时变短** —— 只是把感知延迟从"等总时间"降到"等首字"
+
+<p align="center"><img src="assets/streaming-illustrations/02-overview-card.png" width="420" alt="流式输出快在首字知识卡"></p>

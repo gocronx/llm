@@ -171,3 +171,5 @@ python main.py    # 看激活函数 ASCII 曲线 + 缩放不变性
 | `swiglu` 单输出循环 | element-wise 向量化 |
 
 算法等价, 数值结果对 atol=1e-5 一致.
+
+<p align="center"><img src="assets/03-rmsnorm-swiglu-illustrations/02-overview-card.png" width="420" alt="RMSNorm 与门控知识卡"></p>

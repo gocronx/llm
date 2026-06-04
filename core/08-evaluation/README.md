@@ -29,3 +29,5 @@ python main.py    # 跑 datasets/qa_testset.jsonl，按 category 分类
 - ❌ LLM 裁判没 rubric → 每次跑结果不同
 - ❌ 裁判用同一个 model 评自己 → 自评有偏
 - ❌ 单 LLM 1-5 分打分 → 用 pairwise 比相对
+
+<p align="center"><img src="assets/evaluation-illustrations/02-overview-card.png" width="420" alt="LLM评测三类尺子知识卡"></p>

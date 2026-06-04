@@ -280,3 +280,5 @@ python main.py    # 真调 LLM API (需 .env), 会打 [govern] real=X → view=Y
 | length_recovery / workspace_violation_counts | 不实现 |
 
 剩下的是 **5 个治理函数本身**, 都是纯函数, ~243 行 governance.py, 可以从这个目录抽出来直接塞进任何 ReAct 框架.
+
+<p align="center"><img src="assets/03-governance-illustrations/02-overview-card.png" width="420" alt="Context 治理知识卡"></p>

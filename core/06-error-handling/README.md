@@ -48,3 +48,5 @@ python main.py    # 四个场景的事件流
 - ❌ 退避不带 jitter → thundering herd
 - ❌ breaker 全局一份 → primary 挂了把 secondary 也禁了
 - ❌ 429 不看 Retry-After
+
+<p align="center"><img src="assets/error-handling-illustrations/02-overview-card.png" width="420" alt="LLM调用四道挡灾知识卡"></p>

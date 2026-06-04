@@ -43,3 +43,5 @@ base 模型平均 2.8/5（不知道 Saber），LoRA 后平均 4.9/5（学会了�
 - ❌ 不分层切分，某种 kind 全在 train
 - ❌ 用 BLEU/Rouge 评代码（变量名不同就 0 分）
 - ❌ num-layers 拉满 → 过拟合
+
+<p align="center"><img src="assets/fine-tuning-illustrations/02-overview-card.png" width="420" alt="何时该 LoRA 知识卡"></p>

@@ -29,3 +29,5 @@ python main.py
 - ❌ **Semantic 阈值拍脑袋** —— 必须用真实日志跑混淆矩阵
 - ❌ **缓存时效性内容**（"今日天气"）
 - ❌ **不用 Embedding** —— 生产用 sentence-transformers + cosine，本 demo 用 Jaccard 只为不引依赖
+
+<p align="center"><img src="assets/caching-illustrations/02-overview-card.png" width="420" alt="LLM缓存三层省钱知识卡"></p>

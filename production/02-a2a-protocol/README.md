@@ -43,3 +43,5 @@ python main.py
 - ❌ `/tasks` 不要 auth → 裸奔
 - ❌ dispatch 串行 → 浪费时间
 - ⚠️ 本地小模型 decompose 可能填错 input 字段
+
+<p align="center"><img src="assets/a2a-illustrations/02-overview-card.png" width="420" alt="A2A 多智能体协作知识卡"></p>

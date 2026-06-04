@@ -67,3 +67,5 @@ NN-<project>-<mechanism>/
 ## License
 
 MIT
+
+<p align="center"><img src="assets/case-studies-illustrations/02-overview-card.png" width="420" alt="读源码三步走知识卡"></p>

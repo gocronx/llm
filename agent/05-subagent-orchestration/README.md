@@ -202,3 +202,5 @@ Claude Code 内置的 [Task tool](https://docs.anthropic.com/claude-code/sub-age
 | Tools 子集自动按 agent_type 推断 | 主 agent 显式传 tools_allowed |
 
 核心模式 (isolation + delegate + aggregate) 1:1 一致.
+
+<p align="center"><img src="assets/05-subagent-illustrations/02-overview-card.png" width="420" alt="子 Agent 编排知识卡"></p>

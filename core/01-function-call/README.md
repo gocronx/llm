@@ -101,3 +101,5 @@ cargo run -- verify   # 验证
 - ⚠️ **macOS 系统代理 / `HTTP_PROXY` 把 localhost 走代理** —— Python 版用 `httpx.Client(trust_env=False)`，Go 版用 `Transport.Proxy = nil` 显式绕过
 
 详见每个语言子目录的 README。
+
+<p align="center"><img src="assets/function-call-illustrations/02-overview-card.png" width="420" alt="LLM 只决定不执行知识卡"></p>

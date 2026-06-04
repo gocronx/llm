@@ -39,3 +39,5 @@ cd rust && cargo run
 - ❌ **Tokens 清空所有 msg** —— 至少留最后一条 user
 - ❌ **system prompt 算进 Window 长度** —— Window 只裁对话
 - ⚠️ **token 估算糙** —— 中文 1.5 字/t 是经验，生产换 tiktoken
+
+<p align="center"><img src="assets/memory-illustrations/02-overview-card.png" width="420" alt="聊天Memory四招知识卡"></p>

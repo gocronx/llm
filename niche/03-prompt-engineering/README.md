@@ -28,3 +28,5 @@ python main.py
 - ❌ Few-shot 示例和真问题分布反向
 - ❌ CoT 没让模型输出"思考/答案"标记 → 后处理拿不到答案
 - ⚠️ 本地小模型 CoT 反而准确率下降
+
+<p align="center"><img src="assets/prompt-engineering-illustrations/02-overview-card.png" width="420" alt="四招提示术 Prompt 知识卡"></p>

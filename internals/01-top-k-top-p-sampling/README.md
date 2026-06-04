@@ -85,3 +85,5 @@ python main.py    # 看 8 种参数组合下 10k 次采样的实际分布
 | CDF 用 `for i: r -= probs[i]` 找 | `np.searchsorted(cumsum, r)` |
 
 算法逻辑 1:1 等价, numpy 版可读性 ×3, 性能差不多 (V≤256k 时主要在 sort/partition, 都是 BLAS 加速).
+
+<p align="center"><img src="assets/01-sampling-illustrations/02-overview-card.png" width="420" alt="采样三参数知识卡"></p>

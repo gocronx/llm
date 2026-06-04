@@ -36,3 +36,5 @@ python main.py
 - ❌ cascade 触发条件太松 → 短答案也升级
 - ❌ 不记 escalated_from / failed_over_from → 审计盲
 - ❌ always-premium 当兜底 → SPOF
+
+<p align="center"><img src="assets/model-router-illustrations/02-overview-card.png" width="420" alt="Model 智能路由知识卡"></p>

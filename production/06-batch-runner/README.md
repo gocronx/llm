@@ -29,3 +29,5 @@ python main.py --no-resume
 - ❌ 4xx 也重试 → 浪费
 - ❌ 并发开到 100 → 服务端限流
 - ❌ 批量 write → crash 时丢一批；单条 append 最稳
+
+<p align="center"><img src="assets/batch-runner-illustrations/02-overview-card.png" width="420" alt="Batch 批量跑任务知识卡"></p>

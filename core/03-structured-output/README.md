@@ -51,3 +51,5 @@ cd rust && cargo run
 - ❌ **`required` 不写全** —— strict 不允许"可选"
 - ❌ **prompt 还在求 JSON** —— 多此一举，且容易和 schema 冲突
 - ⚠️ **本地模型未必支持 json_schema** —— MLX / vLLM 老版本可能只支持 `json_object`，这种时候只能退而求其次（"json_object" 只保证合法 JSON，不保证 schema）
+
+<p align="center"><img src="assets/structured-output-illustrations/02-overview-card.png" width="420" alt="结构化让模型守 Schema 知识卡"></p>

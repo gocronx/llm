@@ -145,3 +145,5 @@ dist | correlation | bar
 | `theta_extrap *= theta_scale` (累积更新) | `pos * freqs[i]` 直接算 (内存换可读) |
 
 算法逻辑等价, 数值结果对 atol=1e-5 一致.
+
+<p align="center"><img src="assets/02-rope-illustrations/02-overview-card.png" width="420" alt="RoPE 旋转位置知识卡"></p>

@@ -85,3 +85,5 @@ cd rust && cargo run
 - ❌ **没发 `notifications/initialized`** —— MCP server 会拒绝后续请求
 - ❌ **不收尸子进程** —— 跑几次就一堆 zombie，Go 用 `cmd.Wait()`，Rust 用 `Drop` 里 `wait()`
 - ⚠️ **协议版本** —— 这里用 `2024-11-05`；MCP 协议在演进，要看 server SDK 兼容什么
+
+<p align="center"><img src="assets/mcp-illustrations/02-overview-card.png" width="420" alt="MCP 只认协议不认语言知识卡"></p>
