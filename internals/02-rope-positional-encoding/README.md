@@ -3,7 +3,7 @@
 Transformer 的位置信息怎么塞进去? 早期方案 (Sinusoidal/Learned) 是**加**到 token embedding 上.
 LLaMA 之后所有主流模型 (Qwen / DeepSeek / Mistral) 都用 **RoPE (Rotary Position Embedding)** —— **旋转**而不是相加.
 
-抽自 [ds4.c:4675-4742](https://github.com/...) (`rope_tail_ext_inplace`). 论文: [Su et al. 2021, RoFormer](https://arxiv.org/abs/2104.09864) + [Peng et al. 2023, YaRN](https://arxiv.org/abs/2309.00071).
+抽自 [ds4.c:4675-4742](https://github.com/antirez/ds4) (`rope_tail_ext_inplace`). 论文: [Su et al. 2021, RoFormer](https://arxiv.org/abs/2104.09864) + [Peng et al. 2023, YaRN](https://arxiv.org/abs/2309.00071).
 
 ![小黑沿一排转盘门牌按位置把指针拧到递进的角度](assets/02-rope-illustrations/01-rope.webp)
 

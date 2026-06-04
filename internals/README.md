@@ -14,7 +14,7 @@
 
 ## 源材料
 
-主要来自 [ds4.c](https://github.com/...) (antirez 风格的 C LLM 推理引擎, 800KB 单文件), 部分参考 llama.cpp / vLLM / Mistral / DeepSeek 的现代做法.
+主要来自 [ds4.c](https://github.com/antirez/ds4) (antirez 风格的 C LLM 推理引擎, 800KB 单文件), 部分参考 llama.cpp / vLLM / Mistral / DeepSeek 的现代做法.
 
 ## 完整目录
 
