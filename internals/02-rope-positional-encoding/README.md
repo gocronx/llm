@@ -5,7 +5,7 @@ LLaMA 之后所有主流模型 (Qwen / DeepSeek / Mistral) 都用 **RoPE (Rotary
 
 抽自 [ds4.c:4675-4742](https://github.com/antirez/ds4) (`rope_tail_ext_inplace`). 论文: [Su et al. 2021, RoFormer](https://arxiv.org/abs/2104.09864) + [Peng et al. 2023, YaRN](https://arxiv.org/abs/2309.00071).
 
-![小黑沿一排转盘门牌按位置把指针拧到递进的角度](assets/02-rope-illustrations/01-rope.webp)
+![小黑沿一排转盘门牌按位置把指针拧到递进的角度](assets/02-rope-illustrations/01-rope.png)
 
 ## 几何直觉
 

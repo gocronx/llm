@@ -2,7 +2,7 @@
 
 把 01 的一次 function-call 往返包成多轮 while 循环 = ReAct 风格的最小 agent。
 
-![小黑钓一杆看清结果再决定下一杆，交替着看一步走一步](assets/01-simple-illustrations/01-react-loop.webp)
+![小黑钓一杆看清结果再决定下一杆，交替着看一步走一步](assets/01-simple-illustrations/01-react-loop.png)
 
 ## 什么是 ReAct
 

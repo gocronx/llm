@@ -2,7 +2,7 @@
 
 30 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
 
-![五个抽屉按目的分，每件拿来即跑、拆开能学](assets/readme-illustrations/01-five-drawers.webp)
+![五个抽屉按目的分，每件拿来即跑、拆开能学](assets/readme-illustrations/01-five-drawers.png)
 
 ## 目录结构
 
@@ -119,7 +119,7 @@ cp .env.example .env
 
 ### 怎么选
 
-![先走主干，按需岔路](assets/readme-illustrations/02-trail-fork.webp)
+![先走主干，按需岔路](assets/readme-illustrations/02-trail-fork.png)
 
 - **新手入门**：按 `core/01 → 08` 顺序过，每个看 README + 跑一遍就行
 - **做 Agent 产品**：`agent/01 → 02` → `production/01-skill-loader → 02-a2a-protocol`，最后 **`production/05-tool-guardrails` 必看**（工具安全是上线门槛）
@@ -143,7 +143,7 @@ python python/demo.py
 
 ## 技术取舍
 
-![浇长青的，在蔫的搁置，别押注](assets/readme-illustrations/03-water-evergreen.webp)
+![浇长青的，在蔫的搁置，别押注](assets/readme-illustrations/03-water-evergreen.png)
 
 **价值持续的**：Function Call、MCP、Streaming、结构化输出、Agent、记忆管理、错误处理、缓存、评测、模型路由、工具围栏、长跑治理（context governance、subagent 编排）。
 

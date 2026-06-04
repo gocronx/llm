@@ -10,7 +10,7 @@ Claude Code 的 Skills、Codex 的 `$skill`、各家 agent 框架的"技能包"�
 
 Skill 做的事就一件：把每段领域指令**卷起来装盒、贴上标签、上架**。
 
-![把长指令打包成带标签的盒子](assets/skill-principles-illustrations/01-pack-instructions.webp)
+![把长指令打包成带标签的盒子](assets/skill-principles-illustrations/01-pack-instructions.png)
 
 落到文件上，一个 Skill 就是一个带 YAML frontmatter 的 markdown（见 `python/skills/sql-query-builder.md` 等 5 个真实样例）：
 
@@ -37,7 +37,7 @@ triggers: [sql, 查询, select]   # 标签：触发词
 
 所以 Skill 机制的核心动作是**选择性注入**：每次请求只把相关的 1-2 个 skill 放进背包，其余留在架子上。
 
-![背包有限，只带相关的盒子](assets/skill-principles-illustrations/02-limited-backpack.webp)
+![背包有限，只带相关的盒子](assets/skill-principles-illustrations/02-limited-backpack.png)
 
 对应代码里的组装函数（`python/router.py:93`）：
 
@@ -60,7 +60,7 @@ def compose(skills, loaded):
 
 这就是 Anthropic 文档里说的 **progressive disclosure（渐进式披露）**：模型先看到一排目录卡，确认需要哪本书，才去库里取。
 
-![先翻目录卡，再取地下库的书](assets/skill-principles-illustrations/03-card-vs-book.webp)
+![先翻目录卡，再取地下库的书](assets/skill-principles-illustrations/03-card-vs-book.png)
 
 解析就是一个正则切两半（`python/loader.py:15`）：
 
@@ -77,7 +77,7 @@ FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.DOTALL)
 
 "哪个 skill 相关"是 Skill 机制里唯一有分歧的设计点。`python/router.py` 实现了全部三种，对照着读最清楚：
 
-![三条通道：关键词闸机、小模型代选、自己取](assets/skill-principles-illustrations/04-three-routes.webp)
+![三条通道：关键词闸机、小模型代选、自己取](assets/skill-principles-illustrations/04-three-routes.png)
 
 | 策略 | 怎么选 | 额外 LLM 调用 | 适合 |
 |---|---|---|---|

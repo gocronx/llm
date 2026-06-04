@@ -2,7 +2,7 @@
 
 LLM 应用的"回归测试"。改 prompt / 换模型后怎么知道是变好还是变差 —— 需要一套可重复的评测。
 
-![小黑先用便宜尺子量纸卡，量不出的才送末端盖章机兜底](assets/evaluation-illustrations/01-cheap-metrics-first.webp)
+![小黑先用便宜尺子量纸卡，量不出的才送末端盖章机兜底](assets/evaluation-illustrations/01-cheap-metrics-first.png)
 
 ## 七种 metric + LLM 裁判
 

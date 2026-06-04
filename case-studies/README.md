@@ -2,7 +2,7 @@
 
 不是教程，是**拆解**。挑一个开源 AI 项目里看起来"神秘"的能力（比如"越用越聪明"、"自动找出该用哪个工具"、"上下文怎么不爆"），定位到具体代码、复刻最小可跑版本、抽出可以搬到自己项目里的模式。
 
-![从大机器拆出零件磨成最小可跑版，再量量能不能搬走](assets/case-studies-illustrations/01-strip-grind-measure.webp)
+![从大机器拆出零件磨成最小可跑版，再量量能不能搬走](assets/case-studies-illustrations/01-strip-grind-measure.png)
 
 ## 跟 core/agent/production/niche 有什么不一样
 

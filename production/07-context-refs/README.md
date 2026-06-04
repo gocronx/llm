@@ -2,7 +2,7 @@
 
 Cursor / Claude Code 风格的 `@file.py:5-10` 引用：用户消息里写 `@path`，应用自动读文件附加到 prompt。
 
-![@引用：只剪那几行，贴进 prompt，围栏内取件](assets/context-refs-illustrations/01-at-ref-clip.webp)
+![@引用：只剪那几行，贴进 prompt，围栏内取件](assets/context-refs-illustrations/01-at-ref-clip.png)
 
 ## 引用语法
 

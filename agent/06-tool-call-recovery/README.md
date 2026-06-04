@@ -2,7 +2,7 @@
 
 LLM agent 跑长了会遇到几类经典"卡死". 跟传统软件的 catch/retry 不同, LLM-era 的修法是**把错误信息喂回给 LLM, 让它自己改**.
 
-![小黑给退回件贴张纸条再塞回机器投信口，让机器自己改](assets/06-recovery-illustrations/01-feed-error-back.webp)
+![小黑给退回件贴张纸条再塞回机器投信口，让机器自己改](assets/06-recovery-illustrations/01-feed-error-back.png)
 
 抽自 PraisonAI `llm.py:1089` (`_generate_ollama_tool_summary`) + 实战归纳的另外 3 类.
 

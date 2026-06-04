@@ -2,7 +2,7 @@
 
 LLM 自回归生成的核心瓶颈: **每生成 1 个 token 跑 1 次 full forward**, 70B 模型 ~30 token/s 已是 H100 上限. 投机解码把这个上限**翻 2-4 倍**, 是 vLLM / TensorRT-LLM / DeepSeek V4 的标配优化.
 
-![小黑替身抢先在长纸条上猜写一串话递过去, 大号小黑拿橡皮章逐句盖戳验收, 第三句不认可就撕掉后面全部自己重写](assets/spec-illustrations/01-speculative.webp)
+![小黑替身抢先在长纸条上猜写一串话递过去, 大号小黑拿橡皮章逐句盖戳验收, 第三句不认可就撕掉后面全部自己重写](assets/spec-illustrations/01-speculative.png)
 
 抽自 ds4.c:17575 (`ds4_session_eval_speculative_argmax`), 简化 GPU 强耦合部分, 保留核心算法和 DS4 的 margin 改进.
 

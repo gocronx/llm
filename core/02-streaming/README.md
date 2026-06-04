@@ -2,7 +2,7 @@
 
 三语言流式输出对照。两个场景：纯文本流式、流式 + function call。
 
-![小黑用磁铁把飘来的碎片按槽位归位，拼齐成完整形状后才读取](assets/streaming-illustrations/01-accumulate-by-index.webp)
+![小黑用磁铁把飘来的碎片按槽位归位，拼齐成完整形状后才读取](assets/streaming-illustrations/01-accumulate-by-index.png)
 
 ## 为什么单独做这个 demo
 

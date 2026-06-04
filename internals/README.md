@@ -2,7 +2,7 @@
 
 跟仓库其他目录的关系:
 
-![小黑把玻璃罩里的座钟拆开，露出内部齿轮亲手拨动](assets/readme-illustrations/01-overview.webp)
+![小黑把玻璃罩里的座钟拆开，露出内部齿轮亲手拨动](assets/readme-illustrations/01-overview.png)
 
 | 目录 | 教 | 例子 |
 |------|---|------|

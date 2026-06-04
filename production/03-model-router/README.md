@@ -2,7 +2,7 @@
 
 按 query 难度路由到 cheap / mid / premium 三档模型。
 
-![称难度，分三档管道，答弱升级](assets/model-router-illustrations/01-weigh-and-route.webp)
+![称难度，分三档管道，答弱升级](assets/model-router-illustrations/01-weigh-and-route.png)
 **关键区分**：
 
 | | 触发 | 行为 |

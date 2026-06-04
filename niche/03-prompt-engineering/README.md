@@ -2,7 +2,7 @@
 
 不是教 prompt 基础，是把四种真在生产里赚分的技术做成可 cp 函数：
 
-![长 prompt 像塞满纸条的长管，两端看得见中段沉底被忽略](assets/prompt-engineering-illustrations/01-lost-in-the-middle.webp)
+![长 prompt 像塞满纸条的长管，两端看得见中段沉底被忽略](assets/prompt-engineering-illustrations/01-lost-in-the-middle.png)
 
 | 技术 | 用在 | 收益 | 代价 |
 |---|---|---|---|

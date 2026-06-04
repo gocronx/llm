@@ -2,7 +2,7 @@
 
 LLM 没状态。多轮对话靠应用把历史塞进 `messages` 数组送回去 —— 历史越长，越烧钱也越容易爆 context。四种策略各有取舍。
 
-![小黑把新摘要订在旧摘要串的末尾，链条只长不撕](assets/memory-illustrations/01-accumulate-summary.webp)
+![小黑把新摘要订在旧摘要串的末尾，链条只长不撕](assets/memory-illustrations/01-accumulate-summary.png)
 
 ## 四种策略
 

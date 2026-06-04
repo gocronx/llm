@@ -2,7 +2,7 @@
 
 三语言对照：用 `response_format: json_schema` + `strict: true` 让 LLM 必须按 JSON Schema 返回，从 token 解码阶段就做约束。
 
-![小黑守在带固定凹槽的罐口，形状对上的积木才放进来，不合的当场弹开](assets/structured-output-illustrations/01-schema-gated-decoding.webp)
+![小黑守在带固定凹槽的罐口，形状对上的积木才放进来，不合的当场弹开](assets/structured-output-illustrations/01-schema-gated-decoding.png)
 
 ## 为什么不靠 prompt
 
