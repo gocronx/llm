@@ -6,8 +6,8 @@
 
 | 目录 | 教 | 例子 |
 |------|---|------|
-| [`../`](../)（core / agent / production / niche / case-studies） | **用 LLM** | function call, streaming, agent, memory, MCP, multi-agent, context governance |
-| `internals/` (这里) | **实现 LLM** | 采样, RoPE, RMSNorm, 量化反量化, 投机解码, generation 主循环 |
+| [仓库根目录](../README.md)的 core / agent / production / niche / case-studies | **用 LLM** | function call, streaming, agent, memory, MCP, multi-agent, context governance |
+| `internals/`（这里） | **实现 LLM** | 采样, RoPE, RMSNorm, 量化反量化, 投机解码, generation 主循环 |
 
 为什么单开一个目录: LLM 内部的"数学算法"跟"应用层 demo"是两个层次, 混着写谁都看不清.
 这里所有 demo 都用 **numpy + 纯 Python**, 不需要 GPU / 不引推理框架, 让你能在笔记本上单步跑.
