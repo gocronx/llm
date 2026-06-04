@@ -25,7 +25,9 @@ triggers: [sql, 查询, select]   # 标签：触发词
 1. 永远用参数化查询……          # 盒子里的正文
 ```
 
-就这么多。没有代码、没有沙箱、没有魔法——**Skill 的"安装"就是把文件放进目录，"卸载"就是删文件**。
+就这么多。没有代码、没有沙箱、没有魔法——**Skill 的"安装"就是把文件放进目录，"卸载"就是删文件**。完整形态的 Skill 还可以带参考资料和脚本，一张卡总览：
+
+<p align="center"><img src="assets/skill-principles-illustrations/05-skill-anatomy.png" width="420" alt="Skill 的组成部分：元信息、正文指令、参考资料、脚本工具"></p>
 
 ## 二、为什么要按需加载：context 是背包，不是仓库
 
