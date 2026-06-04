@@ -29,28 +29,26 @@
 
 ## 学习路径
 
-```
-   ┌─ 数据流方向 ─────────────────────────────────────────────────┐
-   │                                                              │
-   │  输入 token IDs                                              │
-   │       ↓                                                     │
-   │  Embedding → [02 RoPE 位置编码]                               │
-   │       ↓                                                     │
-   │  Transformer Block ×N:                                       │
-   │    ↓                                                        │
-   │    [03 RMSNorm] → Attention (Q,K,V) → [02 RoPE on Q,K]      │
-   │                                       ↓                     │
-   │                                    [04 FP8/Q8 量化 K,V cache]│
-   │    ↓                                                        │
-   │    [03 RMSNorm] → FFN → [03 SwiGLU]                          │
-   │       ↓                                                     │
-   │  Final RMSNorm → unembedding → logits                        │
-   │       ↓                                                     │
-   │  [01 top-k/p Sampling] → 下一 token                          │
-   │       ↓                                                     │
-   │  [06 Generation 主循环 prefill→decode]                        │
-   │  [05 投机解码 — 06 的加速版]                                  │
-   └──────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    IN([输入 token IDs]) --> EMB[Embedding]
+    EMB --> BLK
+    subgraph BLK["Transformer Block ×N"]
+        direction TB
+        N1["03 · RMSNorm"] --> ATT["Attention（Q / K / V）"]
+        ATT --> ROPE["02 · RoPE 拧入位置（作用于 Q, K）"]
+        ROPE --> KV["04 · FP8/Q8 量化 K,V cache"]
+        KV --> N2["03 · RMSNorm"]
+        N2 --> FFN["FFN + 03 · SwiGLU 门控"]
+    end
+    BLK --> LOGITS["Final RMSNorm → unembedding → logits"]
+    LOGITS --> SAMP["01 · top-k/top-p 采样"]
+    SAMP --> TOK([下一 token])
+    TOK -. "06 · 生成主循环：prefill 一次吞，decode 逐 token 回填" .-> EMB
+    SPEC["05 · 投机解码（06 的加速版：小模型抢跑 + 一次验收）"] -.替换 06 的逐 token 循环.-> TOK
+
+    classDef demo fill:#fff4e6,stroke:#e8590c,stroke-width:1.5px;
+    class N1,ATT,ROPE,KV,N2,FFN,SAMP,SPEC demo;
 ```
 
 建议顺序: **06 (整体骨架)** → 01 (采样, 最末一步) → 03 (Norm + 激活, 最常见) → 02 (RoPE, 编码位置) → 04 (量化) → 05 (投机).
