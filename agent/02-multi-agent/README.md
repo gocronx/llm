@@ -2,6 +2,8 @@
 
 多 agent 协作。**关键不是 agent 怎么写，是 orchestrator 怎么把上游产物传给下游 + 怎么截断防爆 context。**
 
+![小黑把上游产物倒进带标签的小桶递给下游，桶太满就削掉一截](assets/02-multi-agent-illustrations/01-orchestrate-handoff.webp)
+
 ## 工作流模式
 
 ```

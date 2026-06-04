@@ -6,6 +6,8 @@
 
 本 demo 抽自 nanobot `runner.py:1103-1283` 的 5 步治理组合拳, 让 ReAct 撑到 50+ 轮不崩. 简化成 self-contained 教学版 (无外部 session/storage 依赖).
 
+![小黑只誊抄一张精简副本去喂模型，身后锁链拴住的原账本一字不动](assets/03-governance-illustrations/01-view-not-memory.webp)
+
 ## 为什么会崩 —— 三个具体场景
 
 ### 场景 1: 结构崩 (API 400)

@@ -2,6 +2,8 @@
 
 让通用模型学会用你公司的"内部框架"。本 demo 用虚构的 Saber 框架做例子，端到端跑 LoRA 流水线（Apple Silicon + MLX）。
 
+![微调是给模型换字模学口音，知识更新该翻抽屉用 RAG](assets/fine-tuning-illustrations/01-when-not-to-finetune.webp)
+
 ## 何时考虑 fine-tune
 
 - ✅ 通用模型不认识你的内部 API（公司内部框架、私有 SDK）

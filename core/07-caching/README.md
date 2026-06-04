@@ -2,6 +2,8 @@
 
 LLM 应用最便宜的降本手段。本 demo 把**应用层**两种缓存（Exact / Semantic）做到位，**服务端前缀缓存**单独说一下原理 —— 那一层不需要你写代码。
 
+![小黑用手摇复印机，同一原稿直接抽现成副本，必须确定性一致](assets/caching-illustrations/01-deterministic-cache.webp)
+
 ## 三种层次
 
 | 层次 | 在哪 | 命中条件 | 收益 |

@@ -2,6 +2,8 @@
 
 LLM 调用挡灾的四件事打包：**重试 + 退避 + Retry-After + Circuit Breaker + Fallback**。Python 单语言，因为生产里基本都是 Python 跑挡灾代理（vLLM、LiteLLM 等都是 Python）。
 
+![小黑摇水泵，管子堵死时翻板阀短路把水改道到备用桶](assets/error-handling-illustrations/01-circuit-breaker.webp)
+
 ## 四件事各管什么
 
 | 事 | 解决的问题 |

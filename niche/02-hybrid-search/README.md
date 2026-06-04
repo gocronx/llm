@@ -2,6 +2,8 @@
 
 代码库检索：**grep（精确符号）+ vector（语义）+ 加权融合**。
 
+![精确网和语义网各捞各的鱼，最后按比例配重融合](assets/hybrid-search-illustrations/01-two-nets-one-scale.webp)
+
 | query 类型 | 推荐 |
 |---|---|
 | 字面符号（"def login"） | grep |

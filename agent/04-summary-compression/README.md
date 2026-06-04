@@ -4,6 +4,8 @@
 
 抽自 hermes-agent `agent/context_compressor.py:793-891`. 类似 Claude Code 的 `/compact`. 适合长会话 (50+ 轮) 的 context checkpoint.
 
+![小黑把一大叠旧记录塞进漏斗熬成一小块浓缩块](assets/04-summary-illustrations/01-llm-summary.webp)
+
 ## 跟 21 的关系
 
 21 教**规则式**治理 (代码砍/截/替占位符), 22 教**模型式**总结 (LLM 自己消化).

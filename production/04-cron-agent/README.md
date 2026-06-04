@@ -2,6 +2,8 @@
 
 定时触发的 Agent：监控、汇报、清理、巡检——主动按节奏跑，不等用户输入。
 
+![到点就跑的巡检](assets/cron-agent-illustrations/01-clock-patrol.webp)
+
 ## 三个示例 job
 
 | job | 周期 | 干啥 |

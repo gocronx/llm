@@ -2,6 +2,8 @@
 
 三语言流式输出对照。两个场景：纯文本流式、流式 + function call。
 
+![小黑用磁铁把飘来的碎片按槽位归位，拼齐成完整形状后才读取](assets/streaming-illustrations/01-accumulate-by-index.webp)
+
 ## 为什么单独做这个 demo
 
 非流式 vs 流式总耗时是一样的，区别在**首字延迟**：5-10s → 0.5-1s。用户感知差异巨大，所有面向用户的 LLM 应用都该上流式。

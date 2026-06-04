@@ -2,6 +2,8 @@
 
 跑 1 万条 prompt 的最小可靠实现：**并发 + 重试 + 断点续跑 + 增量落盘**。生产里所有的离线评测、数据生成、批量 inference 都长这个样子。
 
+![崩了从断点继续，跑过不重跑，一条一存](assets/batch-runner-illustrations/01-resume-from-flag.webp)
+
 ## 三件大事
 
 | 件 | 怎么做 |

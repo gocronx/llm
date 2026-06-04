@@ -2,6 +2,8 @@
 
 把 01 的一次 function-call 往返包成多轮 while 循环 = ReAct 风格的最小 agent。
 
+![小黑钓一杆看清结果再决定下一杆，交替着看一步走一步](assets/01-simple-illustrations/01-react-loop.webp)
+
 ## 什么是 ReAct
 
 **ReAct = Reasoning + Acting**, 出自 [Yao et al. 2022, *ReAct: Synergizing Reasoning and Acting in Language Models*](https://arxiv.org/abs/2210.03629). 当今所有 agent 框架 (LangChain / OpenAI Agents / AutoGPT / Claude Code) 的基础范式.

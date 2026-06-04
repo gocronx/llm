@@ -2,6 +2,8 @@
 
 三语言对照：用 `response_format: json_schema` + `strict: true` 让 LLM 必须按 JSON Schema 返回，从 token 解码阶段就做约束。
 
+![小黑守在带固定凹槽的罐口，形状对上的积木才放进来，不合的当场弹开](assets/structured-output-illustrations/01-schema-gated-decoding.webp)
+
 ## 为什么不靠 prompt
 
 "请返回 JSON" + try/except json.loads + 处理 markdown 包裹是上一个时代的活。strict 模式让模型在 token 解码时只能输出符合 schema 的 token —— 不再有 JSON 解析失败、字段名拼错、类型不对的问题。
