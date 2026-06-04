@@ -1,6 +1,6 @@
 # LLM 开发实战项目集
 
-24 个独立 demo + 源码拆解，按"目的"分到 5 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
+30 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
 
 ![五个抽屉按目的分，每件拿来即跑、拆开能学](assets/readme-illustrations/01-five-drawers.webp)
 
@@ -12,7 +12,8 @@ llm/
 ├── agent/          # Agent 范式 + 长跑治理 (6 个)
 ├── production/     # 生产工程化 (7 个)
 ├── niche/          # 价值评估两极的话题 (3 个)
-└── case-studies/   # 真实开源项目源码拆解 + 最小复刻
+├── case-studies/   # 真实开源项目源码拆解 + 最小复刻
+└── internals/      # 推理引擎内核算法，numpy 单步跑 (6 个)
 ```
 
 ## 环境配置
@@ -101,6 +102,21 @@ cp .env.example .env
 
 进一步说明见 [`case-studies/README.md`](case-studies/README.md).
 
+### internals · 推理引擎内核算法
+
+跟前 5 个目录相反的层次——不是"用 LLM"，而是"实现 LLM"。全部 numpy + 纯 Python，无 GPU、无推理框架，笔记本单步跑。源自 ds4.c，部分参考 llama.cpp / vLLM。
+
+| # | demo | 价值 | 说明 |
+|---|------|------|------|
+| 01 | [top-k-top-p-sampling](internals/01-top-k-top-p-sampling) | ⭐⭐⭐⭐⭐ | 采样管道（温度+top_k+top_p+min_p+CDF） |
+| 02 | [rope-positional-encoding](internals/02-rope-positional-encoding) | ⭐⭐⭐⭐⭐ | RoPE + YaRN 长上下文外推 |
+| 03 | [rmsnorm-swiglu](internals/03-rmsnorm-swiglu) | ⭐⭐⭐⭐ | 现代 LayerNorm + 门控激活 |
+| 04 | [fp8-quantize-dequantize](internals/04-fp8-quantize-dequantize) | ⭐⭐⭐⭐ | FP8 / Q8_K 量化 |
+| 05 | [speculative-decoding](internals/05-speculative-decoding) | ⭐⭐⭐⭐⭐ | 投机解码 + margin filter |
+| 06 | [generation-main-loop](internals/06-generation-main-loop) | ⭐⭐⭐⭐ | Prefill→Decode 主循环 |
+
+建议顺序与数据流图见 [`internals/README.md`](internals/README.md)：**06（整体骨架）→ 01 → 03 → 02 → 04 → 05**。
+
 ### 怎么选
 
 ![先走主干，按需岔路](assets/readme-illustrations/02-trail-fork.webp)
@@ -111,7 +127,7 @@ cp .env.example .env
 - **跑评测 / 数据生成**：`core/08-evaluation` + `production/06-batch-runner`，配合用
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
 - **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（错误恢复）；多 agent 并行上 `05-subagent-orchestration`
-- **想懂 LLM 内部**：去 [`../llm-internals/`](../llm-internals/) 看采样 / RoPE / RMSNorm+SwiGLU / FP8 量化 / 投机解码 / 生成主循环（6 个 numpy 单测 demo，建议从 06 主循环入手）
+- **想懂 LLM 内部**：去 [`internals/`](internals/) 看采样 / RoPE / RMSNorm+SwiGLU / FP8 量化 / 投机解码 / 生成主循环（6 个 numpy 单测 demo，建议从 06 主循环入手）
 - **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04) / 三种 skill 哲学对照 (05)
 
 ## 快速开始
