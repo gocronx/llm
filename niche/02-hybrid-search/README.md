@@ -2,7 +2,7 @@
 
 代码库检索：**grep（精确符号）+ vector（语义）+ 加权融合**。
 
-<p align="center"><img src="assets/hybrid-search-illustrations/02-overview-card.png" width="420" alt="混合检索 RAG 知识卡"></p>
+<p align="center"><img src="assets/hybrid-search-illustrations/02-overview-card.png" width="420" alt="检索别只靠一招（知识卡）"></p>
 
 | query 类型 | 推荐 |
 |---|---|

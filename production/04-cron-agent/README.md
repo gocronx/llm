@@ -2,7 +2,7 @@
 
 定时触发的 Agent：监控、汇报、清理、巡检——主动按节奏跑，不等用户输入。
 
-<p align="center"><img src="assets/cron-agent-illustrations/02-overview-card.png" width="420" alt="Cron 定时智能体知识卡"></p>
+<p align="center"><img src="assets/cron-agent-illustrations/02-overview-card.png" width="420" alt="到点自己跑的助手（知识卡）"></p>
 
 ## 三个示例 job
 

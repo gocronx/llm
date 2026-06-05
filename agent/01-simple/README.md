@@ -2,7 +2,7 @@
 
 把 01 的一次 function-call 往返包成多轮 while 循环 = ReAct 风格的最小 agent。
 
-<p align="center"><img src="assets/01-simple-illustrations/02-overview-card.png" width="420" alt="什么是 ReAct 知识卡"></p>
+<p align="center"><img src="assets/01-simple-illustrations/02-overview-card.png" width="420" alt="看一步走一步的 ReAct（知识卡）"></p>
 
 ## 什么是 ReAct
 

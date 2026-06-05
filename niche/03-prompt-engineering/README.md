@@ -2,7 +2,7 @@
 
 不是教 prompt 基础，是把四种真在生产里赚分的技术做成可 cp 函数：
 
-<p align="center"><img src="assets/prompt-engineering-illustrations/02-overview-card.png" width="420" alt="四招提示术 Prompt 知识卡"></p>
+<p align="center"><img src="assets/prompt-engineering-illustrations/02-overview-card.png" width="420" alt="提示术用对才加分（知识卡）"></p>
 
 | 技术 | 用在 | 收益 | 代价 |
 |---|---|---|---|

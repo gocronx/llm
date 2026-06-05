@@ -2,7 +2,7 @@
 
 LLM-70B 用 fp16 是 140 GB, 一张 H100-80G 装不下. 把权重 / KV cache / activation 压成 8-bit, 显存和带宽都翻倍, 还能用 H100 的 Tensor Core FP8 算力 (~2× fp16).
 
-<p align="center"><img src="assets/fp8-illustrations/02-overview-card.png" width="420" alt="FP8 八位量化知识卡"></p>
+<p align="center"><img src="assets/fp8-illustrations/02-overview-card.png" width="420" alt="压缩最怕异常值（知识卡）"></p>
 
 抽自 ds4.c:
 - `dsv4_e4m3fn_value_cpu` / `dsv4_e4m3fn_dequant_cpu` (line 1590, 1608) — FP8 E4M3FN

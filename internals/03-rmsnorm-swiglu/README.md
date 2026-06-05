@@ -2,7 +2,7 @@
 
 现代 LLM (LLaMA / Mistral / Qwen / DeepSeek) 的 normalization + activation 标配. 抽自 [ds4.c:2700, 5012](https://github.com/antirez/ds4).
 
-<p align="center"><img src="assets/03-rmsnorm-swiglu-illustrations/02-overview-card.png" width="420" alt="RMSNorm 与门控知识卡"></p>
+<p align="center"><img src="assets/03-rmsnorm-swiglu-illustrations/02-overview-card.png" width="420" alt="先对齐刻度再开闸门（知识卡）"></p>
 
 | | 经典 (Pre-2020) | 现代 (Post-LLaMA) |
 |--|----------------|------------------|

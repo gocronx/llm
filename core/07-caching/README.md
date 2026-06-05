@@ -2,7 +2,7 @@
 
 LLM 应用最便宜的降本手段。本 demo 把**应用层**两种缓存（Exact / Semantic）做到位，**服务端前缀缓存**单独说一下原理 —— 那一层不需要你写代码。
 
-<p align="center"><img src="assets/caching-illustrations/02-overview-card.png" width="420" alt="LLM缓存三层省钱知识卡"></p>
+<p align="center"><img src="assets/caching-illustrations/02-overview-card.png" width="420" alt="重复提问为啥别再花钱（知识卡）"></p>
 
 ## 三种层次
 

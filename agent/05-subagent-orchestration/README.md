@@ -2,7 +2,7 @@
 
 主 agent 把任务拆给多个 **subagent 并行执行**, 再聚合结果. 比单 agent 干一切快、context 干净.
 
-<p align="center"><img src="assets/05-subagent-illustrations/02-overview-card.png" width="420" alt="子 Agent 编排知识卡"></p>
+<p align="center"><img src="assets/05-subagent-illustrations/02-overview-card.png" width="420" alt="派给子 Agent 分头干（知识卡）"></p>
 
 灵感:
 - [Claude Code](https://docs.anthropic.com/claude-code) 的 `Task` tool (`subagent_type` 参数)

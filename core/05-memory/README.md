@@ -2,7 +2,7 @@
 
 LLM 没状态。多轮对话靠应用把历史塞进 `messages` 数组送回去 —— 历史越长，越烧钱也越容易爆 context。四种策略各有取舍。
 
-<p align="center"><img src="assets/memory-illustrations/02-overview-card.png" width="420" alt="聊天Memory四招知识卡"></p>
+<p align="center"><img src="assets/memory-illustrations/02-overview-card.png" width="420" alt="多轮对话为啥越聊越贵（知识卡）"></p>
 
 ## 四种策略
 

@@ -2,7 +2,7 @@
 
 LLM 应用的"回归测试"。改 prompt / 换模型后怎么知道是变好还是变差 —— 需要一套可重复的评测。
 
-<p align="center"><img src="assets/evaluation-illustrations/02-overview-card.png" width="420" alt="LLM评测三类尺子知识卡"></p>
+<p align="center"><img src="assets/evaluation-illustrations/02-overview-card.png" width="420" alt="改完提示词怎么知道变好（知识卡）"></p>
 
 ## 七种 metric + LLM 裁判
 

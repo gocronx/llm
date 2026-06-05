@@ -2,7 +2,7 @@
 
 跨语言 MCP（Model Context Protocol）演示。**Python 写一个 FastMCP server，Go 和 Rust 客户端拉同一个 server 跑** —— MCP 的卖点就是工具实现在哪个语言不重要，client 只看 JSON-RPC 协议。
 
-<p align="center"><img src="assets/mcp-illustrations/02-overview-card.png" width="420" alt="MCP 只认协议不认语言知识卡"></p>
+<p align="center"><img src="assets/mcp-illustrations/02-overview-card.png" width="420" alt="同一个工具不用写三遍（知识卡）"></p>
 
 ## 协议（够用版）
 

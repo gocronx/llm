@@ -2,7 +2,7 @@
 
 跟仓库其他目录的关系:
 
-<p align="center"><img src="assets/readme-illustrations/02-overview-card.png" width="420" alt="看透推理内核知识卡"></p>
+<p align="center"><img src="assets/readme-illustrations/02-overview-card.png" width="420" alt="调接口出怪事看不懂（知识卡）"></p>
 
 | 目录 | 教 | 例子 |
 |------|---|------|

@@ -2,7 +2,7 @@
 
 三语言对照：用 `response_format: json_schema` + `strict: true` 让 LLM 必须按 JSON Schema 返回，从 token 解码阶段就做约束。
 
-<p align="center"><img src="assets/structured-output-illustrations/02-overview-card.png" width="420" alt="结构化让模型守 Schema 知识卡"></p>
+<p align="center"><img src="assets/structured-output-illustrations/02-overview-card.png" width="420" alt="让模型死守一份格式（知识卡）"></p>
 
 ## 为什么不靠 prompt
 

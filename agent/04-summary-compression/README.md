@@ -2,7 +2,7 @@
 
 > 已经看了 [03-context-governance](../03-context-governance)? 这里讲怎么用 LLM 自己**总结**老 history (而不是规则式截断).
 
-<p align="center"><img src="assets/04-summary-illustrations/02-overview-card.png" width="420" alt="用 LLM 总结历史知识卡"></p>
+<p align="center"><img src="assets/04-summary-illustrations/02-overview-card.png" width="420" alt="让模型自己熬浓缩（知识卡）"></p>
 
 抽自 hermes-agent `agent/context_compressor.py:793-891`. 类似 Claude Code 的 `/compact`. 适合长会话 (50+ 轮) 的 context checkpoint.
 

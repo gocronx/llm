@@ -2,7 +2,7 @@
 
 LLM 调用挡灾的四件事打包：**重试 + 退避 + Retry-After + Circuit Breaker + Fallback**。Python 单语言，因为生产里基本都是 Python 跑挡灾代理（vLLM、LiteLLM 等都是 Python）。
 
-<p align="center"><img src="assets/error-handling-illustrations/02-overview-card.png" width="420" alt="LLM调用四道挡灾知识卡"></p>
+<p align="center"><img src="assets/error-handling-illustrations/02-overview-card.png" width="420" alt="模型调用四道挡灾（知识卡）"></p>
 
 ## 四件事各管什么
 

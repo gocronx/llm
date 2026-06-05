@@ -2,7 +2,7 @@
 
 LLM 推理引擎的"骨架": 把 model forward + sampling + stop condition 串成一个 token-at-a-time 循环. 抽自 ds4.c:15119 (`generate_raw_swa_cpu`).
 
-<p align="center"><img src="assets/genloop-illustrations/02-overview-card.png" width="420" alt="生成主循环骨架知识卡"></p>
+<p align="center"><img src="assets/genloop-illustrations/02-overview-card.png" width="420" alt="大模型怎么吐字（知识卡）"></p>
 
 这个 demo 把前 5 个 (G01-G05) 都能联动起来:
 - G01 sampling 提供 sample_fn

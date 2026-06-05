@@ -2,7 +2,7 @@
 
 多 agent 协作。**关键不是 agent 怎么写，是 orchestrator 怎么把上游产物传给下游 + 怎么截断防爆 context。**
 
-<p align="center"><img src="assets/02-multi-agent-illustrations/02-overview-card.png" width="420" alt="多 Agent 协作知识卡"></p>
+<p align="center"><img src="assets/02-multi-agent-illustrations/02-overview-card.png" width="420" alt="产物要削一截再递（知识卡）"></p>
 
 ## 工作流模式
 

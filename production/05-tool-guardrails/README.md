@@ -2,7 +2,7 @@
 
 Agent 工具调用前的挡灾层。LLM 想调 `write_file` 写 `/etc/passwd` 是常态 —— guardrails 是工具和 LLM 之间的检查关卡。
 
-<p align="center"><img src="assets/tool-guardrails-illustrations/02-overview-card.png" width="420" alt="工具调用挡灾层知识卡"></p>
+<p align="center"><img src="assets/tool-guardrails-illustrations/02-overview-card.png" width="420" alt="工具调用前设关卡（知识卡）"></p>
 
 ## 四层防御
 

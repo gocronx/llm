@@ -2,7 +2,7 @@
 
 三语言流式输出对照。两个场景：纯文本流式、流式 + function call。
 
-<p align="center"><img src="assets/streaming-illustrations/02-overview-card.png" width="420" alt="流式输出快在首字知识卡"></p>
+<p align="center"><img src="assets/streaming-illustrations/02-overview-card.png" width="420" alt="等首字从十秒到半秒（知识卡）"></p>
 
 ## 为什么单独做这个 demo
 

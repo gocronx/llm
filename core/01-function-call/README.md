@@ -2,7 +2,7 @@
 
 Function Call 三语言对照演示。LLM 不执行函数，只决定调哪个工具+用什么参数；应用层执行后把结果回灌给 LLM 总结。
 
-<p align="center"><img src="assets/function-call-illustrations/02-overview-card.png" width="420" alt="LLM 只决定不执行知识卡"></p>
+<p align="center"><img src="assets/function-call-illustrations/02-overview-card.png" width="420" alt="模型只点菜不下厨（知识卡）"></p>
 
 ## 两轮交互
 

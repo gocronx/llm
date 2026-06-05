@@ -2,7 +2,7 @@
 
 Google A2A 风格的 agent ↔ agent 跨进程协作。每个 agent 是独立 HTTP 服务，coordinator 自发现 + LLM 拆任务 + 并行 dispatch。
 
-<p align="center"><img src="assets/a2a-illustrations/02-overview-card.png" width="420" alt="A2A 多智能体协作知识卡"></p>
+<p align="center"><img src="assets/a2a-illustrations/02-overview-card.png" width="420" alt="多个智能体互相调（知识卡）"></p>
 
 ## A2A vs MCP
 

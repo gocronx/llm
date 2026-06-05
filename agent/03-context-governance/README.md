@@ -2,7 +2,7 @@
 
 > 不熟 ReAct 范式? 先看 [01-simple](../01-simple) 的 "什么是 ReAct" 一节.
 
-<p align="center"><img src="assets/03-governance-illustrations/02-overview-card.png" width="420" alt="Context 治理知识卡"></p>
+<p align="center"><img src="assets/03-governance-illustrations/02-overview-card.png" width="420" alt="让长跑撑到五十轮（知识卡）"></p>
 
 [01-simple](../01-simple) 教了 ReAct 长啥样 —— 一个 71 行的 while 循环, 在玩具任务上跑 5 轮没问题. 但真把它塞到 production 里, 跑到 20+ 轮就开始死. 死的不是逻辑, 是 **context 形态**: API 返回 400, 或 LLM 因超 context window 拒绝.
 

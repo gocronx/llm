@@ -2,7 +2,7 @@
 
 按 query 难度路由到 cheap / mid / premium 三档模型。
 
-<p align="center"><img src="assets/model-router-illustrations/02-overview-card.png" width="420" alt="Model 智能路由知识卡"></p>
+<p align="center"><img src="assets/model-router-illustrations/02-overview-card.png" width="420" alt="按难度挑模型（知识卡）"></p>
 
 **关键区分**：
 

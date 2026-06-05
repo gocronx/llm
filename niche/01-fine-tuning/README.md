@@ -2,7 +2,7 @@
 
 让通用模型学会用你公司的"内部框架"。本 demo 用虚构的 Saber 框架做例子，端到端跑 LoRA 流水线（Apple Silicon + MLX）。
 
-<p align="center"><img src="assets/fine-tuning-illustrations/02-overview-card.png" width="420" alt="何时该 LoRA 知识卡"></p>
+<p align="center"><img src="assets/fine-tuning-illustrations/02-overview-card.png" width="420" alt="微调不是知识补丁（知识卡）"></p>
 
 ## 何时考虑 fine-tune
 

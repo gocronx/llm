@@ -2,7 +2,7 @@
 
 LLM 推理的最后一步: 模型输出 V 维 logits (V 是词表大小, 通常 32k-256k), 怎么把它变成一个 token id?
 
-<p align="center"><img src="assets/01-sampling-illustrations/02-overview-card.png" width="420" alt="采样三参数知识卡"></p>
+<p align="center"><img src="assets/01-sampling-illustrations/02-overview-card.png" width="420" alt="四个旋钮调出好回答（知识卡）"></p>
 
 这是 llama.cpp / vLLM / SGLang / Ollama 都在用的"现代"采样组合, 抽自 [ds4.c](https://github.com/antirez/ds4) 
 的 `sample_top_p_min_p` (`ds4.c:15023`).
