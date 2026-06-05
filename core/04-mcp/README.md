@@ -2,7 +2,7 @@
 
 跨语言 MCP（Model Context Protocol）演示。**Python 写一个 FastMCP server，Go 和 Rust 客户端拉同一个 server 跑** —— MCP 的卖点就是工具实现在哪个语言不重要，client 只看 JSON-RPC 协议。
 
-![小黑把形状各异的瓶子拧上同一个统一接头，出水都一致](assets/mcp-illustrations/01-protocol-not-language.png)
+<p align="center"><img src="assets/mcp-illustrations/02-overview-card.png" width="420" alt="MCP 只认协议不认语言知识卡"></p>
 
 ## 协议（够用版）
 
@@ -86,4 +86,4 @@ cd rust && cargo run
 - ❌ **不收尸子进程** —— 跑几次就一堆 zombie，Go 用 `cmd.Wait()`，Rust 用 `Drop` 里 `wait()`
 - ⚠️ **协议版本** —— 这里用 `2024-11-05`；MCP 协议在演进，要看 server SDK 兼容什么
 
-<p align="center"><img src="assets/mcp-illustrations/02-overview-card.png" width="420" alt="MCP 只认协议不认语言知识卡"></p>
+![小黑把形状各异的瓶子拧上同一个统一接头，出水都一致](assets/mcp-illustrations/01-protocol-not-language.png)

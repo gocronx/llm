@@ -2,7 +2,7 @@
 
 LLM 应用最便宜的降本手段。本 demo 把**应用层**两种缓存（Exact / Semantic）做到位，**服务端前缀缓存**单独说一下原理 —— 那一层不需要你写代码。
 
-![小黑用手摇复印机，同一原稿直接抽现成副本，必须确定性一致](assets/caching-illustrations/01-deterministic-cache.png)
+<p align="center"><img src="assets/caching-illustrations/02-overview-card.png" width="420" alt="LLM缓存三层省钱知识卡"></p>
 
 ## 三种层次
 
@@ -30,4 +30,4 @@ python main.py
 - ❌ **缓存时效性内容**（"今日天气"）
 - ❌ **不用 Embedding** —— 生产用 sentence-transformers + cosine，本 demo 用 Jaccard 只为不引依赖
 
-<p align="center"><img src="assets/caching-illustrations/02-overview-card.png" width="420" alt="LLM缓存三层省钱知识卡"></p>
+![小黑用手摇复印机，同一原稿直接抽现成副本，必须确定性一致](assets/caching-illustrations/01-deterministic-cache.png)

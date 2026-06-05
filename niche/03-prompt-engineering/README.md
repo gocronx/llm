@@ -2,7 +2,7 @@
 
 不是教 prompt 基础，是把四种真在生产里赚分的技术做成可 cp 函数：
 
-![长 prompt 像塞满纸条的长管，两端看得见中段沉底被忽略](assets/prompt-engineering-illustrations/01-lost-in-the-middle.png)
+<p align="center"><img src="assets/prompt-engineering-illustrations/02-overview-card.png" width="420" alt="四招提示术 Prompt 知识卡"></p>
 
 | 技术 | 用在 | 收益 | 代价 |
 |---|---|---|---|
@@ -29,4 +29,4 @@ python main.py
 - ❌ CoT 没让模型输出"思考/答案"标记 → 后处理拿不到答案
 - ⚠️ 本地小模型 CoT 反而准确率下降
 
-<p align="center"><img src="assets/prompt-engineering-illustrations/02-overview-card.png" width="420" alt="四招提示术 Prompt 知识卡"></p>
+![长 prompt 像塞满纸条的长管，两端看得见中段沉底被忽略](assets/prompt-engineering-illustrations/01-lost-in-the-middle.png)

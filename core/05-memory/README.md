@@ -2,7 +2,7 @@
 
 LLM 没状态。多轮对话靠应用把历史塞进 `messages` 数组送回去 —— 历史越长，越烧钱也越容易爆 context。四种策略各有取舍。
 
-![小黑把新摘要订在旧摘要串的末尾，链条只长不撕](assets/memory-illustrations/01-accumulate-summary.png)
+<p align="center"><img src="assets/memory-illustrations/02-overview-card.png" width="420" alt="聊天Memory四招知识卡"></p>
 
 ## 四种策略
 
@@ -40,4 +40,4 @@ cd rust && cargo run
 - ❌ **system prompt 算进 Window 长度** —— Window 只裁对话
 - ⚠️ **token 估算糙** —— 中文 1.5 字/t 是经验，生产换 tiktoken
 
-<p align="center"><img src="assets/memory-illustrations/02-overview-card.png" width="420" alt="聊天Memory四招知识卡"></p>
+![小黑把新摘要订在旧摘要串的末尾，链条只长不撕](assets/memory-illustrations/01-accumulate-summary.png)

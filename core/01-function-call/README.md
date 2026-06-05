@@ -2,7 +2,7 @@
 
 Function Call 三语言对照演示。LLM 不执行函数，只决定调哪个工具+用什么参数；应用层执行后把结果回灌给 LLM 总结。
 
-![小黑只下单不下厨，把多张点菜单一次递给并行开火的三个灶台再全收齐](assets/function-call-illustrations/01-decide-not-execute.png)
+<p align="center"><img src="assets/function-call-illustrations/02-overview-card.png" width="420" alt="LLM 只决定不执行知识卡"></p>
 
 ## 两轮交互
 
@@ -102,4 +102,4 @@ cargo run -- verify   # 验证
 
 详见每个语言子目录的 README。
 
-<p align="center"><img src="assets/function-call-illustrations/02-overview-card.png" width="420" alt="LLM 只决定不执行知识卡"></p>
+![小黑只下单不下厨，把多张点菜单一次递给并行开火的三个灶台再全收齐](assets/function-call-illustrations/01-decide-not-execute.png)

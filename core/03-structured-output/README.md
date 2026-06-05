@@ -2,7 +2,7 @@
 
 三语言对照：用 `response_format: json_schema` + `strict: true` 让 LLM 必须按 JSON Schema 返回，从 token 解码阶段就做约束。
 
-![小黑守在带固定凹槽的罐口，形状对上的积木才放进来，不合的当场弹开](assets/structured-output-illustrations/01-schema-gated-decoding.png)
+<p align="center"><img src="assets/structured-output-illustrations/02-overview-card.png" width="420" alt="结构化让模型守 Schema 知识卡"></p>
 
 ## 为什么不靠 prompt
 
@@ -52,4 +52,4 @@ cd rust && cargo run
 - ❌ **prompt 还在求 JSON** —— 多此一举，且容易和 schema 冲突
 - ⚠️ **本地模型未必支持 json_schema** —— MLX / vLLM 老版本可能只支持 `json_object`，这种时候只能退而求其次（"json_object" 只保证合法 JSON，不保证 schema）
 
-<p align="center"><img src="assets/structured-output-illustrations/02-overview-card.png" width="420" alt="结构化让模型守 Schema 知识卡"></p>
+![小黑守在带固定凹槽的罐口，形状对上的积木才放进来，不合的当场弹开](assets/structured-output-illustrations/01-schema-gated-decoding.png)

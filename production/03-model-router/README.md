@@ -2,7 +2,8 @@
 
 按 query 难度路由到 cheap / mid / premium 三档模型。
 
-![称难度，分三档管道，答弱升级](assets/model-router-illustrations/01-weigh-and-route.png)
+<p align="center"><img src="assets/model-router-illustrations/02-overview-card.png" width="420" alt="Model 智能路由知识卡"></p>
+
 **关键区分**：
 
 | | 触发 | 行为 |
@@ -37,4 +38,4 @@ python main.py
 - ❌ 不记 escalated_from / failed_over_from → 审计盲
 - ❌ always-premium 当兜底 → SPOF
 
-<p align="center"><img src="assets/model-router-illustrations/02-overview-card.png" width="420" alt="Model 智能路由知识卡"></p>
+![称难度，分三档管道，答弱升级](assets/model-router-illustrations/01-weigh-and-route.png)

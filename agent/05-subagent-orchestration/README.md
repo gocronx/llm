@@ -2,7 +2,7 @@
 
 主 agent 把任务拆给多个 **subagent 并行执行**, 再聚合结果. 比单 agent 干一切快、context 干净.
 
-![小黑同时放飞三只各在隔离笼里的信鸽，回来只各叼一张纸条](assets/05-subagent-illustrations/01-parallel-delegate.png)
+<p align="center"><img src="assets/05-subagent-illustrations/02-overview-card.png" width="420" alt="子 Agent 编排知识卡"></p>
 
 灵感:
 - [Claude Code](https://docs.anthropic.com/claude-code) 的 `Task` tool (`subagent_type` 参数)
@@ -203,4 +203,4 @@ Claude Code 内置的 [Task tool](https://docs.anthropic.com/claude-code/sub-age
 
 核心模式 (isolation + delegate + aggregate) 1:1 一致.
 
-<p align="center"><img src="assets/05-subagent-illustrations/02-overview-card.png" width="420" alt="子 Agent 编排知识卡"></p>
+![小黑同时放飞三只各在隔离笼里的信鸽，回来只各叼一张纸条](assets/05-subagent-illustrations/01-parallel-delegate.png)

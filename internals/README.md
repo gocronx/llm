@@ -2,7 +2,7 @@
 
 跟仓库其他目录的关系:
 
-![小黑把玻璃罩里的座钟拆开，露出内部齿轮亲手拨动](assets/readme-illustrations/01-overview.png)
+<p align="center"><img src="assets/readme-illustrations/02-overview-card.png" width="420" alt="看透推理内核知识卡"></p>
 
 | 目录 | 教 | 例子 |
 |------|---|------|
@@ -75,4 +75,4 @@ flowchart TD
 
 教学版**不是**生产用. 在 70B 模型上 numpy 实现会慢 10000× (没 GPU + 没 fused kernel). 真要 inference 用 [llama.cpp](https://github.com/ggerganov/llama.cpp) / [vLLM](https://github.com/vllm-project/vllm) / [SGLang](https://github.com/sgl-project/sglang). 这里的目的是**让你看懂他们内部在干什么**.
 
-<p align="center"><img src="assets/readme-illustrations/02-overview-card.png" width="420" alt="看透推理内核知识卡"></p>
+![小黑把玻璃罩里的座钟拆开，露出内部齿轮亲手拨动](assets/readme-illustrations/01-overview.png)

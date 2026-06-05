@@ -2,7 +2,7 @@
 
 把 01 的一次 function-call 往返包成多轮 while 循环 = ReAct 风格的最小 agent。
 
-![小黑钓一杆看清结果再决定下一杆，交替着看一步走一步](assets/01-simple-illustrations/01-react-loop.png)
+<p align="center"><img src="assets/01-simple-illustrations/02-overview-card.png" width="420" alt="什么是 ReAct 知识卡"></p>
 
 ## 什么是 ReAct
 
@@ -97,4 +97,4 @@ python main.py    # 4 个多步任务
 
 延伸读 [03-context-governance](../03-context-governance) —— 5 步治理组合拳, 让 ReAct 撑到 50+ 轮.
 
-<p align="center"><img src="assets/01-simple-illustrations/02-overview-card.png" width="420" alt="什么是 ReAct 知识卡"></p>
+![小黑钓一杆看清结果再决定下一杆，交替着看一步走一步](assets/01-simple-illustrations/01-react-loop.png)

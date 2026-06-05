@@ -2,7 +2,7 @@
 
 LLM-70B 用 fp16 是 140 GB, 一张 H100-80G 装不下. 把权重 / KV cache / activation 压成 8-bit, 显存和带宽都翻倍, 还能用 H100 的 Tensor Core FP8 算力 (~2× fp16).
 
-![小黑把流动的水倒进只有几格的冰格冻成方块, 用时再化回水但边角阶梯状有损, 旁边一个超大冰块撑爆了格子](assets/fp8-illustrations/01-quantize.png)
+<p align="center"><img src="assets/fp8-illustrations/02-overview-card.png" width="420" alt="FP8 八位量化知识卡"></p>
 
 抽自 ds4.c:
 - `dsv4_e4m3fn_value_cpu` / `dsv4_e4m3fn_dequant_cpu` (line 1590, 1608) — FP8 E4M3FN
@@ -146,4 +146,4 @@ python main.py    # 看 FP8 表非线性 + 误差分布
 
 算法等价, 数值结果匹配 (subject to round-to-even tie 实现细节).
 
-<p align="center"><img src="assets/fp8-illustrations/02-overview-card.png" width="420" alt="FP8 八位量化知识卡"></p>
+![小黑把流动的水倒进只有几格的冰格冻成方块, 用时再化回水但边角阶梯状有损, 旁边一个超大冰块撑爆了格子](assets/fp8-illustrations/01-quantize.png)

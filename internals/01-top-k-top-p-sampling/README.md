@@ -2,10 +2,10 @@
 
 LLM 推理的最后一步: 模型输出 V 维 logits (V 是词表大小, 通常 32k-256k), 怎么把它变成一个 token id?
 
+<p align="center"><img src="assets/01-sampling-illustrations/02-overview-card.png" width="420" alt="采样三参数知识卡"></p>
+
 这是 llama.cpp / vLLM / SGLang / Ollama 都在用的"现代"采样组合, 抽自 [ds4.c](https://github.com/antirez/ds4) 
 的 `sample_top_p_min_p` (`ds4.c:15023`).
-
-![小黑面对逐层收口的多层蒸笼，从只剩几个馒头的顶屉闭眼夹一个](assets/01-sampling-illustrations/01-sampling.png)
 
 ## 采样管道
 
@@ -86,4 +86,4 @@ python main.py    # 看 8 种参数组合下 10k 次采样的实际分布
 
 算法逻辑 1:1 等价, numpy 版可读性 ×3, 性能差不多 (V≤256k 时主要在 sort/partition, 都是 BLAS 加速).
 
-<p align="center"><img src="assets/01-sampling-illustrations/02-overview-card.png" width="420" alt="采样三参数知识卡"></p>
+![小黑面对逐层收口的多层蒸笼，从只剩几个馒头的顶屉闭眼夹一个](assets/01-sampling-illustrations/01-sampling.png)

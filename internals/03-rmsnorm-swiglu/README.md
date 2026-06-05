@@ -2,7 +2,7 @@
 
 现代 LLM (LLaMA / Mistral / Qwen / DeepSeek) 的 normalization + activation 标配. 抽自 [ds4.c:2700, 5012](https://github.com/antirez/ds4).
 
-![小黑把三罐不同料位用浮子盘对齐到同一刻度，再拧旋钮闸门控制放多少](assets/03-rmsnorm-swiglu-illustrations/01-rmsnorm-swiglu.png)
+<p align="center"><img src="assets/03-rmsnorm-swiglu-illustrations/02-overview-card.png" width="420" alt="RMSNorm 与门控知识卡"></p>
 
 | | 经典 (Pre-2020) | 现代 (Post-LLaMA) |
 |--|----------------|------------------|
@@ -172,4 +172,4 @@ python main.py    # 看激活函数 ASCII 曲线 + 缩放不变性
 
 算法等价, 数值结果对 atol=1e-5 一致.
 
-<p align="center"><img src="assets/03-rmsnorm-swiglu-illustrations/02-overview-card.png" width="420" alt="RMSNorm 与门控知识卡"></p>
+![小黑把三罐不同料位用浮子盘对齐到同一刻度，再拧旋钮闸门控制放多少](assets/03-rmsnorm-swiglu-illustrations/01-rmsnorm-swiglu.png)

@@ -2,7 +2,7 @@
 
 LLM agent 跑长了会遇到几类经典"卡死". 跟传统软件的 catch/retry 不同, LLM-era 的修法是**把错误信息喂回给 LLM, 让它自己改**.
 
-![小黑给退回件贴张纸条再塞回机器投信口，让机器自己改](assets/06-recovery-illustrations/01-feed-error-back.png)
+<p align="center"><img src="assets/06-recovery-illustrations/02-overview-card.png" width="420" alt="工具调用恢复知识卡"></p>
 
 抽自 PraisonAI `llm.py:1089` (`_generate_ollama_tool_summary`) + 实战归纳的另外 3 类.
 
@@ -210,4 +210,4 @@ LLM 调了不存在的 `magic_search_v2` (被 system prompt 诱导), recovery �
 
 核心思路 (检测 empty + 强制合成 summary) 1:1 保留, 通用化到所有模型.
 
-<p align="center"><img src="assets/06-recovery-illustrations/02-overview-card.png" width="420" alt="工具调用恢复知识卡"></p>
+![小黑给退回件贴张纸条再塞回机器投信口，让机器自己改](assets/06-recovery-illustrations/01-feed-error-back.png)

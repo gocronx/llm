@@ -2,7 +2,7 @@
 
 定时触发的 Agent：监控、汇报、清理、巡检——主动按节奏跑，不等用户输入。
 
-![到点就跑的巡检](assets/cron-agent-illustrations/01-clock-patrol.png)
+<p align="center"><img src="assets/cron-agent-illustrations/02-overview-card.png" width="420" alt="Cron 定时智能体知识卡"></p>
 
 ## 三个示例 job
 
@@ -29,4 +29,4 @@ python main.py    # 跑 180s，Ctrl-C 优雅停
 - ❌ 让 LLM 推 trend → 小样本下编规律
 - ⚠️ 这是进程内调度；服务级用 systemd timer / k8s CronJob
 
-<p align="center"><img src="assets/cron-agent-illustrations/02-overview-card.png" width="420" alt="Cron 定时智能体知识卡"></p>
+![到点就跑的巡检](assets/cron-agent-illustrations/01-clock-patrol.png)

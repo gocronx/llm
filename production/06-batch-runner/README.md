@@ -2,7 +2,7 @@
 
 跑 1 万条 prompt 的最小可靠实现：**并发 + 重试 + 断点续跑 + 增量落盘**。生产里所有的离线评测、数据生成、批量 inference 都长这个样子。
 
-![崩了从断点继续，跑过不重跑，一条一存](assets/batch-runner-illustrations/01-resume-from-flag.png)
+<p align="center"><img src="assets/batch-runner-illustrations/02-overview-card.png" width="420" alt="Batch 批量跑任务知识卡"></p>
 
 ## 三件大事
 
@@ -30,4 +30,4 @@ python main.py --no-resume
 - ❌ 并发开到 100 → 服务端限流
 - ❌ 批量 write → crash 时丢一批；单条 append 最稳
 
-<p align="center"><img src="assets/batch-runner-illustrations/02-overview-card.png" width="420" alt="Batch 批量跑任务知识卡"></p>
+![崩了从断点继续，跑过不重跑，一条一存](assets/batch-runner-illustrations/01-resume-from-flag.png)

@@ -2,7 +2,7 @@
 
 代码库检索：**grep（精确符号）+ vector（语义）+ 加权融合**。
 
-![精确网和语义网各捞各的鱼，最后按比例配重融合](assets/hybrid-search-illustrations/01-two-nets-one-scale.png)
+<p align="center"><img src="assets/hybrid-search-illustrations/02-overview-card.png" width="420" alt="混合检索 RAG 知识卡"></p>
 
 | query 类型 | 推荐 |
 |---|---|
@@ -26,4 +26,4 @@ python main.py
 - ❌ 不按文件聚合 → 同文件多份分数
 - ⚠️ alpha 拍脑袋 → 用真实查询日志校准
 
-<p align="center"><img src="assets/hybrid-search-illustrations/02-overview-card.png" width="420" alt="混合检索 RAG 知识卡"></p>
+![精确网和语义网各捞各的鱼，最后按比例配重融合](assets/hybrid-search-illustrations/01-two-nets-one-scale.png)

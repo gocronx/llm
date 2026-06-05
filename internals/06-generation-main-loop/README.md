@@ -2,7 +2,7 @@
 
 LLM 推理引擎的"骨架": 把 model forward + sampling + stop condition 串成一个 token-at-a-time 循环. 抽自 ds4.c:15119 (`generate_raw_swa_cpu`).
 
-![小黑用大桶一口气把水塔灌满, 塔底小嘴却一滴一滴往小杯里漏, 塔身三个浮球阀任一到顶就停](assets/genloop-illustrations/01-genloop.png)
+<p align="center"><img src="assets/genloop-illustrations/02-overview-card.png" width="420" alt="生成主循环骨架知识卡"></p>
 
 这个 demo 把前 5 个 (G01-G05) 都能联动起来:
 - G01 sampling 提供 sample_fn
@@ -171,4 +171,4 @@ python main.py    # 看流式输出 (sleep 0.05s/token 模拟 20 token/s)
 - **替换 generate 为 G05 speculative_decode**: 加速 2-3×
 - **加 batch 维度**: 让 generate 接受多 prompt 并行, 跟 vLLM 的 continuous batching 看齐
 
-<p align="center"><img src="assets/genloop-illustrations/02-overview-card.png" width="420" alt="生成主循环骨架知识卡"></p>
+![小黑用大桶一口气把水塔灌满, 塔底小嘴却一滴一滴往小杯里漏, 塔身三个浮球阀任一到顶就停](assets/genloop-illustrations/01-genloop.png)

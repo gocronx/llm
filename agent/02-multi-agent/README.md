@@ -2,7 +2,7 @@
 
 多 agent 协作。**关键不是 agent 怎么写，是 orchestrator 怎么把上游产物传给下游 + 怎么截断防爆 context。**
 
-![小黑把上游产物倒进带标签的小桶递给下游，桶太满就削掉一截](assets/02-multi-agent-illustrations/01-orchestrate-handoff.png)
+<p align="center"><img src="assets/02-multi-agent-illustrations/02-overview-card.png" width="420" alt="多 Agent 协作知识卡"></p>
 
 ## 工作流模式
 
@@ -54,4 +54,4 @@ cd rust && cargo run
 - ❌ **并行 step 之间有依赖** —— 拿不到上游产物（run_parallel 不解 DAG）
 - ⚠️ **Rust 按字节切中文** —— 半个字符崩 unwrap，要用 `chars().take()`
 
-<p align="center"><img src="assets/02-multi-agent-illustrations/02-overview-card.png" width="420" alt="多 Agent 协作知识卡"></p>
+![小黑把上游产物倒进带标签的小桶递给下游，桶太满就削掉一截](assets/02-multi-agent-illustrations/01-orchestrate-handoff.png)

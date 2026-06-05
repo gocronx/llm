@@ -2,7 +2,7 @@
 
 LLM 应用的"回归测试"。改 prompt / 换模型后怎么知道是变好还是变差 —— 需要一套可重复的评测。
 
-![小黑先用便宜尺子量纸卡，量不出的才送末端盖章机兜底](assets/evaluation-illustrations/01-cheap-metrics-first.png)
+<p align="center"><img src="assets/evaluation-illustrations/02-overview-card.png" width="420" alt="LLM评测三类尺子知识卡"></p>
 
 ## 七种 metric + LLM 裁判
 
@@ -30,4 +30,4 @@ python main.py    # 跑 datasets/qa_testset.jsonl，按 category 分类
 - ❌ 裁判用同一个 model 评自己 → 自评有偏
 - ❌ 单 LLM 1-5 分打分 → 用 pairwise 比相对
 
-<p align="center"><img src="assets/evaluation-illustrations/02-overview-card.png" width="420" alt="LLM评测三类尺子知识卡"></p>
+![小黑先用便宜尺子量纸卡，量不出的才送末端盖章机兜底](assets/evaluation-illustrations/01-cheap-metrics-first.png)

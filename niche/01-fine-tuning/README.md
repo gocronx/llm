@@ -2,7 +2,7 @@
 
 让通用模型学会用你公司的"内部框架"。本 demo 用虚构的 Saber 框架做例子，端到端跑 LoRA 流水线（Apple Silicon + MLX）。
 
-![微调是给模型换字模学口音，知识更新该翻抽屉用 RAG](assets/fine-tuning-illustrations/01-when-not-to-finetune.png)
+<p align="center"><img src="assets/fine-tuning-illustrations/02-overview-card.png" width="420" alt="何时该 LoRA 知识卡"></p>
 
 ## 何时考虑 fine-tune
 
@@ -44,4 +44,4 @@ base 模型平均 2.8/5（不知道 Saber），LoRA 后平均 4.9/5（学会了�
 - ❌ 用 BLEU/Rouge 评代码（变量名不同就 0 分）
 - ❌ num-layers 拉满 → 过拟合
 
-<p align="center"><img src="assets/fine-tuning-illustrations/02-overview-card.png" width="420" alt="何时该 LoRA 知识卡"></p>
+![微调是给模型换字模学口音，知识更新该翻抽屉用 RAG](assets/fine-tuning-illustrations/01-when-not-to-finetune.png)

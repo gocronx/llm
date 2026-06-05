@@ -2,11 +2,11 @@
 
 > 不熟 ReAct 范式? 先看 [01-simple](../01-simple) 的 "什么是 ReAct" 一节.
 
+<p align="center"><img src="assets/03-governance-illustrations/02-overview-card.png" width="420" alt="Context 治理知识卡"></p>
+
 [01-simple](../01-simple) 教了 ReAct 长啥样 —— 一个 71 行的 while 循环, 在玩具任务上跑 5 轮没问题. 但真把它塞到 production 里, 跑到 20+ 轮就开始死. 死的不是逻辑, 是 **context 形态**: API 返回 400, 或 LLM 因超 context window 拒绝.
 
 本 demo 抽自 nanobot `runner.py:1103-1283` 的 5 步治理组合拳, 让 ReAct 撑到 50+ 轮不崩. 简化成 self-contained 教学版 (无外部 session/storage 依赖).
-
-![小黑只誊抄一张精简副本去喂模型，身后锁链拴住的原账本一字不动](assets/03-governance-illustrations/01-view-not-memory.png)
 
 ## 为什么会崩 —— 三个具体场景
 
@@ -281,4 +281,4 @@ python main.py    # 真调 LLM API (需 .env), 会打 [govern] real=X → view=Y
 
 剩下的是 **5 个治理函数本身**, 都是纯函数, ~243 行 governance.py, 可以从这个目录抽出来直接塞进任何 ReAct 框架.
 
-<p align="center"><img src="assets/03-governance-illustrations/02-overview-card.png" width="420" alt="Context 治理知识卡"></p>
+![小黑只誊抄一张精简副本去喂模型，身后锁链拴住的原账本一字不动](assets/03-governance-illustrations/01-view-not-memory.png)
