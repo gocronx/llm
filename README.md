@@ -55,7 +55,9 @@ cp .env.example .env
 
 ### agent · Agent 范式 + 长跑治理
 
-跑 5 轮的 ReAct 跟跑 50 轮的 Agent 是两回事。01-02 是基础范式，03-06 是真生产中长跑治理（源自 nanobot / hermes-agent / PraisonAI）。
+跑 5 轮的 ReAct 跟跑 50 轮的 Agent 是两回事。01-02、07 是基础范式，03-06 是真生产中长跑治理（源自 nanobot / hermes-agent / PraisonAI）。
+
+主流架构全景（单 Agent 推理范式 + 多 Agent 协作拓扑）与各 demo 的映射见 [`agent/README.md`](agent/README.md)。
 
 | # | demo | 价值 | 说明 |
 |---|------|------|------|
@@ -65,6 +67,7 @@ cp .env.example .env
 | 04 | [summary-compression](agent/04-summary-compression) | ⭐⭐⭐⭐ | LLM 把老 history 总结成结构化 markdown（类 Claude Code `/compact`） |
 | 05 | [subagent-orchestration](agent/05-subagent-orchestration) | ⭐⭐⭐⭐ | 主 agent 并行 fan-out subagent + isolated context + 真 LLM 实测 |
 | 06 | [tool-call-recovery](agent/06-tool-call-recovery) | ⭐⭐⭐⭐ | 4 类死循环检测 + 错误喂回 LLM 自修；真 DuckDuckGo 联网 |
+| 07 | [plan-execute](agent/07-plan-execute) | ⭐⭐⭐⭐ | Plan-and-Execute：先规划再执行 + replan，跟 01 的 ReAct 对照 |
 
 ### production · 生产工程化
 
