@@ -1,4 +1,5 @@
 """Recovery planning, validation, and silent-failure cases."""
+
 from __future__ import annotations
 
 from demo_plan import initial_state
@@ -6,6 +7,8 @@ from recovery.graph import build_graph
 from recovery.loop_guard import LoopGuardConfig
 from recovery.planner import RuleBasedRecoveryPlanner
 from tools import default_runtime
+
+from tests.fakes import runtime_with_silent_upload_failures
 
 
 def test_file_error_is_repaired() -> bool:
@@ -105,7 +108,7 @@ def test_recovery_budget_stops_failure_loop() -> bool:
 def test_silent_upload_failure_is_detected_and_retried() -> bool:
     state = initial_state()
     state["plan"][1]["args"]["path"] = "output/report.pdf"
-    runtime = default_runtime(silently_drop_uploads=1)
+    runtime = runtime_with_silent_upload_failures(1)
     result = build_graph(runtime, RuleBasedRecoveryPlanner()).invoke(
         state,
         config={"configurable": {"thread_id": "test-silent-failure"}},

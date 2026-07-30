@@ -1,4 +1,5 @@
 """恢复规划器：本地 mock 保证可测，OpenAI 兼容 API 用于真实演示。"""
+
 from __future__ import annotations
 
 import json

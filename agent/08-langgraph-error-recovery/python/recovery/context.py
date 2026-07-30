@@ -1,4 +1,5 @@
 """Failure-context construction for recovery planners."""
+
 from __future__ import annotations
 
 from domain.errors import ToolExecutionError

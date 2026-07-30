@@ -59,8 +59,8 @@ Schema 机械校验，避免模型猜错参数或偷偷加入未声明字段。
 
 ## 隐形失败：返回成功不等于目标完成
 
-Demo 可以让第一次 `file.upload` 返回 `uploaded:...`，但故意不写入
-`uploaded_files`。执行图不会相信返回字符串，而是调用 `verify_effect()` 检查
+测试装饰器可以让第一次 `file.upload` 返回 `uploaded:...`，但故意撤销对
+`uploaded_files` 的写入。故障注入不会进入生产 `Tool` 协议。执行图不会相信返回字符串，而是调用 `verify_effect()` 检查
 真实可观察状态。检查失败会产生可重试的 `POSTCONDITION_FAILED`，交给恢复规划器
 决定重试；第二次上传真正落状态后才允许提交该步骤。
 
@@ -214,18 +214,21 @@ LangGraph 解决的是**状态与流程编排**，不会自动理解业务错误
     │   └── errors.py       # 结构化工具错误
     ├── recovery/
     │   ├── graph.py        # 只声明 LangGraph 节点与边
-    │   ├── nodes.py        # 执行、恢复、护栏、提交节点
+    │   ├── nodes.py        # 只负责节点编排与路由
     │   ├── context.py      # FailureContext 构造
+    │   ├── failure.py      # 失败计数与终止条件评估
     │   ├── loop_guard.py   # 次数、时间、重复动作、无进展检测
+    │   ├── policy.py       # 恢复提案的纯校验策略
     │   └── planner.py      # mock 与 OpenAI 兼容恢复规划器
     ├── tools/
     │   ├── base.py         # Tool Protocol 扩展契约
     │   ├── registry.py     # 注册、Schema 校验与分发
     │   ├── builtin.py      # 内置工具实现
     │   ├── runtime.py      # registry + world 运行时门面
-    │   ├── world.py        # 外部状态与测试故障注入
+    │   ├── world.py        # 可观察外部状态
     │   └── security.py     # 参数脱敏
     ├── tests/
+    │   ├── fakes.py
     │   ├── test_recovery.py
     │   ├── test_loop_guard.py
     │   └── test_tools.py
@@ -241,3 +244,7 @@ LangGraph 解决的是**状态与流程编排**，不会自动理解业务错误
 和后置条件放在同一个类中，再交给 `ToolRegistry.register()` 即可。注册表会自动向 AI
 暴露定义、校验参数、执行工具并验证效果。简单且同领域的工具可以共用一个模块；只有
 依赖、状态或验证逻辑较复杂时才单独拆文件，避免为了“小文件”而过度切分。
+
+编排节点只负责读取状态、调用策略并返回 `Command`。失败核算和恢复提案校验分别位于
+`failure.py` 与 `policy.py`，因此可以脱离 LangGraph 单独测试。测试故障通过实现同一
+`Tool` 协议的装饰器注入，不给所有生产工具增加测试参数。

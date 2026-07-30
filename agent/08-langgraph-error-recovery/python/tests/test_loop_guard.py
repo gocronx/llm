@@ -1,4 +1,5 @@
 """Execution loop-guard cases."""
+
 from __future__ import annotations
 
 from demo_plan import initial_state
@@ -7,12 +8,14 @@ from recovery.loop_guard import LoopGuardConfig
 from recovery.planner import RuleBasedRecoveryPlanner
 from tools import default_runtime
 
+from tests.fakes import runtime_with_silent_upload_failures
+
 
 def test_repeated_action_loop_is_stopped() -> bool:
     state = initial_state()
     state["plan"][1]["args"]["path"] = "output/report.pdf"
     graph = build_graph(
-        default_runtime(silently_drop_uploads=10),
+        runtime_with_silent_upload_failures(10),
         RuleBasedRecoveryPlanner(),
     )
     result = graph.invoke(

@@ -1,27 +1,27 @@
 """LangGraph node implementations with explicit injected dependencies."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
 
 from domain.errors import ToolExecutionError
-from domain.models import AgentState
+from domain.models import AgentState, TerminalUpdate
 from langgraph.types import Command
 from tools.runtime import ToolRuntime
 
-from recovery.context import build_failure_context
-from recovery.loop_guard import (
-    LoopGuardConfig,
-    inspect_action,
-    no_progress_count,
-)
+from recovery.failure import assess_failure
+from recovery.loop_guard import LoopGuardConfig, inspect_action
 from recovery.planner import RecoveryPlanner
+from recovery.policy import validate_recovery_proposal
 
 MAX_RECOVERY_ATTEMPTS = 2
 
 
 @dataclass
 class RecoveryNodes:
+    """LangGraph nodes that coordinate execution and pure recovery policies."""
+
     runtime: ToolRuntime
     planner: RecoveryPlanner
     loop_guard: LoopGuardConfig
@@ -30,6 +30,7 @@ class RecoveryNodes:
         self,
         state: AgentState,
     ) -> Command[Literal["commit_step", "plan_recovery", "human_review"]]:
+        """Execute one plan step and route success or failure."""
         step = state["plan"][state["current_step"]]
         action = inspect_action(state, step, self.loop_guard)
         if action.rejection is not None:
@@ -80,54 +81,35 @@ class RecoveryNodes:
         repeated_count: int,
     ) -> Command[Literal["plan_recovery", "human_review"]]:
         step = state["plan"][state["current_step"]]
-        stalled_count = no_progress_count(
-            state["no_progress_count"],
-            before_state,
-            self.runtime.observable_state(),
-        )
-        execution_update = {
-            "execution_count": execution_count,
-            "last_action_signature": signature,
-            "repeated_action_count": repeated_count,
-            "no_progress_count": stalled_count,
-        }
-        if stalled_count >= self.loop_guard.max_no_progress:
-            return Command(
-                update={
-                    **execution_update,
-                    "events": ["LOOP GUARD no observable progress"],
-                },
-                goto="human_review",
-            )
-
-        recovery_attempts = state["recovery_attempts"] + 1
-        context = build_failure_context(
+        assessment = assess_failure(
             state,
             step,
             error,
             self.runtime,
-            recovery_attempts,
+            self.loop_guard,
+            execution_count,
+            signature,
+            repeated_count,
+            before_state,
             MAX_RECOVERY_ATTEMPTS,
         )
-        if recovery_attempts > MAX_RECOVERY_ATTEMPTS:
+        if assessment.terminal_event is not None:
             return Command(
                 update={
-                    "failure_context": context,
-                    "recovery_attempts": recovery_attempts,
-                    **execution_update,
-                    "events": ["RECOVERY BUDGET exhausted"],
+                    "failure_context": assessment.context,
+                    "recovery_attempts": assessment.recovery_attempts,
+                    **assessment.execution_update,
+                    "events": [assessment.terminal_event],
                 },
                 goto="human_review",
             )
         return Command(
             update={
-                "failure_context": context,
-                "recovery_attempts": recovery_attempts,
-                **execution_update,
+                "failure_context": assessment.context,
+                "recovery_attempts": assessment.recovery_attempts,
+                **assessment.execution_update,
                 "status": "recovering",
-                "events": [
-                    f"FAILED {step['id']}: {error.code} — route to AI planner"
-                ],
+                "events": [f"FAILED {step['id']}: {error.code} — route to AI planner"],
             },
             goto="plan_recovery",
         )
@@ -136,6 +118,7 @@ class RecoveryNodes:
         self,
         state: AgentState,
     ) -> Command[Literal["validate_recovery"]]:
+        """Ask the recovery planner for a structured proposal."""
         context = state["failure_context"]
         if context is None:
             raise RuntimeError("Missing failure context")
@@ -143,9 +126,7 @@ class RecoveryNodes:
         return Command(
             update={
                 "recovery_proposal": proposal,
-                "events": [
-                    f"AI PROPOSAL {proposal['strategy']}: {proposal['reason']}"
-                ],
+                "events": [f"AI PROPOSAL {proposal['strategy']}: {proposal['reason']}"],
             },
             goto="validate_recovery",
         )
@@ -154,52 +135,23 @@ class RecoveryNodes:
         self,
         state: AgentState,
     ) -> Command[Literal["execute_step", "human_review"]]:
+        """Apply only recovery proposals accepted by deterministic policy."""
         proposal = state["recovery_proposal"]
         context = state["failure_context"]
         if proposal is None or context is None:
             raise RuntimeError("Missing recovery proposal or context")
-        if proposal["strategy"] == "human":
-            return Command(goto="human_review")
-        if proposal["resume_from"] != context["failed_step"]["id"]:
-            return Command(
-                update={"events": ["GUARDRAIL rejected invalid resume_from"]},
-                goto="human_review",
-            )
-        if proposal["strategy"] == "retry":
-            if not context["error"]["retryable"]:
-                return Command(
-                    update={"events": ["GUARDRAIL rejected non-retryable error"]},
-                    goto="human_review",
-                )
+        decision = validate_recovery_proposal(proposal, context, self.runtime)
+        if decision.action == "human":
+            update = {"events": [decision.event]} if decision.event else None
+            return Command(update=update, goto="human_review")
+        if decision.action == "retry":
             return Command(
                 update={"failure_context": None},
                 goto="execute_step",
             )
-
-        replacement = proposal.get("replacement_step")
-        allowed = context["constraints"]["allowed_tools"]
-        if (
-            proposal["strategy"] != "patch_step"
-            or replacement is None
-            or replacement["tool"] not in allowed
-            or replacement["id"] != context["failed_step"]["id"]
-        ):
-            return Command(
-                update={"events": ["GUARDRAIL rejected unsafe proposal"]},
-                goto="human_review",
-            )
-
-        validation_error = self.runtime.validate_step(replacement)
-        if validation_error is not None:
-            return Command(
-                update={
-                    "events": [
-                        f"GUARDRAIL rejected invalid tool args: {validation_error}"
-                    ]
-                },
-                goto="human_review",
-            )
-
+        replacement = decision.replacement
+        if replacement is None:
+            raise RuntimeError("Patch decision is missing replacement step")
         patched_plan = list(state["plan"])
         patched_plan[state["current_step"]] = replacement
         return Command(
@@ -215,6 +167,7 @@ class RecoveryNodes:
         self,
         state: AgentState,
     ) -> Command[Literal["execute_step", "done"]]:
+        """Commit a successful step and advance the plan cursor."""
         step = state["plan"][state["current_step"]]
         next_index = state["current_step"] + 1
         goto: Literal["execute_step", "done"] = (
@@ -230,13 +183,15 @@ class RecoveryNodes:
             goto=goto,
         )
 
-    def human_review(self, state: AgentState) -> dict[str, object]:
+    def human_review(self, state: AgentState) -> TerminalUpdate:
+        """Pause execution for human intervention."""
         return {
             "status": "human_review",
             "events": ["PAUSED for human review"],
         }
 
-    def done(self, state: AgentState) -> dict[str, object]:
+    def done(self, state: AgentState) -> TerminalUpdate:
+        """Mark the workflow complete."""
         return {
             "status": "completed",
             "events": ["DONE all steps committed"],

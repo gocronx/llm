@@ -1,9 +1,11 @@
 """LangGraph topology for execution and recovery."""
+
 from __future__ import annotations
 
 from domain.models import AgentState
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from tools.runtime import ToolRuntime
 
 from recovery.loop_guard import LoopGuardConfig
@@ -15,7 +17,8 @@ def build_graph(
     runtime: ToolRuntime,
     planner: RecoveryPlanner,
     loop_guard: LoopGuardConfig | None = None,
-):
+) -> CompiledStateGraph:
+    """Compile the recovery workflow with injected runtime and planner."""
     nodes = RecoveryNodes(
         runtime=runtime,
         planner=planner,

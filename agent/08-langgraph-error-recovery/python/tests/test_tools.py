@@ -1,14 +1,17 @@
 """Tool registry extensibility tests."""
+
 from __future__ import annotations
 
 from domain.models import ToolDefinition
 from tools.base import Tool
 from tools.registry import ToolRegistry
 from tools.runtime import ToolRuntime
-from tools.world import FaultInjector, ToolWorld
+from tools.world import ToolWorld
 
 
 class EchoTool:
+    """Minimal custom tool used to prove registry extensibility."""
+
     definition: ToolDefinition = {
         "name": "text.echo",
         "description": "Echo text without changing central dispatch code.",
@@ -25,17 +28,18 @@ class EchoTool:
         self,
         args: dict[str, str],
         world: ToolWorld,
-        faults: FaultInjector,
     ) -> str:
+        """Return the supplied text."""
         return args["text"]
 
     def verify_effect(self, args: dict[str, str], world: ToolWorld) -> str | None:
+        """Declare success because this tool intentionally has no side effect."""
         return None
 
 
 def test_custom_tool_registers_without_dispatch_changes() -> bool:
     registry = ToolRegistry([EchoTool()])
-    runtime = ToolRuntime(registry, ToolWorld(), FaultInjector())
+    runtime = ToolRuntime(registry, ToolWorld())
     result = runtime.execute(
         {"id": "echo", "tool": "text.echo", "args": {"text": "hello"}}
     )

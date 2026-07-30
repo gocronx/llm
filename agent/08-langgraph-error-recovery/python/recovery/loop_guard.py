@@ -1,4 +1,5 @@
 """Pure helpers for detecting execution loops and exhausted budgets."""
+
 from __future__ import annotations
 
 import hashlib

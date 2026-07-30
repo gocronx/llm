@@ -1,4 +1,5 @@
 """Initial plan and state used by the runnable demonstration."""
+
 from __future__ import annotations
 
 import time

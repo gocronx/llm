@@ -1,4 +1,5 @@
 """Tool registration, schema validation, and dispatch."""
+
 from __future__ import annotations
 
 import copy
@@ -7,25 +8,30 @@ from domain.errors import ToolExecutionError
 from domain.models import Step, ToolDefinition
 
 from tools.base import Tool
-from tools.world import FaultInjector, ToolWorld
+from tools.world import ToolWorld
 
 
 class ToolRegistry:
+    """Own tool registration, validation, dispatch, and verification."""
+
     def __init__(self, tools: list[Tool]) -> None:
         self._tools: dict[str, Tool] = {}
         for tool in tools:
             self.register(tool)
 
     def register(self, tool: Tool) -> None:
+        """Register one uniquely named tool."""
         name = tool.definition["name"]
         if name in self._tools:
             raise ValueError(f"duplicate tool registration: {name}")
         self._tools[name] = tool
 
     def definitions(self) -> list[ToolDefinition]:
+        """Return defensive copies of tool definitions for the planner."""
         return copy.deepcopy([tool.definition for tool in self._tools.values()])
 
     def validate_step(self, step: Step) -> str | None:
+        """Return the first schema violation, if any."""
         tool = self._tools.get(step["tool"])
         if tool is None:
             return f"unknown tool: {step['tool']}"
@@ -56,8 +62,8 @@ class ToolRegistry:
         self,
         step: Step,
         world: ToolWorld,
-        faults: FaultInjector,
     ) -> str:
+        """Validate and execute one tool step."""
         validation_error = self.validate_step(step)
         if validation_error is not None:
             raise ToolExecutionError(
@@ -65,7 +71,8 @@ class ToolRegistry:
                 validation_error,
                 retryable=False,
             )
-        return self._tools[step["tool"]].execute(step["args"], world, faults)
+        return self._tools[step["tool"]].execute(step["args"], world)
 
     def verify_effect(self, step: Step, world: ToolWorld) -> str | None:
+        """Check the declared postcondition of an executed step."""
         return self._tools[step["tool"]].verify_effect(step["args"], world)

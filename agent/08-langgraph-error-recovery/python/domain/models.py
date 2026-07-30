@@ -4,6 +4,21 @@ import operator
 from typing import Annotated, Literal, NotRequired, TypedDict
 
 
+class PropertySchema(TypedDict):
+    """Supported JSON Schema subset for one tool argument."""
+
+    type: Literal["string"]
+
+
+class InputSchema(TypedDict):
+    """Strongly typed JSON Schema subset accepted by the demo registry."""
+
+    type: Literal["object"]
+    properties: dict[str, PropertySchema]
+    required: list[str]
+    additionalProperties: bool
+
+
 class Step(TypedDict):
     id: str
     tool: str
@@ -11,9 +26,11 @@ class Step(TypedDict):
 
 
 class ToolDefinition(TypedDict):
+    """Tool metadata shared by the planner and execution registry."""
+
     name: str
     description: str
-    input_schema: dict[str, object]
+    input_schema: InputSchema
     success_condition: str
 
 
@@ -23,6 +40,30 @@ class ToolErrorInfo(TypedDict):
     retryable: bool
 
 
+class RecoveryConstraints(TypedDict):
+    """Mechanical limits supplied to a recovery planner."""
+
+    allowed_tools: list[str]
+    max_recovery_attempts: int
+    remaining_recovery_attempts: int
+
+
+class ExecutionUpdate(TypedDict):
+    """Counters recorded after each tool execution attempt."""
+
+    execution_count: int
+    last_action_signature: str
+    repeated_action_count: int
+    no_progress_count: int
+
+
+class TerminalUpdate(TypedDict):
+    """Minimal state update emitted by terminal graph nodes."""
+
+    status: Literal["completed", "human_review"]
+    events: list[str]
+
+
 class FailureContext(TypedDict):
     goal: str
     committed_steps: list[str]
@@ -30,7 +71,7 @@ class FailureContext(TypedDict):
     error: ToolErrorInfo
     observed_state: dict[str, list[str]]
     available_tools: list[ToolDefinition]
-    constraints: dict[str, object]
+    constraints: RecoveryConstraints
 
 
 class RecoveryProposal(TypedDict):

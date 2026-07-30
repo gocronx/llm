@@ -2,9 +2,11 @@
 
 默认用 mock AI，保证开箱即跑；传 --real-llm 使用 .env 中的模型。
 """
+
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 from demo_plan import initial_state
 from dotenv import load_dotenv
@@ -14,6 +16,7 @@ from tools import default_runtime
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line options for the demo."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--real-llm",
@@ -24,13 +27,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    load_dotenv("../.env")
+    """Run the recovery workflow and print its execution trace."""
+    env_file = Path(__file__).resolve().parents[1] / ".env"
+    load_dotenv(env_file)
     args = parse_args()
-    planner = (
-        OpenAIRecoveryPlanner()
-        if args.real_llm
-        else RuleBasedRecoveryPlanner()
-    )
+    planner = OpenAIRecoveryPlanner() if args.real_llm else RuleBasedRecoveryPlanner()
     runtime = default_runtime()
     graph = build_graph(runtime, planner)
     result = graph.invoke(
