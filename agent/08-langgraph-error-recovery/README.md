@@ -209,11 +209,35 @@ LangGraph 解决的是**状态与流程编排**，不会自动理解业务错误
 ├── .env.example        # 可提交的配置模板
 ├── README.md
 └── python/
-    ├── graph.py        # LangGraph 节点、路由与检查点
-    ├── models.py       # State、FailureContext、RecoveryProposal
-    ├── planner.py      # mock 与 OpenAI 兼容恢复规划器
-    ├── tools.py        # 模拟工具及结构化异常
-    ├── main.py         # 完整演示
-    ├── test.py         # 恢复成功与护栏拒绝测试
+    ├── domain/
+    │   ├── models.py       # State、FailureContext、RecoveryProposal
+    │   └── errors.py       # 结构化工具错误
+    ├── recovery/
+    │   ├── graph.py        # 只声明 LangGraph 节点与边
+    │   ├── nodes.py        # 执行、恢复、护栏、提交节点
+    │   ├── context.py      # FailureContext 构造
+    │   ├── loop_guard.py   # 次数、时间、重复动作、无进展检测
+    │   └── planner.py      # mock 与 OpenAI 兼容恢复规划器
+    ├── tools/
+    │   ├── base.py         # Tool Protocol 扩展契约
+    │   ├── registry.py     # 注册、Schema 校验与分发
+    │   ├── builtin.py      # 内置工具实现
+    │   ├── runtime.py      # registry + world 运行时门面
+    │   ├── world.py        # 外部状态与测试故障注入
+    │   └── security.py     # 参数脱敏
+    ├── tests/
+    │   ├── test_recovery.py
+    │   ├── test_loop_guard.py
+    │   └── test_tools.py
+    ├── demo_plan.py        # 演示计划和初始状态
+    ├── main.py             # 完整演示
+    ├── test.py             # 兼容的一键测试入口
     └── requirements.txt
 ```
+
+## 扩展新工具
+
+新增工具不需要修改中央 `if/elif` 分发器。实现 `Tool` Protocol，把 Schema、执行逻辑
+和后置条件放在同一个类中，再交给 `ToolRegistry.register()` 即可。注册表会自动向 AI
+暴露定义、校验参数、执行工具并验证效果。简单且同领域的工具可以共用一个模块；只有
+依赖、状态或验证逻辑较复杂时才单独拆文件，避免为了“小文件”而过度切分。

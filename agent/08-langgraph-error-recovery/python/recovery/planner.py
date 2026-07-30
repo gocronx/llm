@@ -6,7 +6,7 @@ import os
 from typing import Protocol
 
 import httpx
-from models import FailureContext, RecoveryProposal
+from domain.models import FailureContext, RecoveryProposal
 from openai import OpenAI
 
 SYSTEM_PROMPT = """\

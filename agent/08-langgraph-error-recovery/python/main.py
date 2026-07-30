@@ -6,10 +6,11 @@ from __future__ import annotations
 
 import argparse
 
+from demo_plan import initial_state
 from dotenv import load_dotenv
-from graph import build_graph, initial_state
-from planner import OpenAIRecoveryPlanner, RuleBasedRecoveryPlanner
-from tools import ToolSandbox
+from recovery.graph import build_graph
+from recovery.planner import OpenAIRecoveryPlanner, RuleBasedRecoveryPlanner
+from tools import default_runtime
 
 
 def parse_args() -> argparse.Namespace:
@@ -30,8 +31,8 @@ def main() -> None:
         if args.real_llm
         else RuleBasedRecoveryPlanner()
     )
-    sandbox = ToolSandbox()
-    graph = build_graph(sandbox, planner)
+    runtime = default_runtime()
+    graph = build_graph(runtime, planner)
     result = graph.invoke(
         initial_state(),
         config={
@@ -47,7 +48,7 @@ def main() -> None:
     print("=" * 60)
     print(f"status: {result['status']}")
     print(f"committed_steps: {result['committed_steps']}")
-    print(f"sent_emails: {sandbox.sent_emails}")
+    print(f"sent_emails: {runtime.world.sent_emails}")
 
 
 if __name__ == "__main__":
