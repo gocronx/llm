@@ -5,7 +5,7 @@ from __future__ import annotations
 from demo_plan import initial_state
 from recovery.graph import build_graph
 from recovery.loop_guard import LoopGuardConfig
-from recovery.planner import RuleBasedRecoveryPlanner
+from recovery.planner import SYSTEM_PROMPT, RuleBasedRecoveryPlanner
 from tools import default_runtime
 
 from tests.fakes import runtime_with_silent_upload_failures
@@ -121,10 +121,39 @@ def test_silent_upload_failure_is_detected_and_retried() -> bool:
     return True
 
 
+def test_planner_contract_exposes_only_supported_strategies() -> bool:
+    """Planner 只能看到护栏已实现的恢复策略。"""
+    captured_contexts = []
+
+    class CapturingPlanner:
+        def propose(self, context):
+            captured_contexts.append(context)
+            return {
+                "strategy": "human",
+                "reason": "capture context",
+                "resume_from": context["failed_step"]["id"],
+            }
+
+    result = build_graph(default_runtime(), CapturingPlanner()).invoke(
+        initial_state(),
+        config={"configurable": {"thread_id": "test-planner-contract"}},
+    )
+    assert result["status"] == "human_review"
+    assert captured_contexts[0]["constraints"]["allowed_strategies"] == [
+        "retry",
+        "patch_step",
+        "human",
+    ]
+    assert "replan" not in SYSTEM_PROMPT
+    print("✓ Planner 提示词、FailureContext 与护栏策略一致")
+    return True
+
+
 RECOVERY_TESTS = [
     test_file_error_is_repaired,
     test_unsafe_proposal_is_rejected,
     test_invalid_tool_args_are_rejected,
     test_recovery_budget_stops_failure_loop,
     test_silent_upload_failure_is_detected_and_retried,
+    test_planner_contract_exposes_only_supported_strategies,
 ]

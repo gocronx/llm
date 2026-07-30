@@ -50,7 +50,7 @@ FailureContext
 ├── error              错误码、错误信息、是否可重试
 ├── observed_state     当前真实文件和外部状态
 ├── available_tools    工具用途和 JSON input_schema
-└── constraints        工具白名单、恢复预算
+└── constraints        工具白名单、允许策略、恢复预算
 ```
 
 `available_tools` 不是只有工具名称。每个工具都提供 `description`、必填参数、
@@ -137,6 +137,8 @@ AI 返回结构化 `RecoveryProposal`：
 ```
 
 AI 只负责提出方案，不直接调用工具。护栏会检查策略类型、步骤 ID 和工具白名单，通过后才允许修改计划。
+本案例只支持 `retry`、`patch_step` 和 `human`；完整重规划需要另一套计划级 Schema
+与校验流程，因此不会作为可选策略暴露给模型。
 
 ## 直接运行
 

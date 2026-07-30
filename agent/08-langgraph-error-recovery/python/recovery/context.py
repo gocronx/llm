@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 from domain.errors import ToolExecutionError
-from domain.models import AgentState, FailureContext, Step
+from domain.models import (
+    ALLOWED_RECOVERY_STRATEGIES,
+    AgentState,
+    FailureContext,
+    Step,
+)
 from tools.runtime import ToolRuntime
 from tools.security import redact_args
 
@@ -30,6 +35,7 @@ def build_failure_context(
         "available_tools": definitions,
         "constraints": {
             "allowed_tools": [definition["name"] for definition in definitions],
+            "allowed_strategies": list(ALLOWED_RECOVERY_STRATEGIES),
             "max_recovery_attempts": max_recovery_attempts,
             "remaining_recovery_attempts": max(
                 0,

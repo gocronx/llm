@@ -7,8 +7,14 @@ import os
 from typing import Protocol
 
 import httpx
-from domain.models import FailureContext, RecoveryProposal
+from domain.models import (
+    ALLOWED_RECOVERY_STRATEGIES,
+    FailureContext,
+    RecoveryProposal,
+)
 from openai import OpenAI
+
+_STRATEGY_CHOICES = " | ".join(ALLOWED_RECOVERY_STRATEGIES)
 
 SYSTEM_PROMPT = """\
 你是 Agent 的恢复规划器。根据 FailureContext 生成最小、安全的恢复提案。
@@ -18,17 +24,21 @@ SYSTEM_PROMPT = """\
 2. 只能使用 available_tools 中的工具，并严格遵守对应 input_schema。
 3. 不得绕过权限、审批或预算限制。
 4. replacement_step 必须保留失败步骤的 id，resume_from 必须等于失败步骤 id。
-5. 工具返回成功但 success_condition 未满足时，只在错误标记 retryable 时重试。
-6. 只返回 JSON RecoveryProposal，不执行任何工具。
+5. strategy 只能从 constraints.allowed_strategies 中选择：{strategy_choices}。
+6. retryable=true 才能选择 retry。
+7. 当前步骤参数错误且 observed_state 中已有可用资源时，选择 patch_step，
+   用 replacement_step 修补当前失败步骤；不得重新生成或修改已提交步骤。
+8. 无法在约束内安全修补时选择 human。
+9. 只返回 JSON RecoveryProposal，不执行任何工具。
 
 RecoveryProposal:
 {
-  "strategy": "retry | patch_step | replan | human",
+  "strategy": "{strategy_choices}",
   "reason": "为什么这样恢复",
   "replacement_step": {"id": "...", "tool": "...", "args": {...}},
   "resume_from": "step id"
 }
-"""
+""".replace("{strategy_choices}", _STRATEGY_CHOICES)
 
 
 def parse_json_object(content: str) -> dict:

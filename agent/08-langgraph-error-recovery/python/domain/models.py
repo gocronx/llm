@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 import operator
-from typing import Annotated, Literal, NotRequired, TypedDict
+from typing import Annotated, Final, Literal, NotRequired, TypedDict
+
+RecoveryStrategy = Literal["retry", "patch_step", "human"]
+ALLOWED_RECOVERY_STRATEGIES: Final[tuple[RecoveryStrategy, ...]] = (
+    "retry",
+    "patch_step",
+    "human",
+)
 
 
 class PropertySchema(TypedDict):
@@ -44,6 +51,7 @@ class RecoveryConstraints(TypedDict):
     """Mechanical limits supplied to a recovery planner."""
 
     allowed_tools: list[str]
+    allowed_strategies: list[RecoveryStrategy]
     max_recovery_attempts: int
     remaining_recovery_attempts: int
 
@@ -75,7 +83,7 @@ class FailureContext(TypedDict):
 
 
 class RecoveryProposal(TypedDict):
-    strategy: Literal["retry", "patch_step", "replan", "human"]
+    strategy: RecoveryStrategy
     reason: str
     replacement_step: NotRequired[Step]
     resume_from: str
