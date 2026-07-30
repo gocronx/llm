@@ -1,4 +1,5 @@
 """test.py —— 在 sample_code/ 上跑确定性测试，不依赖外网。"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,7 +22,9 @@ def test_vector_semantic_match() -> bool:
     vidx = VectorIndex(ROOT).build()
     hits = vidx.search("authenticate user", top_k=5)
     ok = len(hits) >= 1 and any("auth" in h.file_path for h in hits[:3])
-    print(f"{'✓' if ok else '✗'} vector semantic match (top files: {[h.file_path for h in hits[:3]]})")
+    print(
+        f"{'✓' if ok else '✗'} vector semantic match (top files: {[h.file_path for h in hits[:3]]})"
+    )
     return ok
 
 
@@ -30,12 +33,20 @@ def test_hybrid_combines() -> bool:
     vidx = VectorIndex(ROOT).build()
     hits = hybrid_search(ROOT, vidx, "database connection", alpha=0.4)
     ok = len(hits) >= 1 and any("database" in h.file_path for h in hits[:3])
-    print(f"{'✓' if ok else '✗'} hybrid finds 'database connection' (top: {[h.file_path for h in hits[:3]]})")
+    print(
+        f"{'✓' if ok else '✗'} hybrid finds 'database connection' (top: {[h.file_path for h in hits[:3]]})"
+    )
     return ok
 
 
 def main() -> None:
-    passed = sum([test_grep_finds_keyword(), test_vector_semantic_match(), test_hybrid_combines()])
+    passed = sum(
+        [
+            test_grep_finds_keyword(),
+            test_vector_semantic_match(),
+            test_hybrid_combines(),
+        ]
+    )
     print(f"\n{passed}/3 passed")
 
 

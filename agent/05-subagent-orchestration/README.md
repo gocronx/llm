@@ -119,8 +119,9 @@ r1, r2, r3 = await asyncio.gather(
 .
 ├── python/
 │   ├── orchestrator.py  # 🟢 SubAgent + Orchestrator + SubAgentResult
+│   ├── models.py        # SubAgentResult 强类型跨模块契约
 │   ├── main.py          # 3 个 researcher 并行调研 RoPE/RMSNorm/SwiGLU
-│   ├── test.py          # 8 个测试: 基本运行 / 工具限制 / max_iter / 失败 / 路由 / 并行 / 隔离
+│   ├── test.py          # 9 个测试: 运行 / 限制 / 失败 / 并行 / 隔离 / 参数对齐
 │   └── requirements.txt
 └── README.md
 ```
@@ -131,7 +132,7 @@ r1, r2, r3 = await asyncio.gather(
 cd python && pip install -r requirements.txt
 cp .env.example .env  # 编辑填 API_KEY + MODEL_ID
 
-python test.py    # 8/8 passed (mock LLM, 不调外网)
+python test.py    # 9/9 passed (mock LLM, 不调外网)
 python main.py    # 真调 LLM, 3 个 subagent 串行 vs 并行对比
 ```
 

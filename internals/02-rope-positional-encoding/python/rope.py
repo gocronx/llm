@@ -35,6 +35,7 @@
 3. **mscale (attention scaling)**: YaRN 外推时配合 attention logit 缩放, 防止 softmax 太尖
 4. **NoPE 部分**: 某些模型 (DS4) head_dim 前部分不用 RoPE, 只对 tail 用; 教学版我们对全部做
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -49,7 +50,7 @@ def precompute_freqs(n_rot: int, freq_base: float = 10000.0) -> np.ndarray:
 
 
 def apply_rope(
-    x: np.ndarray,                 # shape (n_head, head_dim), 一个 token 的 q 或 k
+    x: np.ndarray,  # shape (n_head, head_dim), 一个 token 的 q 或 k
     pos: int,
     freqs: np.ndarray | None = None,
     freq_base: float = 10000.0,
@@ -63,7 +64,7 @@ def apply_rope(
     n_head, head_dim = x.shape
     if head_dim % 2 != 0:
         raise ValueError(f"head_dim must be even, got {head_dim}")
-    n_rot = head_dim   # 教学版: 整个 head_dim 都旋转
+    n_rot = head_dim  # 教学版: 整个 head_dim 都旋转
 
     if freqs is None:
         freqs = precompute_freqs(n_rot, freq_base)
@@ -90,7 +91,10 @@ def apply_rope(
 
 # ----- YaRN 扩展 -----
 
-def yarn_corr_dim(n_dims: int, n_ctx_orig: int, n_rot_at_period: float, freq_base: float) -> float:
+
+def yarn_corr_dim(
+    n_dims: int, n_ctx_orig: int, n_rot_at_period: float, freq_base: float
+) -> float:
     """计算"周期=n_rot_at_period 个 token"对应的维度位置 i.
 
     用 beta_fast/beta_slow 两个周期阈值找出 corr_dims[low, high]:
@@ -98,14 +102,21 @@ def yarn_corr_dim(n_dims: int, n_ctx_orig: int, n_rot_at_period: float, freq_bas
       - i > high: 低频 (周期长于 beta_slow 个 token), YaRN 走插值路径
       - low <= i <= high: 平滑过渡
     """
-    return n_dims * np.log(n_ctx_orig / (n_rot_at_period * 2.0 * np.pi)) / (2.0 * np.log(freq_base))
+    return (
+        n_dims
+        * np.log(n_ctx_orig / (n_rot_at_period * 2.0 * np.pi))
+        / (2.0 * np.log(freq_base))
+    )
 
 
 def yarn_corr_dims(
     n_dims: int, n_ctx_orig: int, freq_base: float, beta_fast: float, beta_slow: float
 ) -> tuple[float, float]:
     low = max(0.0, np.floor(yarn_corr_dim(n_dims, n_ctx_orig, beta_fast, freq_base)))
-    high = min(float(n_dims - 1), np.ceil(yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base)))
+    high = min(
+        float(n_dims - 1),
+        np.ceil(yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base)),
+    )
     return float(low), float(high)
 
 
@@ -118,10 +129,10 @@ def yarn_ramp(low: float, high: float, i0: int) -> float:
 def apply_rope_yarn(
     x: np.ndarray,
     pos: int,
-    n_ctx_orig: int = 4096,             # 训练时的 context 长度
+    n_ctx_orig: int = 4096,  # 训练时的 context 长度
     freq_base: float = 10000.0,
-    freq_scale: float = 1.0,             # = n_ctx_orig / target_ctx, e.g. 4096/32768 = 0.125
-    ext_factor: float = 1.0,             # 1=用 YaRN 混合, 0=纯插值 (PI)
+    freq_scale: float = 1.0,  # = n_ctx_orig / target_ctx, e.g. 4096/32768 = 0.125
+    ext_factor: float = 1.0,  # 1=用 YaRN 混合, 0=纯插值 (PI)
     attn_factor: float = 1.0,
     beta_fast: float = 32.0,
     beta_slow: float = 1.0,
@@ -134,7 +145,11 @@ def apply_rope_yarn(
     n_head, head_dim = x.shape
     n_rot = head_dim
 
-    corr_dims = yarn_corr_dims(n_rot, n_ctx_orig, freq_base, beta_fast, beta_slow) if ext_factor != 0 else (0.0, 0.0)
+    corr_dims = (
+        yarn_corr_dims(n_rot, n_ctx_orig, freq_base, beta_fast, beta_slow)
+        if ext_factor != 0
+        else (0.0, 0.0)
+    )
     sin_sign = -1.0 if inverse else 1.0
 
     out = np.empty_like(x)
@@ -166,6 +181,7 @@ def apply_rope_yarn(
 
 
 # ----- 验证用: q·k 内积应只依赖相对位置差 -----
+
 
 def dot_product(q: np.ndarray, k: np.ndarray) -> float:
     """对每 head 做内积, 求和返回标量 (用来观察 RoPE 的相对位置编码性质)."""

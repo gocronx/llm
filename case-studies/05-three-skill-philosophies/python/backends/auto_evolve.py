@@ -3,12 +3,12 @@
 对标 hermes-agent/run_agent.py:4077 _SKILL_REVIEW_PROMPT + skill_manage(action="create").
 最小版本: 同步调用, 落盘到 .skills/auto-evolve/.
 """
+
 from __future__ import annotations
 
 import json
 import re
 from pathlib import Path
-from typing import Optional
 
 from openai import OpenAI
 from skills import Skill, SkillRegistry, format_skill_md, parse_skill_md
@@ -49,8 +49,11 @@ class AutoEvolveRegistry(SkillRegistry):
         for skill_dir in sorted(self.base_dir.iterdir()):
             md = skill_dir / "SKILL.md"
             if md.is_file():
-                out.append(parse_skill_md(md.read_text(encoding="utf-8"),
-                                          fallback_name=skill_dir.name))
+                out.append(
+                    parse_skill_md(
+                        md.read_text(encoding="utf-8"), fallback_name=skill_dir.name
+                    )
+                )
         return out
 
     def acquire(self, *, transcript=None, user_hint=None) -> list[Skill]:
@@ -64,7 +67,9 @@ class AutoEvolveRegistry(SkillRegistry):
         ]
         try:
             resp = self.client.chat.completions.create(
-                model=self.model, messages=messages, temperature=0.3,
+                model=self.model,
+                messages=messages,
+                temperature=0.3,
             )
             raw = (resp.choices[0].message.content or "").strip()
         except Exception as e:

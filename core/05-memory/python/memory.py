@@ -10,6 +10,7 @@ system prompt 不算进上面任何策略 —— 它在前面永远固定一条�
 
 Token 估算：中文按 1.5 字符/token，其它按 4 字符/token。生产里换 tiktoken。
 """
+
 from __future__ import annotations
 
 from typing import Callable
@@ -43,17 +44,19 @@ class Full(Memory):
 
 class Window(Memory):
     """只保留最近 k 条消息（不包括 system）。便宜，但会忘早期事实。"""
+
     def __init__(self, system: str, k: int = 8):
         super().__init__(system)
         self.k = k
 
     def _trim(self) -> None:
         if len(self._msgs) > self.k:
-            self._msgs = self._msgs[-self.k:]
+            self._msgs = self._msgs[-self.k :]
 
 
 class Tokens(Memory):
     """token 预算硬上限：超了就从头扔，至少留最后一条 user。"""
+
     def __init__(self, system: str, max_tokens: int = 500):
         super().__init__(system)
         self.max_tokens = max_tokens
@@ -63,6 +66,7 @@ class Tokens(Memory):
             return estimate_tokens(self.system["content"]) + sum(
                 estimate_tokens(m["content"]) for m in self._msgs
             )
+
         # 至少留最后一条，否则模型连"用户刚说啥"都不知道
         while len(self._msgs) > 1 and total() > self.max_tokens:
             self._msgs.pop(0)
@@ -71,7 +75,10 @@ class Tokens(Memory):
 class Summary(Memory):
     """每攒满 k 条就调 summarize_fn 把它们压成一段事实塞到 system 后面。
     summarize_fn 是注入的，避免 memory 这层直接拉 OpenAI 依赖。"""
-    def __init__(self, system: str, summarize_fn: Callable[[list[dict]], str], k: int = 6):
+
+    def __init__(
+        self, system: str, summarize_fn: Callable[[list[dict]], str], k: int = 6
+    ):
         super().__init__(system)
         self.summarize_fn = summarize_fn
         self.k = k

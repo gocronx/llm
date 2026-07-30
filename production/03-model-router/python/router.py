@@ -42,8 +42,9 @@ class RouteResult:
     failed_over_from: list[Model] = field(default_factory=list)
 
 
-def _post_raw(model: Model, prompt: str, max_tokens: int = 500,
-              system: str | None = None) -> tuple[str, int]:
+def _post_raw(
+    model: Model, prompt: str, max_tokens: int = 500, system: str | None = None
+) -> tuple[str, int]:
     """One HTTP call. Raises requests.HTTPError on 4xx, Timeout/ConnectionError on network."""
     messages = []
     if system:
@@ -131,8 +132,9 @@ def _build_result(
 
 def route_always(tier: str, prompt: str) -> RouteResult:
     answer, ms, chosen, failed = _post_with_failover(tier, prompt)
-    return _build_result(answer, chosen, ms, prompt,
-                         rationale=f"always-{tier}", failed_over_from=failed)
+    return _build_result(
+        answer, chosen, ms, prompt, rationale=f"always-{tier}", failed_over_from=failed
+    )
 
 
 _HARD = re.compile(
@@ -157,8 +159,14 @@ def route_rules(prompt: str) -> RouteResult:
         tier, why = "mid", "default"
 
     answer, ms, chosen, failed = _post_with_failover(tier, prompt)
-    return _build_result(answer, chosen, ms, prompt,
-                         rationale=f"rules → {tier} ({why})", failed_over_from=failed)
+    return _build_result(
+        answer,
+        chosen,
+        ms,
+        prompt,
+        rationale=f"rules → {tier} ({why})",
+        failed_over_from=failed,
+    )
 
 
 _CLASSIFIER_SYS = (
@@ -174,7 +182,9 @@ def _classify(prompt: str) -> tuple[str, float]:
     """Returns (label, cost_of_classifier_call)."""
     classifier = BY_TIER["cheap"]
     text, _ = _post_raw(classifier, prompt[:500], max_tokens=10, system=_CLASSIFIER_SYS)
-    label = next((lab for lab in ("easy", "medium", "hard") if lab in text.lower()), "medium")
+    label = next(
+        (lab for lab in ("easy", "medium", "hard") if lab in text.lower()), "medium"
+    )
     return label, estimate_cost(classifier, prompt[:500], label)
 
 
@@ -183,7 +193,10 @@ def route_classifier(prompt: str) -> RouteResult:
     starting_tier = _LABEL_TO_TIER[label]
     answer, ms, chosen, failed = _post_with_failover(starting_tier, prompt)
     return _build_result(
-        answer, chosen, ms, prompt,
+        answer,
+        chosen,
+        ms,
+        prompt,
         rationale=f"classifier → {label} → {chosen.tier}",
         extra_cost=classifier_cost,
         failed_over_from=failed,
@@ -217,15 +230,20 @@ def route_cascade(prompt: str) -> RouteResult:
 
     if not _looks_weak(answer, prompt):
         return RouteResult(
-            answer=answer, chosen=chosen, elapsed_ms=ms,
-            cost=first_cost, rationale="cascade → cheap (kept)",
+            answer=answer,
+            chosen=chosen,
+            elapsed_ms=ms,
+            cost=first_cost,
+            rationale="cascade → cheap (kept)",
             failed_over_from=failed_first,
         )
 
     cheap_first = chosen
     answer2, ms2, chosen2, failed_second = _post_with_failover("premium", prompt)
     return RouteResult(
-        answer=answer2, chosen=chosen2, elapsed_ms=ms + ms2,
+        answer=answer2,
+        chosen=chosen2,
+        elapsed_ms=ms + ms2,
         cost=first_cost + estimate_cost(chosen2, prompt, answer2),
         rationale="cascade → cheap weak → premium",
         escalated_from=cheap_first,

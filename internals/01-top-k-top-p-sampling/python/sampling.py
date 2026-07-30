@@ -28,6 +28,7 @@
 - 数值稳定 softmax: 减 max_logit 再 exp, 避免 overflow
 - 非 finite 的 logit 直接跳过 (Inf/-Inf/NaN), 不污染 sum
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -111,7 +112,7 @@ def sample(
         return int(ids[0])
 
     # --- 5. CDF 采样 ---
-    filtered = probs[:n]                       # 用未归一化的 probs, 跟 ds4.c 一致
+    filtered = probs[:n]  # 用未归一化的 probs, 跟 ds4.c 一致
     r = rng.random() * filtered.sum()
     cum_filtered = np.cumsum(filtered)
     pick = int(np.searchsorted(cum_filtered, r, side="right"))

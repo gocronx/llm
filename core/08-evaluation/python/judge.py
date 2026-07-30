@@ -9,6 +9,7 @@
 只暴露第一种 + JSON 结构化输出，因为这是 dataset 评测里最常用的。pairwise
 留给 main.py 演示。
 """
+
 from __future__ import annotations
 
 import json
@@ -26,18 +27,26 @@ _SCHEMA = {
 }
 
 
-def binary(client: OpenAI, model: str, question: str, rubric: str, answer: str) -> tuple[bool, str]:
+def binary(
+    client: OpenAI, model: str, question: str, rubric: str, answer: str
+) -> tuple[bool, str]:
     """裁判：按 rubric 判断 answer 对不对。强制结构化输出。"""
     resp = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": "你是严格但公平的评分员。按 rubric 判定，不要被措辞华丽影响。"},
-            {"role": "user", "content": (
-                f"问题：{question}\n\n"
-                f"评分标准：{rubric}\n\n"
-                f"被评答案：{answer}\n\n"
-                "请判断答案是否满足评分标准。"
-            )},
+            {
+                "role": "system",
+                "content": "你是严格但公平的评分员。按 rubric 判定，不要被措辞华丽影响。",
+            },
+            {
+                "role": "user",
+                "content": (
+                    f"问题：{question}\n\n"
+                    f"评分标准：{rubric}\n\n"
+                    f"被评答案：{answer}\n\n"
+                    "请判断答案是否满足评分标准。"
+                ),
+            },
         ],
         response_format={
             "type": "json_schema",
@@ -54,17 +63,29 @@ def pairwise(client: OpenAI, model: str, question: str, a: str, b: str) -> str:
     给两个候选答案对比 —— 比单 LLM 直接打分稳得多，避免分数漂移。"""
     schema = {
         "type": "object",
-        "properties": {"winner": {"type": "string", "enum": ["A", "B", "tie"]}, "reason": {"type": "string"}},
+        "properties": {
+            "winner": {"type": "string", "enum": ["A", "B", "tie"]},
+            "reason": {"type": "string"},
+        },
         "required": ["winner", "reason"],
         "additionalProperties": False,
     }
     resp = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": "你是中立评审员。只比较两个答案的相对质量，不要被位置 A/B 影响。"},
-            {"role": "user", "content": f"问题：{question}\n\nA：{a}\n\nB：{b}\n\n哪个更好？"},
+            {
+                "role": "system",
+                "content": "你是中立评审员。只比较两个答案的相对质量，不要被位置 A/B 影响。",
+            },
+            {
+                "role": "user",
+                "content": f"问题：{question}\n\nA：{a}\n\nB：{b}\n\n哪个更好？",
+            },
         ],
-        response_format={"type": "json_schema", "json_schema": {"name": "verdict", "schema": schema, "strict": True}},
+        response_format={
+            "type": "json_schema",
+            "json_schema": {"name": "verdict", "schema": schema, "strict": True},
+        },
         temperature=0,
     )
     return json.loads(resp.choices[0].message.content or "{}").get("winner", "tie")

@@ -39,7 +39,9 @@ def _safe_resolve(rel_path: str) -> Path | None:
     return candidate
 
 
-def _read_slice(path: Path, start: int | None, end: int | None) -> tuple[str, str | None]:
+def _read_slice(
+    path: Path, start: int | None, end: int | None
+) -> tuple[str, str | None]:
     try:
         text = path.read_text(encoding="utf-8")
     except FileNotFoundError:
@@ -56,7 +58,7 @@ def _read_slice(path: Path, start: int | None, end: int | None) -> tuple[str, st
     if start < 1 or start > len(lines):
         return "", f"start line {start} out of range (file has {len(lines)} lines)"
     last = min(end or start, len(lines))
-    return "\n".join(lines[start - 1:last]), None
+    return "\n".join(lines[start - 1 : last]), None
 
 
 def resolve_refs(message: str) -> tuple[list[ResolvedRef], list[Path]]:
@@ -76,8 +78,9 @@ def resolve_refs(message: str) -> tuple[list[ResolvedRef], list[Path]]:
 
         path = _safe_resolve(rel)
         if path is None:
-            ref = ResolvedRef(m.group(0), None, start, end, "",
-                              "path outside workspace or invalid")
+            ref = ResolvedRef(
+                m.group(0), None, start, end, "", "path outside workspace or invalid"
+            )
         elif not path.exists():
             ref = ResolvedRef(m.group(0), path, start, end, "", "file not found")
         else:

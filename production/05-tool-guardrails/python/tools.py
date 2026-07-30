@@ -35,7 +35,11 @@ def delete_file(path: str) -> str:
 
 def run_shell(cmd: str) -> str:
     result = subprocess.run(
-        cmd, shell=True, capture_output=True, text=True, timeout=10,
+        cmd,
+        shell=True,
+        capture_output=True,
+        text=True,
+        timeout=10,
     )
     return result.stdout or result.stderr
 
@@ -46,17 +50,17 @@ def http_get(url: str) -> str:
 
 
 TOOLS = {
-    "read_file":   read_file,
-    "write_file":  write_file,
+    "read_file": read_file,
+    "write_file": write_file,
     "delete_file": delete_file,
-    "run_shell":   run_shell,
-    "http_get":    http_get,
+    "run_shell": run_shell,
+    "http_get": http_get,
 }
 
 SEVERITY: dict[str, Severity] = {
-    "read_file":   "low",
-    "http_get":    "low",
-    "write_file":  "medium",
+    "read_file": "low",
+    "http_get": "low",
+    "write_file": "medium",
     "delete_file": "high",
-    "run_shell":   "high",
+    "run_shell": "high",
 }

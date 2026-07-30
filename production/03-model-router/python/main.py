@@ -24,11 +24,11 @@ QUERIES = [
 
 
 STRATEGIES = {
-    "always-cheap":   lambda q: route_always("cheap", q),
+    "always-cheap": lambda q: route_always("cheap", q),
     "always-premium": lambda q: route_always("premium", q),
-    "rules":          route_rules,
-    "classifier":     route_classifier,
-    "cascade":        route_cascade,
+    "rules": route_rules,
+    "classifier": route_classifier,
+    "cascade": route_cascade,
 }
 
 
@@ -45,19 +45,24 @@ def _fmt(r: RouteResult) -> str:
 def _print_registry() -> None:
     print("Registered models:")
     for m in REGISTRY:
-        print(f"  {m.tier:<7} {m.id:<70} ${m.input_per_1k:.5f}/k in  ${m.output_per_1k:.5f}/k out  q={m.quality}")
+        print(
+            f"  {m.tier:<7} {m.id:<70} ${m.input_per_1k:.5f}/k in  ${m.output_per_1k:.5f}/k out  q={m.quality}"
+        )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--strategy", default="all",
-                        choices=["all", *STRATEGIES])
+    parser.add_argument("--strategy", default="all", choices=["all", *STRATEGIES])
     parser.add_argument("--limit", type=int, default=len(QUERIES))
     args = parser.parse_args()
 
     _print_registry()
     queries = QUERIES[: args.limit]
-    selected = STRATEGIES if args.strategy == "all" else {args.strategy: STRATEGIES[args.strategy]}
+    selected = (
+        STRATEGIES
+        if args.strategy == "all"
+        else {args.strategy: STRATEGIES[args.strategy]}
+    )
 
     for name, fn in selected.items():
         print(f"\n=== {name} ===")

@@ -1,8 +1,9 @@
 """test.py —— 验证 RoPE 的核心性质. 不依赖任何模型."""
+
 from __future__ import annotations
 
 import numpy as np
-from rope import apply_rope, apply_rope_yarn, dot_product, precompute_freqs
+from rope import apply_rope, apply_rope_yarn, dot_product
 
 
 def test_pos_zero_is_identity() -> bool:
@@ -10,7 +11,9 @@ def test_pos_zero_is_identity() -> bool:
     x = np.random.randn(4, 64).astype(np.float32)
     out = apply_rope(x, pos=0)
     ok = np.allclose(out, x, atol=1e-5)
-    print(f"{'✓' if ok else '✗'} pos=0 is identity (max diff {np.abs(out-x).max():.2e})")
+    print(
+        f"{'✓' if ok else '✗'} pos=0 is identity (max diff {np.abs(out - x).max():.2e})"
+    )
     return ok
 
 
@@ -21,8 +24,10 @@ def test_norm_preserved() -> bool:
         out = apply_rope(x, pos=pos)
         n_before = np.linalg.norm(x)
         n_after = np.linalg.norm(out)
-        assert np.allclose(n_before, n_after, rtol=1e-4), f"pos={pos} norm changed: {n_before} -> {n_after}"
-    print(f"✓ norm preserved across positions")
+        assert np.allclose(n_before, n_after, rtol=1e-4), (
+            f"pos={pos} norm changed: {n_before} -> {n_after}"
+        )
+    print("✓ norm preserved across positions")
     return True
 
 
@@ -32,7 +37,9 @@ def test_inverse_undoes_rope() -> bool:
     rotated = apply_rope(x, pos=42)
     back = apply_rope(rotated, pos=42, inverse=True)
     ok = np.allclose(back, x, atol=1e-4)
-    print(f"{'✓' if ok else '✗'} inverse undoes rotation (max diff {np.abs(back-x).max():.2e})")
+    print(
+        f"{'✓' if ok else '✗'} inverse undoes rotation (max diff {np.abs(back - x).max():.2e})"
+    )
     return ok
 
 
@@ -54,7 +61,9 @@ def test_relative_position_dot_product() -> bool:
     # 三个距离=5 的内积应当几乎相等
     spread = max(dots) - min(dots)
     ok = spread < 1e-3
-    print(f"✓ relative position: dot products at distance=5 = {[f'{d:.4f}' for d in dots]}, spread={spread:.2e}")
+    print(
+        f"✓ relative position: dot products at distance=5 = {[f'{d:.4f}' for d in dots]}, spread={spread:.2e}"
+    )
     return ok
 
 
@@ -79,9 +88,13 @@ def test_far_distance_smaller_correlation() -> bool:
 
     distances = [0, 1, 10, 100, 1000]
     avg_corrs = [mean_corr_at_distance(d) for d in distances]
-    print(f"  distance -> |avg corr|: {list(zip(distances, [f'{c:.3f}' for c in avg_corrs]))}")
+    print(
+        f"  distance -> |avg corr|: {list(zip(distances, [f'{c:.3f}' for c in avg_corrs]))}"
+    )
 
-    ok = avg_corrs[0] > 0.99 and avg_corrs[-1] < avg_corrs[0] - 0.3   # d=1000 比 d=0 至少跌 0.3
+    ok = (
+        avg_corrs[0] > 0.99 and avg_corrs[-1] < avg_corrs[0] - 0.3
+    )  # d=1000 比 d=0 至少跌 0.3
     print(f"{'✓' if ok else '✗'} far distance reduces avg correlation")
     return ok
 
@@ -97,13 +110,21 @@ def test_yarn_long_context_does_not_explode() -> bool:
     x = np.random.randn(2, 64).astype(np.float32)
 
     # 在 pos=20000 (远超原训练 ctx) 应用 YaRN
-    out_yarn = apply_rope_yarn(x, pos=20000, n_ctx_orig=n_ctx_orig, freq_scale=freq_scale)
+    out_yarn = apply_rope_yarn(
+        x, pos=20000, n_ctx_orig=n_ctx_orig, freq_scale=freq_scale
+    )
     out_plain = apply_rope(x, pos=20000)
 
     yarn_finite = np.all(np.isfinite(out_yarn))
-    plain_finite = np.all(np.isfinite(out_plain))   # plain RoPE 在这位置也不会溢出 (cos/sin 有界)
-    print(f"  YaRN @ pos=20000: norm={np.linalg.norm(out_yarn):.4f}, finite={yarn_finite}")
-    print(f"  plain @ pos=20000: norm={np.linalg.norm(out_plain):.4f}, finite={plain_finite}")
+    plain_finite = np.all(
+        np.isfinite(out_plain)
+    )  # plain RoPE 在这位置也不会溢出 (cos/sin 有界)
+    print(
+        f"  YaRN @ pos=20000: norm={np.linalg.norm(out_yarn):.4f}, finite={yarn_finite}"
+    )
+    print(
+        f"  plain @ pos=20000: norm={np.linalg.norm(out_plain):.4f}, finite={plain_finite}"
+    )
     ok = yarn_finite and plain_finite
     print(f"{'✓' if ok else '✗'} numerically healthy at far positions")
     return ok
@@ -119,7 +140,9 @@ def test_yarn_pi_equivalent_when_ext_zero() -> bool:
     # 注意 pos 是 int, freq_scale=0.25 时 plain 用 pos=250
     # YaRN 内部 theta = 0.25 * 1000 * freq = 250 * freq, 跟 plain pos=250 等价
     ok = np.allclose(yarn_pi, plain_scaled, atol=1e-4)
-    print(f"{'✓' if ok else '✗'} YaRN ext_factor=0 ≡ pure PI (max diff {np.abs(yarn_pi-plain_scaled).max():.2e})")
+    print(
+        f"{'✓' if ok else '✗'} YaRN ext_factor=0 ≡ pure PI (max diff {np.abs(yarn_pi - plain_scaled).max():.2e})"
+    )
     return ok
 
 

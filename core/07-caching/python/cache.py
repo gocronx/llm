@@ -8,6 +8,7 @@ Semantic  —— 把 prompt 拆成字符 2-gram，按 Jaccard 相似度找近邻
 注：这是应用层缓存（prompt → answer 整对存）。还有服务端 KV-cache 复用
 （"前缀缓存"）那是另一回事，模型推理引擎做的，见 README。
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -23,8 +24,10 @@ class Cache(Protocol):
 
 # ---- Exact ----
 
+
 class Exact:
     """SHA256 精确匹配。可选磁盘持久化。"""
+
     def __init__(self, path: str | None = None):
         self._mem: dict[str, str] = {}
         self._path = Path(path) if path else None
@@ -40,14 +43,17 @@ class Exact:
     def set(self, prompt: str, value: str) -> None:
         self._mem[self._key(prompt)] = value
         if self._path:
-            self._path.write_text(json.dumps(self._mem, ensure_ascii=False), encoding="utf-8")
+            self._path.write_text(
+                json.dumps(self._mem, ensure_ascii=False), encoding="utf-8"
+            )
 
 
 # ---- Semantic ----
 
+
 def _bigrams(s: str) -> set[str]:
     s = s.strip().lower()
-    return {s[i:i + 2] for i in range(len(s) - 1)} if len(s) >= 2 else {s}
+    return {s[i : i + 2] for i in range(len(s) - 1)} if len(s) >= 2 else {s}
 
 
 def _jaccard(a: set[str], b: set[str]) -> float:
@@ -62,9 +68,12 @@ class Semantic:
     - 太高（>0.9）命中率不如 Exact。
     生产里换 sentence-transformers + cosine。
     """
+
     def __init__(self, threshold: float = 0.7):
         self.threshold = threshold
-        self._entries: list[tuple[set[str], str, str]] = []  # (bigrams, raw_prompt, value)
+        self._entries: list[
+            tuple[set[str], str, str]
+        ] = []  # (bigrams, raw_prompt, value)
 
     def get(self, prompt: str) -> str | None:
         bg = _bigrams(prompt)

@@ -7,17 +7,18 @@ route_implicit   —— 把 skill 索引塞 system，主 LLM 自己通过 tool �
 
 三种各有取舍：keyword 最便宜，implicit 最贴近真"按需"但要求模型理解 tool。
 """
+
 from __future__ import annotations
 
 import json
 import re
 from dataclasses import dataclass
-from typing import Literal
 
 from loader import Skill
 from openai import OpenAI
 
 # ---- 关键词路由 ----
+
 
 def route_keyword(prompt: str, skills: list[Skill], top_k: int = 2) -> list[Skill]:
     """trigger 全词命中 1.0，description 词命中 0.3。命中数排序取 top_k。"""
@@ -25,7 +26,9 @@ def route_keyword(prompt: str, skills: list[Skill], top_k: int = 2) -> list[Skil
     scored: list[tuple[float, Skill]] = []
     for s in skills:
         hits = sum(1 for t in s.triggers if t.lower() in p)
-        desc_words = {w.lower() for w in re.findall(r"[a-zA-Z一-鿿]{3,}", s.description)}
+        desc_words = {
+            w.lower() for w in re.findall(r"[a-zA-Z一-鿿]{3,}", s.description)
+        }
         hits += 0.3 * sum(1 for w in desc_words if w in p)
         if hits > 0:
             scored.append((hits, s))
@@ -36,7 +39,7 @@ def route_keyword(prompt: str, skills: list[Skill], top_k: int = 2) -> list[Skil
 # ---- LLM 路由 ----
 
 _ROUTER_SYS = (
-    "你是 skill 路由器。只输出 JSON 数组，例如 [\"sql-query-builder\"]。"
+    '你是 skill 路由器。只输出 JSON 数组，例如 ["sql-query-builder"]。'
     "不要任何解释。挑 0-2 个和用户领域相关的 skill。完全没匹配就 []。"
 )
 
@@ -54,20 +57,24 @@ def _extract_array(text: str) -> list:
                 depth -= 1
                 if depth == 0:
                     try:
-                        return json.loads(text[start: end + 1])
+                        return json.loads(text[start : end + 1])
                     except json.JSONDecodeError:
                         break
     return []
 
 
-def route_llm(client: OpenAI, model: str, prompt: str, skills: list[Skill],
-              top_k: int = 2) -> list[Skill]:
+def route_llm(
+    client: OpenAI, model: str, prompt: str, skills: list[Skill], top_k: int = 2
+) -> list[Skill]:
     catalog = "\n".join(f"- {s.name}: {s.description}" for s in skills)
     resp = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": _ROUTER_SYS},
-            {"role": "user", "content": f"Skills:\n{catalog}\n\nPrompt: {prompt}\n\nJSON 数组（最多 {top_k}）："},
+            {
+                "role": "user",
+                "content": f"Skills:\n{catalog}\n\nPrompt: {prompt}\n\nJSON 数组（最多 {top_k}）：",
+            },
         ],
         temperature=0,
         max_tokens=200,
@@ -78,6 +85,7 @@ def route_llm(client: OpenAI, model: str, prompt: str, skills: list[Skill],
 
 
 # ---- 组装 system ----
+
 
 @dataclass
 class Composed:
@@ -120,11 +128,14 @@ _IMPLICIT_TPL = (
 
 
 def build_implicit_system(skills: list[Skill]) -> str:
-    return _IMPLICIT_TPL.format(idx="\n".join(f"  - {s.name}: {s.description}" for s in skills))
+    return _IMPLICIT_TPL.format(
+        idx="\n".join(f"  - {s.name}: {s.description}" for s in skills)
+    )
 
 
-def run_implicit(client: OpenAI, model: str, prompt: str, skills: list[Skill],
-                 max_iters: int = 3) -> tuple[str, list[str]]:
+def run_implicit(
+    client: OpenAI, model: str, prompt: str, skills: list[Skill], max_iters: int = 3
+) -> tuple[str, list[str]]:
     """让主 LLM 通过 skill_view tool 自己决定加载哪些 skill。"""
     by_name = {s.name: s for s in skills}
     messages: list[dict] = [
@@ -134,8 +145,11 @@ def run_implicit(client: OpenAI, model: str, prompt: str, skills: list[Skill],
     loaded: list[str] = []
     for _ in range(max_iters):
         resp = client.chat.completions.create(
-            model=model, messages=messages, tools=[SKILL_VIEW_TOOL],
-            temperature=0, max_tokens=600,
+            model=model,
+            messages=messages,
+            tools=[SKILL_VIEW_TOOL],
+            temperature=0,
+            max_tokens=600,
         )
         msg = resp.choices[0].message
         if not msg.tool_calls:
@@ -145,7 +159,9 @@ def run_implicit(client: OpenAI, model: str, prompt: str, skills: list[Skill],
             args = json.loads(tc.function.arguments or "{}")
             name = args.get("name", "")
             skill = by_name.get(name)
-            content = skill.body.strip() if skill else f"Error: skill '{name}' not found"
+            content = (
+                skill.body.strip() if skill else f"Error: skill '{name}' not found"
+            )
             if skill:
                 loaded.append(name)
             messages.append({"role": "tool", "tool_call_id": tc.id, "content": content})

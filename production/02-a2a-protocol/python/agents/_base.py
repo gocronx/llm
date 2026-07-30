@@ -1,4 +1,5 @@
 """_base.py —— A2A agent 通用脚手架：FastAPI app factory + LLM 客户端 + Bearer auth。"""
+
 from __future__ import annotations
 
 import os
@@ -43,6 +44,7 @@ def call_llm(system: str, user: str, max_tokens: int = 600) -> str:
 
 # ---- Bearer auth dependency ----
 
+
 def _verify_bearer(authorization: str | None = Header(default=None)) -> None:
     """没设 AGENT_TOKEN 就跳过；设了就强制 Bearer header 匹配。"""
     if AGENT_TOKEN is None:
@@ -66,11 +68,16 @@ def make_app(card: AgentCard, handlers: dict[str, Callable[[dict], dict]]) -> Fa
     def get_card() -> AgentCard:
         return card
 
-    @app.post("/tasks", response_model=TaskResponse, dependencies=[Depends(_verify_bearer)])
+    @app.post(
+        "/tasks", response_model=TaskResponse, dependencies=[Depends(_verify_bearer)]
+    )
     def handle_task(req: TaskRequest) -> TaskResponse:
         if req.task_type not in handlers:
-            return TaskResponse(task_id=req.task_id, state="failed",
-                                error=f"unsupported task_type {req.task_type!r}; supported: {list(handlers)}")
+            return TaskResponse(
+                task_id=req.task_id,
+                state="failed",
+                error=f"unsupported task_type {req.task_type!r}; supported: {list(handlers)}",
+            )
         try:
             output = handlers[req.task_type](req.input)
             return TaskResponse(task_id=req.task_id, state="completed", output=output)
@@ -88,8 +95,9 @@ def serve(app: FastAPI, port: int, name: str) -> None:
     """启动 uvicorn，log level 可被环境变量压低（launcher 给子进程压成 warning）。"""
     auth = "bearer auth" if AGENT_TOKEN else "open"
     print(f"[{name}] http://127.0.0.1:{port}  ({auth})")
-    uvicorn.run(app, host="127.0.0.1", port=port,
-                log_level=os.getenv("AGENT_LOG_LEVEL", "info"))
+    uvicorn.run(
+        app, host="127.0.0.1", port=port, log_level=os.getenv("AGENT_LOG_LEVEL", "info")
+    )
 
 
 def new_task_id() -> str:

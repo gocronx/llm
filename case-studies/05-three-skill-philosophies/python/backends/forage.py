@@ -3,6 +3,7 @@
 对标 zeroclaw/crates/zeroclaw-runtime/src/skillforge/ (scout / evaluate / integrate).
 最小版本: catalog 是本地目录 (模拟远程 catalog), 评分是简单加权.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -19,6 +20,7 @@ class ForageConfig:
     score_threshold: 高于这个分自动装. 低的扔.
     max_per_acquire: 一次最多装几个 (防 catalog 突然增加 100 个把库塞满).
     """
+
     score_threshold: float = 0.6
     max_per_acquire: int = 3
 
@@ -26,9 +28,13 @@ class ForageConfig:
 class ForageRegistry(SkillRegistry):
     """zeroclaw 风格. scout catalog → evaluate → integrate."""
 
-    def __init__(self, catalog_dir: Path, installed_dir: Path,
-                 config: Optional[ForageConfig] = None) -> None:
-        self.catalog_dir = catalog_dir   # 模拟外部 catalog (本地目录)
+    def __init__(
+        self,
+        catalog_dir: Path,
+        installed_dir: Path,
+        config: Optional[ForageConfig] = None,
+    ) -> None:
+        self.catalog_dir = catalog_dir  # 模拟外部 catalog (本地目录)
         self.installed_dir = installed_dir
         self.installed_dir.mkdir(parents=True, exist_ok=True)
         self.config = config or ForageConfig()
@@ -41,8 +47,11 @@ class ForageRegistry(SkillRegistry):
         for skill_dir in sorted(self.installed_dir.iterdir()):
             md = skill_dir / "SKILL.md"
             if md.is_file():
-                out.append(parse_skill_md(md.read_text(encoding="utf-8"),
-                                          fallback_name=skill_dir.name))
+                out.append(
+                    parse_skill_md(
+                        md.read_text(encoding="utf-8"), fallback_name=skill_dir.name
+                    )
+                )
         return out
 
     # ── 三步: scout → evaluate → integrate ────────────────────────────
@@ -69,15 +78,21 @@ class ForageRegistry(SkillRegistry):
             if len(installed_now) >= self.config.max_per_acquire:
                 break
             if score < self.config.score_threshold:
-                print(f"  [forage] 跳过 {skill.name!r} (score {score:.2f} < threshold {self.config.score_threshold})")
+                print(
+                    f"  [forage] 跳过 {skill.name!r} (score {score:.2f} < threshold {self.config.score_threshold})"
+                )
                 continue
             if skill.name in already_installed:
                 continue
             skill_dir = self.installed_dir / skill.name
             skill_dir.mkdir(parents=True, exist_ok=True)
-            (skill_dir / "SKILL.md").write_text(format_skill_md(skill), encoding="utf-8")
+            (skill_dir / "SKILL.md").write_text(
+                format_skill_md(skill), encoding="utf-8"
+            )
             installed_now.append(skill)
-            print(f"  [forage] 装 {skill.name!r} (score={score:.2f}, 来源={skill.source})")
+            print(
+                f"  [forage] 装 {skill.name!r} (score={score:.2f}, 来源={skill.source})"
+            )
         return installed_now
 
     def acquire(self, *, transcript=None, user_hint=None) -> list[Skill]:

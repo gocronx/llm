@@ -1,4 +1,5 @@
 """test.py —— 只验证一件事：LLM 在三类问题上调对了工具。"""
+
 from __future__ import annotations
 
 import os

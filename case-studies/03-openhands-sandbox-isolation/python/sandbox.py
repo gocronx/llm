@@ -15,6 +15,7 @@
   - HTTP 健康检查 (用 file-based 心跳代替)
   - Docker / Remote 后端 (只保留抽象基类 + ProcessSandbox)
 """
+
 from __future__ import annotations
 
 import hmac
@@ -23,11 +24,10 @@ import secrets
 import shutil
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Optional
@@ -40,17 +40,17 @@ import psutil
 # 真要安全请用 Docker 后端 (有 namespace 隔离).
 # 之所以加这一层: ProcessSandbox 暴露给 demo 用户时, 防一下最显眼的事故.
 _DENIED_PATTERNS = [
-    r'/etc/',         # 系统配置
-    r'/usr/',         # 系统二进制
-    r'/var/',         # 系统状态
-    r'/sys/',         # 内核接口
-    r'/proc/',        # 进程信息
-    r'/root/',        # root 家目录
-    r'~[/\s]',        # 用户家目录
-    r'\$HOME',        # 同上
-    r'\.\./',         # 路径回溯
+    r"/etc/",  # 系统配置
+    r"/usr/",  # 系统二进制
+    r"/var/",  # 系统状态
+    r"/sys/",  # 内核接口
+    r"/proc/",  # 进程信息
+    r"/root/",  # root 家目录
+    r"~[/\s]",  # 用户家目录
+    r"\$HOME",  # 同上
+    r"\.\./",  # 路径回溯
 ]
-_DENIED_RE = re.compile('|'.join(_DENIED_PATTERNS))
+_DENIED_RE = re.compile("|".join(_DENIED_PATTERNS))
 
 
 def _command_looks_safe(cmd: str) -> tuple[bool, str]:
@@ -60,8 +60,11 @@ def _command_looks_safe(cmd: str) -> tuple[bool, str]:
     """
     m = _DENIED_RE.search(cmd)
     if m:
-        return (False, f"command matched denied pattern: {m.group(0)!r}. "
-                       f"ProcessSandbox is not a real sandbox; use Docker backend for unsafe commands.")
+        return (
+            False,
+            f"command matched denied pattern: {m.group(0)!r}. "
+            f"ProcessSandbox is not a real sandbox; use Docker backend for unsafe commands.",
+        )
     return (True, "")
 
 
@@ -82,13 +85,14 @@ class SandboxInfo:
     workspace 是隔离的工作目录, agent 的所有文件操作都在这里发生.
     last_activity_at 给 idle-timeout sweeper 用 (upgrade #5).
     """
+
     id: str
     status: SandboxStatus
     workspace: Path
     session_api_key: str
     created_at: float
-    last_activity_at: float = 0.0          # 最近一次 exec / pause / resume 的时间
-    daemon_pid: Optional[int] = None       # 长寿 daemon 进程, pause/resume 的对象
+    last_activity_at: float = 0.0  # 最近一次 exec / pause / resume 的时间
+    daemon_pid: Optional[int] = None  # 长寿 daemon 进程, pause/resume 的对象
 
 
 # ── 抽象基类 (对标 SandboxService) ────────────────────────────────────
@@ -202,6 +206,7 @@ class ProcessSandbox(SandboxService):
         if db_path is not None:
             # Circular dependency: persistence imports SandboxInfo from this module.
             from persistence import SandboxRegistry  # noqa: PLC0415
+
             self._db = SandboxRegistry(db_path)
             self._reload_from_db()
 
@@ -251,14 +256,15 @@ class ProcessSandbox(SandboxService):
         # 这里用心跳文件让 pause/resume 的效果可以 "看见".
         heartbeat = workspace / ".heartbeat"
         daemon_cmd = [
-            sys.executable, "-c",
+            sys.executable,
+            "-c",
             f"import time, pathlib;\n"
             f"p = pathlib.Path({str(heartbeat)!r});\n"
             f"i = 0\n"
             f"while True:\n"
             f"    p.write_text(f'tick {{i}} at {{time.time():.3f}}\\n')\n"
             f"    i += 1\n"
-            f"    time.sleep(1)\n"
+            f"    time.sleep(1)\n",
         ]
         log_file = workspace / ".sandbox-daemon.log"
         # 对标 OpenHands process_sandbox_service.py:139-143:
@@ -370,7 +376,11 @@ class ProcessSandbox(SandboxService):
             return (1, "", "invalid session_api_key")
 
         if state.info.status != SandboxStatus.RUNNING:
-            return (1, "", f"sandbox status is {state.info.status.value}, must be RUNNING")
+            return (
+                1,
+                "",
+                f"sandbox status is {state.info.status.value}, must be RUNNING",
+            )
 
         # upgrade #6: best-effort 路径黑名单. 防 LLM 顺手 cat /etc/passwd 这类事故.
         # 不是安全保证 — Docker 后端才是.
@@ -401,5 +411,6 @@ class ProcessSandbox(SandboxService):
 class _SandboxState:
     """SandboxInfo + Popen 句柄. 进程重启后 reload 出来的 daemon=None
     (用 info.daemon_pid + psutil 仍能操作)."""
+
     info: SandboxInfo
     daemon: Optional[subprocess.Popen] = None

@@ -38,12 +38,15 @@ SwiGLU (Gated Linear Unit with SiLU):
 
 不显式做这个判断, fp16 训练就会崩.
 """
+
 from __future__ import annotations
 
 import numpy as np
 
 
-def rms_norm(x: np.ndarray, weight: np.ndarray | None = None, eps: float = 1e-6) -> np.ndarray:
+def rms_norm(
+    x: np.ndarray, weight: np.ndarray | None = None, eps: float = 1e-6
+) -> np.ndarray:
     """RMSNorm: y = x / sqrt(mean(x²) + eps) * weight (weight=None 时无学习缩放).
 
     x shape (..., n), 最后一维做 normalization. weight shape (n,).
@@ -63,6 +66,7 @@ def rms_norm_per_head(x: np.ndarray, eps: float = 1e-6) -> np.ndarray:
 
 
 # ---------------- Activations ----------------
+
 
 def sigmoid_stable(x: np.ndarray) -> np.ndarray:
     """数值稳定 sigmoid. x ≥ 0 用 1/(1+e^-x), x < 0 用 e^x/(1+e^x).
@@ -94,7 +98,13 @@ def swiglu(gate: np.ndarray, up: np.ndarray) -> np.ndarray:
 
 # ---------------- 对照: 经典 LayerNorm (不在现代 LLM 用, 留作对比) ----------------
 
-def layer_norm(x: np.ndarray, weight: np.ndarray | None = None, bias: np.ndarray | None = None, eps: float = 1e-5) -> np.ndarray:
+
+def layer_norm(
+    x: np.ndarray,
+    weight: np.ndarray | None = None,
+    bias: np.ndarray | None = None,
+    eps: float = 1e-5,
+) -> np.ndarray:
     """经典 LayerNorm. 教学用, 现代 LLM 已被 RMSNorm 取代."""
     mean = x.mean(axis=-1, keepdims=True)
     var = x.var(axis=-1, keepdims=True)

@@ -3,6 +3,7 @@
 LoRA 适配的目标就是让模型学会用 Saber 而不是 Flask/FastAPI。下面 5 个
 信号都是"模型学到东西没"的可量化证据，比单看 BLEU/Rouge 更可解释。
 """
+
 from __future__ import annotations
 
 import ast
@@ -11,21 +12,38 @@ from dataclasses import asdict, dataclass
 
 @dataclass
 class Check:
-    import_saber: bool         # 至少 import 了 saber.*
-    handler_decorator: bool    # 用 @handler('METHOD', '/path')
-    q_from: bool               # 用 Q.from_(...)
-    tuple_return: bool         # return (Response..., {})
-    no_wrong_framework: bool   # 没用 Flask / FastAPI / Django
+    import_saber: bool  # 至少 import 了 saber.*
+    handler_decorator: bool  # 用 @handler('METHOD', '/path')
+    q_from: bool  # 用 Q.from_(...)
+    tuple_return: bool  # return (Response..., {})
+    no_wrong_framework: bool  # 没用 Flask / FastAPI / Django
 
     @property
     def score(self) -> int:
         return sum(asdict(self).values())
 
 
-_METHODS = ("'get'", "'post'", "'put'", "'patch'", "'delete'",
-            '"get"', '"post"', '"put"', '"patch"', '"delete"')
-_WRONG = ("from flask", "from fastapi", "from django",
-          "@app.route", "@app.get", "@app.post", "jsonify(")
+_METHODS = (
+    "'get'",
+    "'post'",
+    "'put'",
+    "'patch'",
+    "'delete'",
+    '"get"',
+    '"post"',
+    '"put"',
+    '"patch"',
+    '"delete"',
+)
+_WRONG = (
+    "from flask",
+    "from fastapi",
+    "from django",
+    "@app.route",
+    "@app.get",
+    "@app.post",
+    "jsonify(",
+)
 
 
 def check(code: str) -> Check:
@@ -57,8 +75,13 @@ def summarize(results: list[tuple[Check, bool]]) -> dict:
     n = len(results)
     if n == 0:
         return {"n": 0}
-    fields = ["import_saber", "handler_decorator", "q_from",
-              "tuple_return", "no_wrong_framework"]
+    fields = [
+        "import_saber",
+        "handler_decorator",
+        "q_from",
+        "tuple_return",
+        "no_wrong_framework",
+    ]
     out: dict = {"n": n}
     for k in fields:
         out[k] = sum(1 for c, _ in results if asdict(c)[k])

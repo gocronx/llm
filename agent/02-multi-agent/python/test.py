@@ -1,8 +1,8 @@
 """test.py —— 用 mock agent 测 orchestrator 的依赖传递和并行。"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from orchestrator import Step, _context, run_parallel, run_sequential
 
@@ -19,9 +19,9 @@ class FakeAgent:
 def test_sequential_context_propagation() -> bool:
     a = {"w": FakeAgent("writer"), "r": FakeAgent("reviewer"), "e": FakeAgent("editor")}
     wf = [
-        Step("draft",  "w", "写"),
+        Step("draft", "w", "写"),
         Step("review", "r", "审", depends_on=["draft"]),
-        Step("final",  "e", "改", depends_on=["draft", "review"]),
+        Step("final", "e", "改", depends_on=["draft", "review"]),
     ]
     res = run_sequential(a, wf)
     # editor 应该看到 draft 和 review 的内容
@@ -41,7 +41,7 @@ def test_parallel_runs_all() -> bool:
 
 def test_context_truncation() -> bool:
     a = {"w": FakeAgent("w")}
-    res1 = a["w"].execute("step1")
+    a["w"].execute("step1")
     # 直接造一个超长的依赖输出
     results = {"draft": "x" * 1000}
     ctx = _context(results, ["draft"], max_chars=100)
@@ -51,11 +51,13 @@ def test_context_truncation() -> bool:
 
 
 def main() -> None:
-    passed = sum([
-        test_sequential_context_propagation(),
-        test_parallel_runs_all(),
-        test_context_truncation(),
-    ])
+    passed = sum(
+        [
+            test_sequential_context_propagation(),
+            test_parallel_runs_all(),
+            test_context_truncation(),
+        ]
+    )
     print(f"\n{passed}/3 passed")
 
 

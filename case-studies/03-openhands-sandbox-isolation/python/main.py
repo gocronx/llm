@@ -5,6 +5,7 @@
     python main.py --scenario 1   # 只跑某一个
     python main.py --cleanup   # 把磁盘残留的 .sandboxes/ 清掉
 """
+
 from __future__ import annotations
 
 import argparse
@@ -15,7 +16,7 @@ import time
 from pathlib import Path
 
 from docker_sandbox import RESOURCE_LIMITS, DockerSandbox
-from sandbox import ProcessSandbox, SandboxStatus
+from sandbox import ProcessSandbox
 
 import agent
 
@@ -34,7 +35,9 @@ def scenario_isolation(svc: ProcessSandbox) -> None:
     print(f"启动了 sandbox B id={b.id} workspace={b.workspace}")
 
     # A 创建一个文件
-    rc, out, err = svc.exec_in_sandbox(a.id, a.session_api_key, "echo 'hello from A' > a.txt && ls")
+    rc, out, err = svc.exec_in_sandbox(
+        a.id, a.session_api_key, "echo 'hello from A' > a.txt && ls"
+    )
     print(f"\nA 跑 'echo > a.txt && ls': rc={rc}")
     print(f"  stdout: {out.strip()}")
 
@@ -44,15 +47,17 @@ def scenario_isolation(svc: ProcessSandbox) -> None:
     print(f"  stdout: {out.strip() or '(empty workspace)'}")
 
     # host 工作目录也不应该看见 a.txt
-    host_files = [p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")]
+    host_files = [
+        p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")
+    ]
     print(f"\nHost (本目录) 文件列表: {host_files}")
-    print(f"  → 不包含 a.txt, sandbox 没污染 host ✓")
+    print("  → 不包含 a.txt, sandbox 没污染 host ✓")
 
     # 用错钥匙访问 A → 应该拒绝
     rc, out, err = svc.exec_in_sandbox(a.id, "wrong-key", "ls")
     print(f"\n用错的 session_api_key 访问 A: rc={rc}")
     print(f"  stderr: {err}")
-    print(f"  → 鉴权拒绝 ✓")
+    print("  → 鉴权拒绝 ✓")
 
     svc.delete_sandbox(a.id)
     svc.delete_sandbox(b.id)
@@ -105,16 +110,20 @@ def scenario_state_machine(svc: ProcessSandbox) -> None:
 def scenario_llm_in_sandbox(svc: ProcessSandbox) -> None:
     _print_section("场景 3 · LLM agent 通过 sandbox 干活 (host 全程不动)")
 
-    host_files_before = sorted([p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")])
+    host_files_before = sorted(
+        [p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")]
+    )
 
     s = svc.start_sandbox()
     print(f"sandbox 起好, workspace={s.workspace}")
 
-    task = ("通过 bash 工具:\n"
-            "  1) 在 sandbox 里用 cat<<EOF > fizzbuzz.py ... EOF 写出 FizzBuzz (1-15)\n"
-            "  2) 用 bash 运行 python fizzbuzz.py 看实际输出\n"
-            "  3) 看完输出后, 一句话总结对不对\n"
-            "每一步都必须是真的 bash 工具调用, 不要在回复里贴代码.")
+    task = (
+        "通过 bash 工具:\n"
+        "  1) 在 sandbox 里用 cat<<EOF > fizzbuzz.py ... EOF 写出 FizzBuzz (1-15)\n"
+        "  2) 用 bash 运行 python fizzbuzz.py 看实际输出\n"
+        "  3) 看完输出后, 一句话总结对不对\n"
+        "每一步都必须是真的 bash 工具调用, 不要在回复里贴代码."
+    )
     print(f"\n[任务] {task}\n")
 
     def trace(tc):
@@ -128,16 +137,22 @@ def scenario_llm_in_sandbox(svc: ProcessSandbox) -> None:
     print(f"\n共调了 {len(history)} 次 bash, 全部在 sandbox 里跑.")
 
     # 检查 sandbox 内确实有 fizzbuzz.py
-    rc, out, _ = svc.exec_in_sandbox(s.id, s.session_api_key, "ls *.py 2>/dev/null || echo none")
+    rc, out, _ = svc.exec_in_sandbox(
+        s.id, s.session_api_key, "ls *.py 2>/dev/null || echo none"
+    )
     print(f"\n验证 sandbox 内文件: {out.strip()}")
 
     # 关键: host 本目录全程没多文件
-    host_files_after = sorted([p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")])
+    host_files_after = sorted(
+        [p.name for p in Path(__file__).parent.iterdir() if not p.name.startswith(".")]
+    )
     print(f"\nHost 本目录: 前 {host_files_before} → 后 {host_files_after}")
     if host_files_before == host_files_after:
         print("  → host 完全没受影响 ✓")
     else:
-        print(f"  ✗ host 多了文件? 差: {set(host_files_after) - set(host_files_before)}")
+        print(
+            f"  ✗ host 多了文件? 差: {set(host_files_after) - set(host_files_before)}"
+        )
 
     svc.delete_sandbox(s.id)
 
@@ -156,10 +171,14 @@ def scenario_workspace_persistence(svc: ProcessSandbox) -> None:
     print(f"  读出: {out.strip()}")
 
     # 第二轮 (跟第一轮完全独立的 exec_in_sandbox 调用, 模拟下一条对话消息)
-    rc, out, _ = svc.exec_in_sandbox(s.id, s.session_api_key, "cat state.txt && echo ' (v2 read again)'")
+    rc, out, _ = svc.exec_in_sandbox(
+        s.id, s.session_api_key, "cat state.txt && echo ' (v2 read again)'"
+    )
     print("\n第二轮: 再次读 state.txt (模拟下一轮对话)")
     print(f"  读出: {out.strip()}")
-    print("  → 文件跨调用保留 ✓ (这是为什么 sandbox 是 per-conversation 不是 per-message)")
+    print(
+        "  → 文件跨调用保留 ✓ (这是为什么 sandbox 是 per-conversation 不是 per-message)"
+    )
 
     # pause → resume 后文件还在吗?
     svc.pause_sandbox(s.id)
@@ -174,7 +193,7 @@ def scenario_workspace_persistence(svc: ProcessSandbox) -> None:
     svc.delete_sandbox(s.id)
     # delete 后 workspace 应该没了
     if not s.workspace.exists():
-        print(f"\ndelete 后 workspace 已清理 ✓")
+        print("\ndelete 后 workspace 已清理 ✓")
 
 
 # ── 场景 5: 资源限制 (Docker only, upgrade #2) ─────────────────────────
@@ -198,14 +217,15 @@ def scenario_resource_limits(svc) -> None:
     # 没限制的话整机会被拖死.
     print("\n试图 fork-bomb (pids_limit=64 应该拦住)...")
     rc, out, err = svc.exec_in_sandbox(
-        s.id, s.session_api_key,
+        s.id,
+        s.session_api_key,
         # 加 timeout 5 防 fork-bomb 真的卡住
         "timeout 5 bash -c ':(){ :|:& };:' 2>&1 | head -3 || true; "
-        "echo 'host still alive: '$(date +%s)"
+        "echo 'host still alive: '$(date +%s)",
     )
     print(f"  rc={rc}")
     print(f"  output 末段: ...{out.strip()[-200:]}")
-    print(f"  → host 进程仍然存活, 容器被 pids_limit 兜住 ✓")
+    print("  → host 进程仍然存活, 容器被 pids_limit 兜住 ✓")
 
     svc.delete_sandbox(s.id)
 
@@ -215,7 +235,9 @@ def scenario_idle_timeout(svc) -> None:
     _print_section("场景 6 · idle sandbox 自动 pause (用 sweeper)")
 
     # 短 timeout 方便观察: 5 秒不动就 pause
-    stop_sweeper = svc.start_idle_sweeper(idle_timeout_seconds=5.0, sweep_interval_seconds=1.0)
+    stop_sweeper = svc.start_idle_sweeper(
+        idle_timeout_seconds=5.0, sweep_interval_seconds=1.0
+    )
     print("启动 idle sweeper (timeout=5s)")
 
     s = svc.start_sandbox()
@@ -229,7 +251,7 @@ def scenario_idle_timeout(svc) -> None:
     for i in range(8):
         time.sleep(1)
         st = svc.get_sandbox(s.id).status.value
-        print(f"  +{i+1}s: 状态={st}")
+        print(f"  +{i + 1}s: 状态={st}")
         if st == "PAUSED":
             break
 
@@ -249,7 +271,9 @@ def scenario_path_blacklist(svc) -> None:
 
     if not isinstance(svc, ProcessSandbox):
         print("此场景演示 ProcessSandbox 的字符串黑名单.")
-        print("Docker 后端不需要 — 它有真隔离. 跑: python main.py --backend process --scenario 7")
+        print(
+            "Docker 后端不需要 — 它有真隔离. 跑: python main.py --backend process --scenario 7"
+        )
         return
 
     s = svc.start_sandbox()
@@ -275,7 +299,9 @@ def scenario_path_blacklist(svc) -> None:
     print(f"\n  [{'通过' if rc == 0 else '拒'}] {good}")
     print(f"           → {out.strip()}")
 
-    print("\n⚠️  诚实声明: 这是 best-effort 字符串匹配, 真 LLM 能用 base64 / 变量替换绕过.")
+    print(
+        "\n⚠️  诚实声明: 这是 best-effort 字符串匹配, 真 LLM 能用 base64 / 变量替换绕过."
+    )
     print("    ProcessSandbox 永远不是真的 sandbox. 要安全请用 Docker 后端.")
 
     svc.delete_sandbox(s.id)
@@ -301,14 +327,16 @@ def scenario_persistence(svc) -> None:
 
     persistent_svc = ProcessSandbox(base_dir=base, db_path=db_path)
     s = persistent_svc.start_sandbox()
-    persistent_svc.exec_in_sandbox(s.id, s.session_api_key, "echo persisted-v1 > marker.txt")
+    persistent_svc.exec_in_sandbox(
+        s.id, s.session_api_key, "echo persisted-v1 > marker.txt"
+    )
 
-    print(f"Step 1 (本进程):")
+    print("Step 1 (本进程):")
     print(f"  sandbox id={s.id}")
     print(f"  daemon pid={s.daemon_pid}")
-    print(f"  写了 workspace/marker.txt = 'persisted-v1'")
+    print("  写了 workspace/marker.txt = 'persisted-v1'")
     print(f"  DB 文件: {db_path.name}")
-    print(f"  *注意: 不 delete_sandbox, daemon 继续在后台跑 (孤儿进程)*")
+    print("  *注意: 不 delete_sandbox, daemon 继续在后台跑 (孤儿进程)*")
 
     # 不主动停 daemon. 进程 exit 后, daemon 会被 launchd / init 接管,
     # 子进程仍能通过 pid 接管它.
@@ -343,10 +371,11 @@ def scenario_persistence(svc) -> None:
         "print('  delete 完成, daemon 已停, workspace 已清')\n"
     )
 
-    print(f"\nStep 2 (子进程 — 全新 Python 解释器):")
+    print("\nStep 2 (子进程 — 全新 Python 解释器):")
     result = subprocess.run(
         [sys.executable, "-c", child_script],
-        capture_output=True, text=True,
+        capture_output=True,
+        text=True,
     )
     print(result.stdout, end="")
     if result.returncode != 0:
@@ -354,8 +383,10 @@ def scenario_persistence(svc) -> None:
         print(result.stderr)
         return
 
-    print(f"\n→ 跨进程恢复成功 ✓")
-    print(f"  daemon 进程在 step 1 起的, step 2 (完全独立的 Python) 通过 SQLite 找回 + 接管.")
+    print("\n→ 跨进程恢复成功 ✓")
+    print(
+        "  daemon 进程在 step 1 起的, step 2 (完全独立的 Python) 通过 SQLite 找回 + 接管."
+    )
 
     # Cleanup DB
     if db_path.exists():
@@ -365,9 +396,15 @@ def scenario_persistence(svc) -> None:
 # ── main ──────────────────────────────────────────────────────────────
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--scenario", type=int, choices=[1, 2, 3, 4, 5, 6, 7, 8], help="只跑某个场景")
-    p.add_argument("--backend", choices=["process", "docker"], default="process",
-                   help="选 sandbox 后端 (默认 process). docker 需要 'pip install docker' + 本机 docker daemon.")
+    p.add_argument(
+        "--scenario", type=int, choices=[1, 2, 3, 4, 5, 6, 7, 8], help="只跑某个场景"
+    )
+    p.add_argument(
+        "--backend",
+        choices=["process", "docker"],
+        default="process",
+        help="选 sandbox 后端 (默认 process). docker 需要 'pip install docker' + 本机 docker daemon.",
+    )
     p.add_argument("--cleanup", action="store_true", help="清理 .sandboxes/")
     args = p.parse_args()
 
@@ -391,17 +428,17 @@ def main() -> None:
             sys.exit(1)
     else:
         svc = ProcessSandbox(base_dir=base)
-        print(f"[使用 Process 后端]")
+        print("[使用 Process 后端]")
 
     scenarios = {
         1: scenario_isolation,
         2: scenario_state_machine,
         3: scenario_llm_in_sandbox,
         4: scenario_workspace_persistence,
-        5: scenario_resource_limits,    # upgrade #2 (仅 Docker)
-        6: scenario_idle_timeout,       # upgrade #5
-        7: scenario_path_blacklist,     # upgrade #6 (仅 Process)
-        8: scenario_persistence,        # upgrade #3 (仅 Process)
+        5: scenario_resource_limits,  # upgrade #2 (仅 Docker)
+        6: scenario_idle_timeout,  # upgrade #5
+        7: scenario_path_blacklist,  # upgrade #6 (仅 Process)
+        8: scenario_persistence,  # upgrade #3 (仅 Process)
     }
 
     if args.scenario:

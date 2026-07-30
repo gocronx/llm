@@ -3,6 +3,7 @@
 
 对标 OpenHands openhands/app_server/event/event_service.py 的 FilesystemEventService.
 """
+
 from __future__ import annotations
 
 import json
@@ -23,6 +24,7 @@ class Event:
     kind: 事件类型字符串 (MessageEvent / ToolResultEvent / ...).
     OpenHands 用 EventKind = Literal[tuple(子类名)] 动态生成, 本 demo 用字符串简化.
     """
+
     kind: str
     conversation_id: str
     payload: dict[str, Any]
@@ -36,8 +38,9 @@ def append(event: Event) -> Path:
     conv_dir.mkdir(parents=True, exist_ok=True)
     fname = f"{event.timestamp:.6f}_{event.event_id}.json"
     path = conv_dir / fname
-    path.write_text(json.dumps(asdict(event), ensure_ascii=False, indent=2),
-                    encoding="utf-8")
+    path.write_text(
+        json.dumps(asdict(event), ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     return path
 
 

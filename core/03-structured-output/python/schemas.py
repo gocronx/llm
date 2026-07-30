@@ -4,6 +4,7 @@
   2) `required` 必须列出 properties 里的所有 key
   3) 不支持 `default` / `format` / 部分 `pattern`
 这些规则违反时 OpenAI 直接报 400，不会"宽松降级"。"""
+
 from __future__ import annotations
 
 # 1) 简历提取：嵌套对象 + 数组。

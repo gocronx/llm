@@ -40,10 +40,11 @@ ds4.c:17629 处 `mtp_margin_threshold` 就是干这事的.
 - 不实现 KV cache 回滚 (真实 GPU 必须把 reject 部分的 KV state 复原)
 - 保留: 主循环 + accept/reject 决策 + margin filter + bonus token
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -51,13 +52,14 @@ import numpy as np
 @dataclass
 class DecodeStats:
     """投机解码的统计."""
-    target_calls: int = 0       # target 模型 forward 次数 (理论时间成本主项)
-    draft_calls: int = 0        # draft 模型 forward 次数 (便宜)
-    accepted: int = 0           # accept 的 draft token 数
-    rejected: int = 0           # reject 的 draft token 数
-    bonus: int = 0              # 全 accept 时拿到的免费 bonus token 数
-    margin_filtered: int = 0    # 因 margin 太低被丢弃的 draft 数
-    rounds: int = 0             # 投机循环轮次
+
+    target_calls: int = 0  # target 模型 forward 次数 (理论时间成本主项)
+    draft_calls: int = 0  # draft 模型 forward 次数 (便宜)
+    accepted: int = 0  # accept 的 draft token 数
+    rejected: int = 0  # reject 的 draft token 数
+    bonus: int = 0  # 全 accept 时拿到的免费 bonus token 数
+    margin_filtered: int = 0  # 因 margin 太低被丢弃的 draft 数
+    rounds: int = 0  # 投机循环轮次
 
 
 def naive_decode(
@@ -72,7 +74,7 @@ def naive_decode(
         tok = target(history)
         stats.target_calls += 1
         history.append(tok)
-    return history[len(prefix):], stats
+    return history[len(prefix) :], stats
 
 
 def speculative_decode(
@@ -136,7 +138,7 @@ def speculative_decode(
 
         if replacement is None:
             # 全 accept: bonus token 免费 (target 已经算好了 K+1 位置)
-            history.extend(drafts[n_accept:])    # n_accept == len(drafts), 已经 extend 过
+            history.extend(drafts[n_accept:])  # n_accept == len(drafts), 已经 extend 过
             extra = target(history)
             stats.target_calls += 1
             history.append(extra)
@@ -149,17 +151,20 @@ def speculative_decode(
         if len(history) - len(prefix) > n_steps:
             history = history[: len(prefix) + n_steps]
 
-    return history[len(prefix):], stats
+    return history[len(prefix) :], stats
 
 
 # ----- Mock 模型: 用确定性 RNG 构造可重复的实验 -----
 
+
 def make_target(seed: int = 0, vocab: int = 100) -> Callable[[list[int]], int]:
     """Target 模型: 给定 history 返回"标准答案"的下一个 token. 确定性."""
+
     def target(history: list[int]) -> int:
         h = hash(tuple(history)) ^ seed
         rng = np.random.default_rng(h & 0xFFFFFFFF)
         return int(rng.integers(0, vocab))
+
     return target
 
 
@@ -170,6 +175,7 @@ def make_draft(
     vocab: int = 100,
 ) -> Callable[[list[int]], tuple[int, float]]:
     """Draft 模型: 以 accuracy 概率跟 target 一致 (产生 margin 高); 否则瞎猜 (margin 低)."""
+
     def draft(history: list[int]) -> tuple[int, float]:
         h = (hash(tuple(history)) ^ seed) & 0xFFFFFFFF
         rng = np.random.default_rng(h)
@@ -185,4 +191,5 @@ def make_draft(
                 wrong = (wrong + 1) % vocab
             margin = float(rng.uniform(0.0, 1.0))
             return wrong, margin
+
     return draft

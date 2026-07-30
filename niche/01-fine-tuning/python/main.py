@@ -7,6 +7,7 @@
 为什么 train 不直接跑：mlx-lm.lora 是个长跑命令（5-30 分钟），让用户手动
 copy-paste 看着跑更安全。把参数和命令打印出来就行。
 """
+
 from __future__ import annotations
 
 import sys
@@ -24,7 +25,9 @@ def cmd_generate() -> None:
     samples = build_samples()
     train, valid, test = stratified_split(samples)
     write_splits(DATA, train, valid, test)
-    print(f"生成 {len(samples)} 样本  train={len(train)}  valid={len(valid)}  test={len(test)}")
+    print(
+        f"生成 {len(samples)} 样本  train={len(train)}  valid={len(valid)}  test={len(test)}"
+    )
     print(f"写入：{DATA}/train.jsonl  valid.jsonl  test.jsonl")
 
 
@@ -55,15 +58,19 @@ def cmd_train() -> None:
 def cmd_compare() -> None:
     # Optional MLX dependency is loaded only for the compare subcommand.
     from compare import main as compare_main  # noqa: PLC0415
-    compare_main(DEFAULT_MODEL, str(ADAPTERS), DATA / "test.jsonl",
-                 HERE / "compare_results.json")
+
+    compare_main(
+        DEFAULT_MODEL, str(ADAPTERS), DATA / "test.jsonl", HERE / "compare_results.json"
+    )
 
 
 def main() -> None:
     if len(sys.argv) < 2 or sys.argv[1] not in ("generate", "train", "compare"):
         print(__doc__)
         sys.exit(1)
-    {"generate": cmd_generate, "train": cmd_train, "compare": cmd_compare}[sys.argv[1]]()
+    {"generate": cmd_generate, "train": cmd_train, "compare": cmd_compare}[
+        sys.argv[1]
+    ]()
 
 
 if __name__ == "__main__":

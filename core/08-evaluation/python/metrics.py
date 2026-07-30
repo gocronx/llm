@@ -12,6 +12,7 @@
   rouge_l        Rouge-L F1（字符级，中文友好）
   levenshtein    归一化编辑距离相似度 0~1
 """
+
 from __future__ import annotations
 
 import json
@@ -40,6 +41,7 @@ def keywords(pred: str, groups: list[str]) -> bool:
 
 def json_equal(pred: str, expected: str) -> bool:
     """先剥掉 ```json ``` 包裹，再 loads 比较。"""
+
     def _strip(s: str) -> str:
         s = s.strip()
         if s.startswith("```"):
@@ -47,6 +49,7 @@ def json_equal(pred: str, expected: str) -> bool:
             s = re.sub(r"^```\w*\s*", "", s)
             s = re.sub(r"\s*```$", "", s)
         return s
+
     try:
         return json.loads(_strip(pred)) == json.loads(_strip(expected))
     except json.JSONDecodeError:
@@ -63,7 +66,9 @@ def rouge_l(pred: str, expected: str) -> float:
     dp = [[0] * (n + 1) for _ in range(m + 1)]
     for i in range(m):
         for j in range(n):
-            dp[i + 1][j + 1] = dp[i][j] + 1 if a[i] == b[j] else max(dp[i + 1][j], dp[i][j + 1])
+            dp[i + 1][j + 1] = (
+                dp[i][j] + 1 if a[i] == b[j] else max(dp[i + 1][j], dp[i][j + 1])
+            )
     lcs = dp[m][n]
     p, r = lcs / m, lcs / n
     return 0.0 if p + r == 0 else 2 * p * r / (p + r)
@@ -79,7 +84,8 @@ def levenshtein(pred: str, expected: str) -> float:
     for i in range(m):
         for j in range(n):
             dp[i + 1][j + 1] = (
-                dp[i][j] if a[i] == b[j]
+                dp[i][j]
+                if a[i] == b[j]
                 else 1 + min(dp[i][j], dp[i][j + 1], dp[i + 1][j])
             )
     return 1 - dp[m][n] / max(m, n)
@@ -93,7 +99,7 @@ def evaluate(pred: str, sample: dict) -> tuple[bool, str]:
     elif metric == "contains":
         ok = contains(pred, sample["expected"])
     elif metric.startswith("regex:"):
-        ok = regex(pred, metric[len("regex:"):])
+        ok = regex(pred, metric[len("regex:") :])
     elif metric == "keywords":
         ok = keywords(pred, sample["expected_keywords"])
     elif metric == "json_equal":
@@ -104,4 +110,9 @@ def evaluate(pred: str, sample: dict) -> tuple[bool, str]:
         ok = levenshtein(pred, sample["expected"]) >= sample.get("threshold", 0.7)
     else:
         return False, f"unknown metric: {metric}"
-    return ok, "" if ok else f"expected={sample.get('expected', sample.get('expected_keywords'))} got={pred[:50]}"
+    return (
+        ok,
+        ""
+        if ok
+        else f"expected={sample.get('expected', sample.get('expected_keywords'))} got={pred[:50]}",
+    )

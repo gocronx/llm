@@ -12,6 +12,7 @@
   - self-DISABLE: callback 内部把自己 disabled=True, 派发器跳过 (模式 A 配)
   - 注册表 JSON 持久化: 跨进程能 reload (类比 OpenHands SQL)
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -21,9 +22,9 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
-from callbacks import CallbackResult, EventCallbackProcessor, ResultStatus
+from callbacks import EventCallbackProcessor
 from events import Event
 
 _logger = logging.getLogger("dispatcher")
@@ -41,6 +42,7 @@ class CallbackRegistration:
       processor        = processor (实例)
       status           = "ACTIVE" | "DISABLED"
     """
+
     callback_id: str
     processor: EventCallbackProcessor
     conv_id: Optional[str] = None
@@ -52,9 +54,10 @@ class CallbackRegistration:
 @dataclass
 class ExecutionRecord:
     """每次 callback 执行的 audit record. 对标 event_callback_result 表."""
+
     callback_id: str
     event_id: str
-    status: str        # SUCCESS / ERROR / PENDING / TIMEOUT
+    status: str  # SUCCESS / ERROR / PENDING / TIMEOUT
     detail: str
     timestamp: float = field(default_factory=time.time)
 
@@ -202,13 +205,19 @@ class CallbackDispatcher:
             return
         self._audit_log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._audit_log_path, "a", encoding="utf-8") as f:
-            f.write(json.dumps({
-                "callback_id": record.callback_id,
-                "event_id": record.event_id,
-                "status": record.status,
-                "detail": record.detail,
-                "timestamp": record.timestamp,
-            }, ensure_ascii=False) + "\n")
+            f.write(
+                json.dumps(
+                    {
+                        "callback_id": record.callback_id,
+                        "event_id": record.event_id,
+                        "status": record.status,
+                        "detail": record.detail,
+                        "timestamp": record.timestamp,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
 
     def audit_records(self) -> list[ExecutionRecord]:
         """读 audit log 回来. 给 demo 验证用."""

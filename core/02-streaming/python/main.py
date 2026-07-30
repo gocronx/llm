@@ -1,6 +1,7 @@
 """main.py —— demo only：两个场景。
 1) 纯文本流式：对比首字延迟。
 2) 流式 + function call：tool_calls 的 delta 累积。"""
+
 from __future__ import annotations
 
 import os

@@ -1,4 +1,5 @@
 """main.py —— demo only：拉起 3 个 specialist 子进程，通过 coordinator 跑 demo query，最后收尸。"""
+
 from __future__ import annotations
 
 import os
@@ -17,9 +18,9 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 HERE = Path(__file__).resolve().parent
 
 AGENTS = [
-    ("translator",  int(os.getenv("TRANSLATOR_PORT", "8101"))),
-    ("reviewer",    int(os.getenv("REVIEWER_PORT", "8102"))),
-    ("summarizer",  int(os.getenv("SUMMARIZER_PORT", "8103"))),
+    ("translator", int(os.getenv("TRANSLATOR_PORT", "8101"))),
+    ("reviewer", int(os.getenv("REVIEWER_PORT", "8102"))),
+    ("summarizer", int(os.getenv("SUMMARIZER_PORT", "8103"))),
 ]
 
 DEMO_QUERIES = [
@@ -66,7 +67,11 @@ def spawn_agent(name: str, port: int) -> subprocess.Popen:
 
 def main():
     print("=== A2A protocol demo ===\n")
-    auth = "bearer token (AGENT_TOKEN set)" if os.getenv("AGENT_TOKEN") else "DISABLED (open)"
+    auth = (
+        "bearer token (AGENT_TOKEN set)"
+        if os.getenv("AGENT_TOKEN")
+        else "DISABLED (open)"
+    )
     print(f"Auth: {auth}")
     print("\nSpawning specialist agents...")
     procs: list[subprocess.Popen] = []

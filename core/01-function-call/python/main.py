@@ -1,4 +1,5 @@
 """main.py —— demo only：跑三个场景。"""
+
 from __future__ import annotations
 
 import os

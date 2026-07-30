@@ -9,12 +9,12 @@ OpenHands 的 ProcessSandboxService 把 sandbox 元信息存在内存全局字�
 只覆盖 ProcessSandbox. DockerSandbox 的恢复要存 container_id + docker_client.containers.get(),
 模式同, 留作衍生题目.
 """
+
 from __future__ import annotations
 
 import sqlite3
 import threading
 from pathlib import Path
-from typing import Optional
 
 from sandbox import SandboxInfo, SandboxStatus
 

@@ -1,5 +1,6 @@
 """test.py —— 不需要 LLM 的纯逻辑测试。
 验证四种 memory 的裁剪行为符合预期。"""
+
 from __future__ import annotations
 
 from memory import Full, Summary, Tokens, Window
@@ -11,7 +12,7 @@ def test_full() -> bool:
         m.append("user", f"q{i}")
         m.append("assistant", f"a{i}")
     ok = len(m.messages()) == 1 + 10  # system + 10 条
-    print(f"{'✓' if ok else '✗'} full: kept {len(m.messages())-1} msgs")
+    print(f"{'✓' if ok else '✗'} full: kept {len(m.messages()) - 1} msgs")
     return ok
 
 
@@ -41,6 +42,7 @@ def test_tokens() -> bool:
 
 def test_summary() -> bool:
     calls: list[list[dict]] = []
+
     def fake_summarize(msgs: list[dict]) -> str:
         calls.append(list(msgs))
         return "summary"
@@ -52,7 +54,9 @@ def test_summary() -> bool:
     # 第 4 次时 _msgs 长度 == 4，触发，清空
     # 接着第 5~8 又攒 4 条，再触发，清空
     ok = len(calls) == 2 and m.summary.count("summary") == 2
-    print(f"{'✓' if ok else '✗'} summary(k=4): triggered {len(calls)}x, summary={m.summary!r}")
+    print(
+        f"{'✓' if ok else '✗'} summary(k=4): triggered {len(calls)}x, summary={m.summary!r}"
+    )
     return ok
 
 

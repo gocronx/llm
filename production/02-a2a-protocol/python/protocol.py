@@ -20,16 +20,16 @@ class AgentCard(BaseModel):
     capabilities: list[str]  # task types this agent can handle
     endpoint: str
     version: str = "1.0"
-    auth: AuthSpec | None = None   # None = open / no auth required
+    auth: AuthSpec | None = None  # None = open / no auth required
 
 
 class TaskRequest(BaseModel):
     """Sent by a coordinator (or any agent) to a specialist agent."""
 
     task_id: str
-    task_type: str          # must match one of the target's capabilities
-    input: dict             # task-specific payload
-    requester: str          # caller name, for tracing
+    task_type: str  # must match one of the target's capabilities
+    input: dict  # task-specific payload
+    requester: str  # caller name, for tracing
 
 
 class TaskResponse(BaseModel):

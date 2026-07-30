@@ -22,9 +22,9 @@ logging.getLogger("apscheduler").setLevel(logging.WARNING)
 # `max_instances=1` 防止慢 job (summarize) 与下一次触发并发。
 # `coalesce=True` 合并多次错过的触发为一次（系统休眠后不要补刷屏）。
 JOB_SPECS = [
-    dict(func=heartbeat,         id="heartbeat", seconds=30,  grace=10),
-    dict(func=check_api,         id="check_api", seconds=60,  grace=15),
-    dict(func=summarize_recent,  id="summary",   seconds=120, grace=30),
+    dict(func=heartbeat, id="heartbeat", seconds=30, grace=10),
+    dict(func=check_api, id="check_api", seconds=60, grace=15),
+    dict(func=summarize_recent, id="summary", seconds=120, grace=30),
 ]
 
 
@@ -55,11 +55,14 @@ def print_status(sch: BackgroundScheduler) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-for", type=int, default=180,
-                        help="seconds to keep the scheduler alive")
+    parser.add_argument(
+        "--run-for", type=int, default=180, help="seconds to keep the scheduler alive"
+    )
     args = parser.parse_args()
 
-    print(f"Resuming from state.json (last_heartbeat={state.get('last_heartbeat', '<never>')})")
+    print(
+        f"Resuming from state.json (last_heartbeat={state.get('last_heartbeat', '<never>')})"
+    )
     sch = build_scheduler()
     sch.start()
 

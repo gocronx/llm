@@ -3,23 +3,24 @@
 三种后端 (auto_evolve / forage / curated) 都实现 SkillRegistry 这同一套接口,
 main.py 不知道底层是哪种哲学.
 """
+
 from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
-from pathlib import Path
+from dataclasses import dataclass
 from typing import Optional
 
 
 @dataclass
 class Skill:
     """一份 skill = markdown 内容 + 元数据."""
-    name: str                      # kebab-case 唯一 id
-    description: str               # 一行: 什么时候用我
-    body: str                      # 主体 markdown
-    source: str = "unknown"        # "auto-evolved" / "foraged-from-X" / "curated-by-Y"
-    score: float = 0.0             # 采集模式才有意义
+
+    name: str  # kebab-case 唯一 id
+    description: str  # 一行: 什么时候用我
+    body: str  # 主体 markdown
+    source: str = "unknown"  # "auto-evolved" / "foraged-from-X" / "curated-by-Y"
+    score: float = 0.0  # 采集模式才有意义
     signed_by: Optional[str] = None  # 策展模式才有意义
 
 
@@ -77,8 +78,12 @@ class SkillRegistry(ABC):
         ...
 
     @abstractmethod
-    def acquire(self, *, transcript: Optional[list[dict]] = None,
-                user_hint: Optional[str] = None) -> list[Skill]:
+    def acquire(
+        self,
+        *,
+        transcript: Optional[list[dict]] = None,
+        user_hint: Optional[str] = None,
+    ) -> list[Skill]:
         """让 registry 去 "获取新 skill". 三种后端实现各自不同:
           - 自产: 看 transcript, 产 markdown
           - 采集: 扫 catalog, 评分挑选

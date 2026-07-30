@@ -47,20 +47,22 @@ H100/B200 都原生支持 FP8 计算 (Tensor Core), 是 2024+ LLM 推理标配.
 
 教学版同时实现 FP8 和 Q8, 你能看到两套不同的"per-block dynamic scaling"思路.
 """
+
 from __future__ import annotations
 
 import numpy as np
 
-FP8_MAX = 448.0          # E4M3FN 可表示的最大正值
-FP8_N_CODES = 127        # 索引范围 [0, 126], i=127 留给特殊 (这里跳过)
-Q8_BLOCK_SIZE = 32       # Q8 每个 block 内的元素数
+FP8_MAX = 448.0  # E4M3FN 可表示的最大正值
+FP8_N_CODES = 127  # 索引范围 [0, 126], i=127 留给特殊 (这里跳过)
+Q8_BLOCK_SIZE = 32  # Q8 每个 block 内的元素数
 
 
 # ----- FP8 E4M3FN -----
 
+
 def fp8_e4m3_value(i: int) -> float:
     """FP8 E4M3FN 索引 i ∈ [0, 126] → 对应正值. 复刻 ds4.c:dsv4_e4m3fn_value_cpu."""
-    exp = (i >> 3) & 0xf
+    exp = (i >> 3) & 0xF
     mant = i & 0x7
     if exp == 0:
         # subnormal: mant * 2^-9
@@ -128,7 +130,7 @@ def fp8_quantize_block_inplace(x: np.ndarray, block_size: int = 64) -> np.ndarra
         # scale = 2 ^ ceil(log2(amax/448))
         # 用 power-of-2 scale, 这样 x/scale 是简单的指数移位 (硬件友好)
         log2_scale = np.ceil(np.log2(amax / FP8_MAX))
-        scale = 2.0 ** log2_scale
+        scale = 2.0**log2_scale
         scaled = np.clip(block / scale, -FP8_MAX, FP8_MAX)
         flat[start:end] = fp8_e4m3_quantize(scaled) * scale
     return flat.reshape(x.shape)
@@ -136,7 +138,10 @@ def fp8_quantize_block_inplace(x: np.ndarray, block_size: int = 64) -> np.ndarra
 
 # ----- Q8 per-block (int8 + scale) -----
 
-def q8_quantize_block(x: np.ndarray, block_size: int = Q8_BLOCK_SIZE) -> tuple[np.ndarray, np.ndarray]:
+
+def q8_quantize_block(
+    x: np.ndarray, block_size: int = Q8_BLOCK_SIZE
+) -> tuple[np.ndarray, np.ndarray]:
     """对 x 分 block 量化成 int8 + per-block scale (fp32).
 
     返回 (int8_codes, scales). int8_codes shape (n,), scales shape (n_blocks,).
@@ -163,7 +168,9 @@ def q8_quantize_block(x: np.ndarray, block_size: int = Q8_BLOCK_SIZE) -> tuple[n
     return codes, scales
 
 
-def q8_dequantize(codes: np.ndarray, scales: np.ndarray, block_size: int = Q8_BLOCK_SIZE) -> np.ndarray:
+def q8_dequantize(
+    codes: np.ndarray, scales: np.ndarray, block_size: int = Q8_BLOCK_SIZE
+) -> np.ndarray:
     """int8 codes + scales → fp32. 反量化是简单乘法."""
     out = np.zeros(len(codes), dtype=np.float32)
     n_blocks = len(scales)

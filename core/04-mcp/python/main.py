@@ -1,4 +1,5 @@
 """main.py —— demo only：让 LLM 通过 MCP server 创建并读回一个 todo 文件。"""
+
 from __future__ import annotations
 
 import os
@@ -27,12 +28,26 @@ _server_args = ["server.py", _workspace]
 
 def main() -> None:
     print(">>> 让 LLM 通过 MCP 创建 todo.txt")
-    print(run_sync(_server_cmd, _server_args, _client, _model,
-                   "请在 todo.txt 里写三条 todo：1. 学习 MCP 2. 写 demo 3. 提 PR"))
+    print(
+        run_sync(
+            _server_cmd,
+            _server_args,
+            _client,
+            _model,
+            "请在 todo.txt 里写三条 todo：1. 学习 MCP 2. 写 demo 3. 提 PR",
+        )
+    )
 
     print("\n>>> 让 LLM 通过 MCP 列目录并读回 todo.txt")
-    print(run_sync(_server_cmd, _server_args, _client, _model,
-                   "先列出当前目录，然后读 todo.txt 的内容回给我。"))
+    print(
+        run_sync(
+            _server_cmd,
+            _server_args,
+            _client,
+            _model,
+            "先列出当前目录，然后读 todo.txt 的内容回给我。",
+        )
+    )
 
 
 if __name__ == "__main__":

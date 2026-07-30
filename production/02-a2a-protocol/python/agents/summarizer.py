@@ -12,7 +12,7 @@ PORT = int(os.getenv("SUMMARIZER_PORT", "8103"))
 card = AgentCard(
     name="summarizer",
     description="Summarize long text into a short paragraph or bullet points. "
-                "Outputs the summary in the same language as the input.",
+    "Outputs the summary in the same language as the input.",
     capabilities=["summarize"],
     endpoint=f"http://localhost:{PORT}",
 )

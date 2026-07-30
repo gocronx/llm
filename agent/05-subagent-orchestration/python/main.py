@@ -11,6 +11,7 @@
   3. LLM 综合 search result, 给最终 summary
 
 工具 mock 是因为真 web search 在教学版不可行 (API key / 配额); 编排逻辑本身是真的."""
+
 from __future__ import annotations
 
 import asyncio
@@ -27,6 +28,7 @@ load_dotenv()
 
 
 # ----- Mock 工具 (真 web 不可行, 但 LLM 决策真) -----
+
 
 def web_search(query: str) -> str:
     """返回预编好的"搜索结果". LLM 拿到这个再综合."""
@@ -54,22 +56,28 @@ def web_search(query: str) -> str:
     for key, facts in knowledge.items():
         if key in q:
             return json.dumps({"results": facts}, ensure_ascii=False)
-    return json.dumps({"results": [f"No matching facts for '{query}'"]}, ensure_ascii=False)
+    return json.dumps(
+        {"results": [f"No matching facts for '{query}'"]}, ensure_ascii=False
+    )
 
 
 TOOLS = {"web_search": web_search}
-SCHEMAS = {"web_search": {
-    "type": "function",
-    "function": {
-        "name": "web_search",
-        "description": "Search facts about a technical topic. Returns a list of relevant statements.",
-        "parameters": {
-            "type": "object",
-            "properties": {"query": {"type": "string", "description": "the topic to search"}},
-            "required": ["query"],
+SCHEMAS = {
+    "web_search": {
+        "type": "function",
+        "function": {
+            "name": "web_search",
+            "description": "Search facts about a technical topic. Returns a list of relevant statements.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "the topic to search"}
+                },
+                "required": ["query"],
+            },
         },
-    },
-}}
+    }
+}
 
 
 # ----- 真 LLM client adapter -----
@@ -98,13 +106,20 @@ def real_llm_call(messages: list[dict], schemas: list[dict]) -> dict:
     return {
         "content": msg.content or "",
         "tool_calls": [
-            {"id": tc.id, "function": {"name": tc.function.name, "arguments": tc.function.arguments}}
+            {
+                "id": tc.id,
+                "function": {
+                    "name": tc.function.name,
+                    "arguments": tc.function.arguments,
+                },
+            }
             for tc in (msg.tool_calls or [])
         ],
     }
 
 
 # ----- Demo -----
+
 
 async def run_demo() -> None:
     orch = Orchestrator()
@@ -114,7 +129,8 @@ async def run_demo() -> None:
             SubAgent(
                 agent_type=f"researcher_{topic}",
                 llm_call=real_llm_call,
-                tool_registry=TOOLS, tool_schemas=SCHEMAS,
+                tool_registry=TOOLS,
+                tool_schemas=SCHEMAS,
                 system_prompt=(
                     f"You are a research subagent. Your task: research {topic} concisely. "
                     f"Use the web_search tool once to gather facts about {topic}, then synthesize "
@@ -140,23 +156,33 @@ async def run_demo() -> None:
     # 并行
     print(">>> 现在跑并行 (asyncio.gather + to_thread)...")
     t0 = time.perf_counter()
-    parallel_results = await orch.delegate_parallel([
-        ("researcher_RoPE", "Research RoPE briefly."),
-        ("researcher_RMSNorm", "Research RMSNorm briefly."),
-        ("researcher_SwiGLU", "Research SwiGLU briefly."),
-    ])
+    parallel_results = await orch.delegate_parallel(
+        [
+            ("researcher_RoPE", "Research RoPE briefly."),
+            ("researcher_RMSNorm", "Research RMSNorm briefly."),
+            ("researcher_SwiGLU", "Research SwiGLU briefly."),
+        ]
+    )
     parallel_elapsed = (time.perf_counter() - t0) * 1000
     print(f"   并行: {parallel_elapsed:.0f} ms\n")
 
-    speedup = serial_elapsed / parallel_elapsed if parallel_elapsed > 0 else float("inf")
-    print(f">>> 加速比: {speedup:.2f}× (理论上限 3.0×, 实际受 LLM 服务并发承载力影响)\n")
+    speedup = (
+        serial_elapsed / parallel_elapsed if parallel_elapsed > 0 else float("inf")
+    )
+    print(
+        f">>> 加速比: {speedup:.2f}× (理论上限 3.0×, 实际受 LLM 服务并发承载力影响)\n"
+    )
 
     print(">>> 每个 subagent 的 summary:")
-    for i, (r, topic) in enumerate(zip(parallel_results, ["RoPE", "RMSNorm", "SwiGLU"])):
-        print(f"\n📋 Subagent #{i+1} ({topic}):")
+    for i, (r, topic) in enumerate(
+        zip(parallel_results, ["RoPE", "RMSNorm", "SwiGLU"])
+    ):
+        print(f"\n📋 Subagent #{i + 1} ({topic}):")
         print(f"   status: {r.status}, iter: {r.n_iterations}, ms: {r.elapsed_ms:.0f}")
         print(f"   summary: {r.summary[:300]}{'...' if len(r.summary) > 300 else ''}")
-        print(f"   artifacts (tool 调用次数): {dict((k, len(v)) for k, v in r.artifacts.items())}")
+        print(
+            f"   artifacts (tool 调用次数): {dict((k, len(v)) for k, v in r.artifacts.items())}"
+        )
 
 
 if __name__ == "__main__":

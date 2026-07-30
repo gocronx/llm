@@ -4,6 +4,7 @@
 干的就一件事：MCP 协议下的 `tools/list` -> 转成 OpenAI 的 `tools` 字段；
 LLM 决定 `tool_calls` -> 通过 MCP 的 `tools/call` 执行 -> 把结果回灌 LLM。
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -29,16 +30,22 @@ class MCPBridge:
     async def __aenter__(self):
         # stdio_client 是 async context manager；进栈拿读写流
         read, write = await self._stack.enter_async_context(stdio_client(self._params))
-        self._session = await self._stack.enter_async_context(ClientSession(read, write))
+        self._session = await self._stack.enter_async_context(
+            ClientSession(read, write)
+        )
         await self._session.initialize()
         # 把 MCP 的 Tool 列表翻译成 OpenAI 的 tools schema
         listed = await self._session.list_tools()
         self._tools = [
-            {"type": "function", "function": {
-                "name": t.name,
-                "description": t.description or "",
-                "parameters": t.inputSchema or {"type": "object", "properties": {}},
-            }} for t in listed.tools
+            {
+                "type": "function",
+                "function": {
+                    "name": t.name,
+                    "description": t.description or "",
+                    "parameters": t.inputSchema or {"type": "object", "properties": {}},
+                },
+            }
+            for t in listed.tools
         ]
         return self
 
@@ -55,15 +62,23 @@ class MCPBridge:
         result = await self._session.call_tool(name, args)
         # 结果是 list[TextContent|ImageContent|...]；这里只取 text 拼起来
         parts = [c.text for c in result.content if getattr(c, "type", None) == "text"]
-        out = "\n".join(parts) if parts else json.dumps([c.model_dump() for c in result.content])
+        out = (
+            "\n".join(parts)
+            if parts
+            else json.dumps([c.model_dump() for c in result.content])
+        )
         return out
 
-    async def chat(self, client: OpenAI, model: str, user_msg: str, max_rounds: int = 6) -> str:
+    async def chat(
+        self, client: OpenAI, model: str, user_msg: str, max_rounds: int = 6
+    ) -> str:
         """LLM ↔ MCP tools 多轮循环，直到 LLM 不再 call tool 为止。"""
         messages: list[dict] = [{"role": "user", "content": user_msg}]
         for _ in range(max_rounds):
             resp = client.chat.completions.create(
-                model=model, messages=messages, tools=self.tools,
+                model=model,
+                messages=messages,
+                tools=self.tools,
             )
             msg = resp.choices[0].message
             if not msg.tool_calls:
@@ -73,13 +88,18 @@ class MCPBridge:
             for tc in msg.tool_calls:
                 args = json.loads(tc.function.arguments or "{}")
                 result = await self.call(tc.function.name, args)
-                messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+                messages.append(
+                    {"role": "tool", "tool_call_id": tc.id, "content": result}
+                )
         return "(max rounds reached)"
 
 
 # 同步 wrapper：把 asyncio.run 藏掉，main.py / test.py 调用更顺
-def run_sync(command: str, args: list[str], client: OpenAI, model: str, user_msg: str) -> str:
+def run_sync(
+    command: str, args: list[str], client: OpenAI, model: str, user_msg: str
+) -> str:
     async def go() -> str:
         async with MCPBridge(command, args) as bridge:
             return await bridge.chat(client, model, user_msg)
+
     return asyncio.run(go())

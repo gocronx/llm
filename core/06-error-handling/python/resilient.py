@@ -8,6 +8,7 @@
 
 故意不引 tenacity / pybreaker —— 三百行依赖看不清，自己 80 行更顺。
 """
+
 from __future__ import annotations
 
 import random
@@ -26,9 +27,10 @@ from openai import (
 
 # ---- circuit breaker：闭合 / 打开 / 半开 ----
 
+
 @dataclass
 class Breaker:
-    threshold: int = 5            # 连续失败多少次进入 open
+    threshold: int = 5  # 连续失败多少次进入 open
     cooldown_seconds: float = 30  # open 多久后试一次（half-open）
     fails: int = 0
     opened_at: float = 0.0
@@ -62,7 +64,7 @@ RETRYABLE = (APIConnectionError, APITimeoutError, RateLimitError)
 
 def _backoff(attempt: int, base: float = 0.5, cap: float = 8.0) -> float:
     """指数退避 + jitter：避免一群客户端同时复试雪崩。"""
-    raw = min(cap, base * (2 ** attempt))
+    raw = min(cap, base * (2**attempt))
     return raw * (0.5 + random.random() / 2)
 
 
@@ -82,9 +84,11 @@ def _retry_after(exc: Exception) -> float | None:
 
 # ---- 主入口 ----
 
+
 @dataclass
 class Endpoint:
     """一个可调 LLM 配置：客户端 + model 名 + 独立的 breaker。"""
+
     client: OpenAI
     model: str
     breaker: Breaker = field(default_factory=Breaker)
@@ -122,13 +126,17 @@ class Resilient:
                     last_exc = e
                     ep.breaker.on_failure()
                     if attempt == self.max_attempts - 1:
-                        emit(f"[{ep.label}] gave up after {attempt+1}: {type(e).__name__}")
+                        emit(
+                            f"[{ep.label}] gave up after {attempt + 1}: {type(e).__name__}"
+                        )
                         break
                     # 429 优先 Retry-After，其它走指数退避 + jitter
                     wait = _retry_after(e) if isinstance(e, RateLimitError) else None
                     if wait is None:
                         wait = _backoff(attempt)
-                    emit(f"[{ep.label}] attempt {attempt+1} {type(e).__name__}, wait {wait:.2f}s")
+                    emit(
+                        f"[{ep.label}] attempt {attempt + 1} {type(e).__name__}, wait {wait:.2f}s"
+                    )
                     time.sleep(wait)
 
                 except APIStatusError as e:

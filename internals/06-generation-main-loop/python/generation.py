@@ -50,16 +50,18 @@ attention 算 softmax(Q · K^T) · V 时, 第 t 个 token 的 K, V 用到所有 
 - 配合 G01 的 sampling 一起用
 - 统计 prefill_ms / decode_ms / tok_per_s
 """
+
 from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Protocol
 
 import numpy as np
 
 # ----- 接口定义 -----
+
 
 class Model(Protocol):
     """LLM model 接口. 真实模型是个 transformer; 教学版 mock."""
@@ -99,6 +101,7 @@ class KVCache:
 
 
 # ----- 主循环 -----
+
 
 @dataclass
 class GenStats:
@@ -188,6 +191,7 @@ def generate(
 
 
 # ----- Mock model: 帮助 demo 跑起来 -----
+
 
 class MockModel:
     """Mock LLM, 用于教学. forward 用 RNG seed=hash(history) 假装是 transformer.

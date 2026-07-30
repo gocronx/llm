@@ -15,6 +15,7 @@
   - 网络不过滤, 容器能 curl 外网, 跟 OpenHands 一样.
   - 生产请自己加 mem_limit='2g', cpu_quota=100000, network_mode='internal' 之类.
 """
+
 from __future__ import annotations
 
 import os
@@ -36,11 +37,11 @@ DEFAULT_IMAGE = "python:3.11-slim"
 # 一个跑疯的 LLM 可以让一个容器吃满 CPU / 内存 / 把 fd 用光把整机拖垮.
 # 这里给个保守默认; 生产按自己产品调整.
 RESOURCE_LIMITS = {
-    "mem_limit": "512m",      # 内存上限 512MB
+    "mem_limit": "512m",  # 内存上限 512MB
     "memswap_limit": "512m",  # 跟 mem_limit 一致 = 禁 swap 滥用
-    "cpu_quota": 50000,       # 100ms 周期内最多用 50ms = 0.5 core
-    "cpu_period": 100000,     # 配 cpu_quota 用的周期
-    "pids_limit": 64,         # 进程总数上限, 防 fork-bomb
+    "cpu_quota": 50000,  # 100ms 周期内最多用 50ms = 0.5 core
+    "cpu_period": 100000,  # 配 cpu_quota 用的周期
+    "pids_limit": 64,  # 进程总数上限, 防 fork-bomb
 }
 
 
@@ -55,7 +56,7 @@ class DockerSandbox(SandboxService):
         # Lazy import: 没装 docker 也不影响 ProcessSandbox 用户.
         try:
             # Optional dependency: ProcessSandbox must work without docker-py.
-            import docker  # type: ignore  # noqa: PLC0415
+            import docker  # type: ignore[import-untyped]  # noqa: PLC0415 -- optional docker-py has no stubs
         except ImportError as e:
             raise RuntimeError(
                 "DockerSandbox 需要 docker-py: pip install 'docker>=6.0.0'"
@@ -84,12 +85,13 @@ class DockerSandbox(SandboxService):
     def _ensure_image(self) -> None:
         # Optional dependency: see the guarded import in __init__.
         import docker  # noqa: PLC0415
+
         try:
             self._docker.images.get(self.image)
         except docker.errors.ImageNotFound:
             print(f"  [Docker] 拉镜像 {self.image} (首次可能要几十秒)...")
             self._docker.images.pull(self.image)
-            print(f"  [Docker] 镜像就绪.")
+            print("  [Docker] 镜像就绪.")
 
     # ── start ─────────────────────────────────────────────────────────
     def start_sandbox(self) -> SandboxInfo:
@@ -137,9 +139,9 @@ class DockerSandbox(SandboxService):
             },
             user=user_spec,
             detach=True,
-            init=True,            # OpenHands line 463: tini 处理 signal
+            init=True,  # OpenHands line 463: tini 处理 signal
             # network_mode='none',  # 生产应该启用. demo 不限制保持跟 OpenHands 一致.
-            **RESOURCE_LIMITS,    # upgrade #2: mem / cpu / pids 全设上
+            **RESOURCE_LIMITS,  # upgrade #2: mem / cpu / pids 全设上
         )
         info.daemon_pid = None  # daemon 在容器里, host 没 PID
 
@@ -233,7 +235,11 @@ class DockerSandbox(SandboxService):
         if not self._check_session_key(session_api_key, state["info"].session_api_key):
             return (1, "", "invalid session_api_key")
         if state["info"].status != SandboxStatus.RUNNING:
-            return (1, "", f"sandbox status is {state['info'].status.value}, must be RUNNING")
+            return (
+                1,
+                "",
+                f"sandbox status is {state['info'].status.value}, must be RUNNING",
+            )
 
         # upgrade #5: idle sweeper 需要这个时间戳
         state["info"].last_activity_at = time.time()

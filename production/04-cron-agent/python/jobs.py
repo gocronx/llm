@@ -3,6 +3,7 @@
 
 每个 job 是一个无参函数。结果通过 state 持久化，跨进程重启可恢复。
 """
+
 from __future__ import annotations
 
 import os
@@ -40,9 +41,11 @@ def check_api() -> None:
     """每 60s 探一次后端 /models 端点；记录 status / 状态码 / 延迟。"""
     started = time.time()
     try:
-        resp = _http.get(f"{API_BASE_URL}/models",
-                         headers={"Authorization": f"Bearer {API_KEY}"},
-                         timeout=5.0)
+        resp = _http.get(
+            f"{API_BASE_URL}/models",
+            headers={"Authorization": f"Bearer {API_KEY}"},
+            timeout=5.0,
+        )
         event = {
             "job": "check_api",
             "status": "up" if resp.is_success else "degraded",
@@ -64,8 +67,7 @@ def summarize_recent() -> None:
         return
 
     bullets = "\n".join(
-        f"- {e['ts']}  {e.get('job', '?')}  {e.get('status', '')}"
-        for e in events[-30:]
+        f"- {e['ts']}  {e.get('job', '?')}  {e.get('status', '')}" for e in events[-30:]
     )
     prompt = (
         "Summarize the events below in exactly ONE sentence. "
@@ -87,9 +89,12 @@ def summarize_recent() -> None:
     except Exception as e:
         summary = f"[LLM call failed: {e}]"
 
-    state.set_("last_summary", {
-        "ts": datetime.now().isoformat(timespec="seconds"),
-        "event_count": len(events),
-        "summary": summary,
-    })
+    state.set_(
+        "last_summary",
+        {
+            "ts": datetime.now().isoformat(timespec="seconds"),
+            "event_count": len(events),
+            "summary": summary,
+        },
+    )
     print(f"  · summarize_recent ({len(events)} events): {summary[:120]}")

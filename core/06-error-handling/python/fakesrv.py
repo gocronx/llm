@@ -1,5 +1,6 @@
 """fakesrv.py —— 本地起一个假的 OpenAI-compatible 服务，能按需返回 429/500/超时。
 让 main.py / test.py 不依赖真 LLM 就能跑全套挡灾路径。"""
+
 from __future__ import annotations
 
 import json
@@ -37,10 +38,12 @@ class _Handler(BaseHTTPRequestHandler):
         if retry_after is not None:
             self.send_header("Retry-After", str(retry_after))
         self.send_header("Content-Type", "application/json")
-        body = json.dumps({
-            "choices": [{"message": {"content": content}, "finish_reason": "stop"}],
-            "model": "fake",
-        }).encode()
+        body = json.dumps(
+            {
+                "choices": [{"message": {"content": content}, "finish_reason": "stop"}],
+                "model": "fake",
+            }
+        ).encode()
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -48,9 +51,9 @@ class _Handler(BaseHTTPRequestHandler):
 
 class FakeServer:
     """用法：
-        with FakeServer() as srv:
-            srv.script("/chat/completions", (429, 1.0, "ok"), (200, None, "hi"))
-            ... 调 LLM 客户端，base_url=srv.base_url
+    with FakeServer() as srv:
+        srv.script("/chat/completions", (429, 1.0, "ok"), (200, None, "hi"))
+        ... 调 LLM 客户端，base_url=srv.base_url
     """
 
     def __init__(self, host: str = "127.0.0.1") -> None:

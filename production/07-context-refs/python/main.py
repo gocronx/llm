@@ -1,4 +1,5 @@
 """main.py —— demo only：5 个场景过 resolve_refs → render_for_llm → 调 LLM。"""
+
 from __future__ import annotations
 
 import os

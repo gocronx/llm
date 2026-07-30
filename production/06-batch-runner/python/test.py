@@ -1,9 +1,9 @@
 """test.py —— batch 行为测试：load/append/resume + retry 路径，全部 mock 不调外网。"""
+
 from __future__ import annotations
 
 import json
 import tempfile
-from dataclasses import asdict
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,7 +18,9 @@ def t(label: str, cond: bool) -> bool:
 def test_load_jobs_skips_blank_lines() -> bool:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "in.jsonl"
-        p.write_text('{"id":"a","prompt":"x"}\n\n{"id":"b","prompt":"y"}\n', encoding="utf-8")
+        p.write_text(
+            '{"id":"a","prompt":"x"}\n\n{"id":"b","prompt":"y"}\n', encoding="utf-8"
+        )
         jobs = batch.load_jobs(p)
     return [j.id for j in jobs] == ["a", "b"]
 
@@ -27,8 +29,10 @@ def test_load_done_skips_failed() -> bool:
     with tempfile.TemporaryDirectory() as d:
         p = Path(d) / "out.jsonl"
         p.write_text(
-            json.dumps({"id": "ok1", "error": None, "answer": "x"}) + "\n" +
-            json.dumps({"id": "bad", "error": "boom", "answer": None}) + "\n",
+            json.dumps({"id": "ok1", "error": None, "answer": "x"})
+            + "\n"
+            + json.dumps({"id": "bad", "error": "boom", "answer": None})
+            + "\n",
             encoding="utf-8",
         )
         done = batch.load_done(p)
@@ -52,8 +56,7 @@ def test_run_one_retry_then_success() -> bool:
 
 def test_run_one_gives_up_after_max_attempts() -> bool:
     """所有 attempt 都 TransientError，期待返回 error 不抛。"""
-    with patch.object(batch, "_single_call",
-                      side_effect=batch.TransientError("nope")):
+    with patch.object(batch, "_single_call", side_effect=batch.TransientError("nope")):
         r = batch.run_one(batch.Job(id="x", prompt="hi"))
     return r.error is not None and r.attempts == batch.MAX_ATTEMPTS and r.answer is None
 
@@ -75,23 +78,57 @@ def test_append_result_idempotent_open() -> bool:
     """append_result 写一行后能被 load_done 读到。"""
     with tempfile.TemporaryDirectory() as d:
         out = Path(d) / "out.jsonl"
-        r = batch.Result(id="z", prompt="p", answer="a", error=None,
-                         elapsed_ms=1, attempts=1, tokens=5)
+        r = batch.Result(
+            id="z",
+            prompt="p",
+            answer="a",
+            error=None,
+            elapsed_ms=1,
+            attempts=1,
+            tokens=5,
+        )
         batch.append_result(out, r)
         done = batch.load_done(out)
     return done == {"z"}
 
 
+def test_run_batch_rejects_ambiguous_inputs() -> bool:
+    """非法并发数和重复 ID 必须在启动线程前失败。"""
+    job = batch.Job(id="same", prompt="p")
+    try:
+        batch.run_batch([job], Path("unused.jsonl"), concurrency=0)
+    except ValueError as error:
+        invalid_concurrency = "at least 1" in str(error)
+    else:
+        invalid_concurrency = False
+    try:
+        batch.run_batch([job, job], Path("unused.jsonl"))
+    except ValueError as error:
+        duplicate_ids = "unique" in str(error)
+    else:
+        duplicate_ids = False
+    return invalid_concurrency and duplicate_ids
+
+
 def main() -> None:
-    passed = sum([
-        t("load_jobs skips blank", test_load_jobs_skips_blank_lines()),
-        t("load_done excludes failed", test_load_done_skips_failed()),
-        t("run_one retries then succeeds", test_run_one_retry_then_success()),
-        t("run_one gives up after MAX_ATTEMPTS", test_run_one_gives_up_after_max_attempts()),
-        t("run_one no retry on non-transient", test_run_one_does_not_retry_4xx()),
-        t("append_result round-trip", test_append_result_idempotent_open()),
-    ])
-    print(f"\n{passed}/6 passed")
+    passed = sum(
+        [
+            t("load_jobs skips blank", test_load_jobs_skips_blank_lines()),
+            t("load_done excludes failed", test_load_done_skips_failed()),
+            t("run_one retries then succeeds", test_run_one_retry_then_success()),
+            t(
+                "run_one gives up after MAX_ATTEMPTS",
+                test_run_one_gives_up_after_max_attempts(),
+            ),
+            t("run_one no retry on non-transient", test_run_one_does_not_retry_4xx()),
+            t("append_result round-trip", test_append_result_idempotent_open()),
+            t(
+                "run_batch rejects ambiguous inputs",
+                test_run_batch_rejects_ambiguous_inputs(),
+            ),
+        ]
+    )
+    print(f"\n{passed}/7 passed")
 
 
 if __name__ == "__main__":

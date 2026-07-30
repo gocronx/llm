@@ -54,6 +54,7 @@ rule-based 治理互补 —— H21 是"砍/截/替占位符", H22 是"让 LLM �
 3. **summary 目标 token 数**: 太短 LLM 总结不全, 太长 = 没压缩. 一般取被压缩区的 5-15%.
 4. **iterative update**: 已有 summary 时, 不重新总结, 在 summary 基础上 append 增量 (省 prompt token).
 """
+
 from __future__ import annotations
 
 import time
@@ -99,14 +100,16 @@ Target ~{budget} tokens. Be CONCRETE — file paths, errors, values."""
 
 # ---------------- Config + Result ----------------
 
+
 @dataclass
 class CompactConfig:
     """压缩配置. 调参指导见 README."""
-    threshold_tokens: int = 4000        # 总 tokens 超此值触发压缩
-    keep_recent_turns: int = 4          # 最近 N 轮保留原文 (跟 H21 keep_recent 同理)
-    target_summary_tokens: int = 600    # summary 目标长度
-    focus_topic: str | None = None      # 引导压缩偏向的子话题
-    cooldown_seconds: float = 60.0      # LLM 总结失败后短期不重试
+
+    threshold_tokens: int = 4000  # 总 tokens 超此值触发压缩
+    keep_recent_turns: int = 4  # 最近 N 轮保留原文 (跟 H21 keep_recent 同理)
+    target_summary_tokens: int = 600  # summary 目标长度
+    focus_topic: str | None = None  # 引导压缩偏向的子话题
+    cooldown_seconds: float = 60.0  # LLM 总结失败后短期不重试
 
 
 @dataclass
@@ -119,6 +122,7 @@ class CompactResult:
 
 
 # ---------------- 主类 ----------------
+
 
 class LLMCompactor:
     """LLM-driven 历史压缩器.
@@ -208,7 +212,8 @@ class LLMCompactor:
         serialized = self._serialize(middle)
         focus_line = (
             f"\nFocus topic (preserve info about this): {self.config.focus_topic}\n"
-            if self.config.focus_topic else ""
+            if self.config.focus_topic
+            else ""
         )
         prompt = (
             f"{_SUMMARY_PREAMBLE}\n{focus_line}\n"
@@ -265,5 +270,7 @@ class LLMCompactor:
                 truncated = content[:400] + ("..." if len(content) > 400 else "")
                 lines.append(f"[tool '{name}' returned]: {truncated}")
             else:
-                lines.append(f"[{role}]: {content[:500]}{'...' if len(content) > 500 else ''}")
+                lines.append(
+                    f"[{role}]: {content[:500]}{'...' if len(content) > 500 else ''}"
+                )
         return "\n".join(lines)

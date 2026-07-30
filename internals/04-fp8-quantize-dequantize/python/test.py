@@ -1,9 +1,9 @@
 """test.py —— FP8 + Q8 量化的正确性 + 精度损失测量."""
+
 from __future__ import annotations
 
 import numpy as np
 from quant import (
-    FP8_MAX,
     build_fp8_table,
     fp8_e4m3_quantize,
     fp8_e4m3_value,
@@ -50,7 +50,9 @@ def test_fp8_idempotent() -> bool:
     sample = np.concatenate([table, -table])
     q = fp8_e4m3_quantize(sample)
     ok = np.allclose(q, sample, atol=1e-6)
-    print(f"{'✓' if ok else '✗'} FP8 quantize idempotent on table values (max diff {np.abs(q-sample).max():.2e})")
+    print(
+        f"{'✓' if ok else '✗'} FP8 quantize idempotent on table values (max diff {np.abs(q - sample).max():.2e})"
+    )
     return ok
 
 
@@ -63,7 +65,7 @@ def test_fp8_block_roundtrip_precision() -> bool:
     rel_err = np.abs(y - x) / (np.abs(x) + 1e-6)
     p50 = np.percentile(rel_err, 50)
     p95 = np.percentile(rel_err, 95)
-    print(f"  FP8 roundtrip: P50 err {p50*100:.2f}%, P95 err {p95*100:.2f}%")
+    print(f"  FP8 roundtrip: P50 err {p50 * 100:.2f}%, P95 err {p95 * 100:.2f}%")
     ok = p50 < 0.05 and p95 < 0.20
     print(f"{'✓' if ok else '✗'} FP8 block precision (P50<5%, P95<20%)")
     return ok
@@ -78,7 +80,7 @@ def test_q8_block_roundtrip_precision() -> bool:
     rel_err = np.abs(y - x) / (np.abs(x) + 1e-6)
     p50 = np.percentile(rel_err, 50)
     p95 = np.percentile(rel_err, 95)
-    print(f"  Q8 roundtrip:  P50 err {p50*100:.2f}%, P95 err {p95*100:.2f}%")
+    print(f"  Q8 roundtrip:  P50 err {p50 * 100:.2f}%, P95 err {p95 * 100:.2f}%")
     # P95 受 small magnitude 值的相对误差放大影响, 阈值放宽; abs err P95 才严格小
     abs_err = np.abs(y - x)
     abs_p95 = np.percentile(abs_err, 95)
@@ -92,18 +94,22 @@ def test_fp8_better_at_outliers() -> bool:
     """FP8 有 exponent, 处理 outlier 大值时比 Q8 损失小."""
     # 构造 block: 1 个 outlier + 一群 small
     np.random.seed(0)
-    x = np.concatenate([np.random.randn(63) * 0.1, np.array([100.0])]).astype(np.float32)
+    x = np.concatenate([np.random.randn(63) * 0.1, np.array([100.0])]).astype(
+        np.float32
+    )
 
     y_fp8 = fp8_quantize_block_inplace(x.copy(), block_size=64)
     y_q8 = q8_roundtrip(x.copy(), block_size=64)
 
     err_fp8 = np.abs(y_fp8 - x).mean()
     err_q8 = np.abs(y_q8 - x).mean()
-    print(f"  outlier scenario: FP8 mean abs err {err_fp8:.4f}, Q8 mean abs err {err_q8:.4f}")
-    print(f"  ratio: Q8 误差是 FP8 的 {err_q8/err_fp8:.1f}×")
+    print(
+        f"  outlier scenario: FP8 mean abs err {err_fp8:.4f}, Q8 mean abs err {err_q8:.4f}"
+    )
+    print(f"  ratio: Q8 误差是 FP8 的 {err_q8 / err_fp8:.1f}×")
     # Q8 的 scale 被 outlier 拉大, small values 全砸到 0; FP8 还能用低 exp 表
     # 但有时 fp8 也吃亏 (exp 量化非线性). 教学版只验证趋势.
-    print(f"⚠ FP8 vs Q8 outlier handling (具体差距数据相关, 不强断言)")
+    print("⚠ FP8 vs Q8 outlier handling (具体差距数据相关, 不强断言)")
     return True
 
 
@@ -127,8 +133,10 @@ def test_quantize_vs_naive_fp8_value():
     cases = [(0, 0.0), (1, 0.001953125), (8, 0.015625), (56, 1.0), (64, 2.0)]
     for i, expected in cases:
         got = fp8_e4m3_value(i)
-        assert abs(got - expected) < 1e-7, f"fp8_e4m3_value({i}) = {got}, expected {expected}"
-    print(f"✓ fp8_e4m3_value matches ds4.c table at sentinel indices")
+        assert abs(got - expected) < 1e-7, (
+            f"fp8_e4m3_value({i}) = {got}, expected {expected}"
+        )
+    print("✓ fp8_e4m3_value matches ds4.c table at sentinel indices")
     return True
 
 

@@ -1,4 +1,5 @@
 """test.py —— 纯逻辑测试，不调 LLM。"""
+
 from __future__ import annotations
 
 import tempfile
@@ -47,8 +48,14 @@ def test_semantic_unrelated_miss() -> bool:
 
 
 def main() -> None:
-    passed = sum([test_exact_hit(), test_exact_persist(),
-                  test_semantic_near_hit(), test_semantic_unrelated_miss()])
+    passed = sum(
+        [
+            test_exact_hit(),
+            test_exact_persist(),
+            test_semantic_near_hit(),
+            test_semantic_unrelated_miss(),
+        ]
+    )
     print(f"\n{passed}/4 passed")
 
 

@@ -12,6 +12,7 @@
 
 如果模型很聪明把多个工具合并到一次 assistant.tool_calls, 治理可能在前几轮不触发,
 但跑到 3+ 轮 web_fetch 后必然超 2000 token 预算, snip 会出手."""
+
 from __future__ import annotations
 
 import os
@@ -50,17 +51,24 @@ def trace_step(s: Step) -> None:
 
 def trace_govern(before_n: int, after_n: int, before_tok: int, after_tok: int) -> None:
     if before_n != after_n or before_tok != after_tok:
-        n_diff = f"{before_n}->{after_n}msgs" if before_n != after_n else f"{before_n}msgs"
-        t_diff = f"{before_tok}->{after_tok}tok" if before_tok != after_tok else f"{before_tok}tok"
+        n_diff = (
+            f"{before_n}->{after_n}msgs" if before_n != after_n else f"{before_n}msgs"
+        )
+        t_diff = (
+            f"{before_tok}->{after_tok}tok"
+            if before_tok != after_tok
+            else f"{before_tok}tok"
+        )
         print(f"  [govern] {n_diff}, {t_diff}")
 
 
 def main() -> None:
     agent = Agent(
-        _client, _model,
+        _client,
+        _model,
         max_iterations=20,
-        context_window_tokens=2000,        # 故意调小, 强制 snip 触发
-        max_tool_result_chars=1500,        # 故意调小, 强制 budget 截断生效
+        context_window_tokens=2000,  # 故意调小, 强制 snip 触发
+        max_tool_result_chars=1500,  # 故意调小, 强制 budget 截断生效
         on_step=trace_step,
         on_govern=trace_govern,
     )

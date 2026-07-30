@@ -1,10 +1,9 @@
 """test.py —— state 模块 + 不依赖 LLM 的 job 逻辑测试。"""
+
 from __future__ import annotations
 
 import tempfile
-import time
 from pathlib import Path
-from unittest.mock import patch
 
 import state
 
@@ -42,13 +41,17 @@ def main() -> None:
 
     # get_events_since 过滤掉过老的事件
     # 模拟"在很久以前写的事件" —— 直接污染 state file
-    data = {"events": [
-        {"ts": "2000-01-01T00:00:00", "job": "old"},
-        *events,
-    ]}
+    data = {
+        "events": [
+            {"ts": "2000-01-01T00:00:00", "job": "old"},
+            *events,
+        ]
+    }
     state.STATE_FILE.write_text(__import__("json").dumps(data), encoding="utf-8")
     recent = state.get_events_since(seconds_ago=10)
-    passed += t("get_events_since filters old", not any(e.get("job") == "old" for e in recent))
+    passed += t(
+        "get_events_since filters old", not any(e.get("job") == "old" for e in recent)
+    )
 
     # MAX_EVENTS 上限
     state.STATE_FILE.write_text("{}", encoding="utf-8")

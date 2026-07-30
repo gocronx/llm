@@ -5,6 +5,7 @@ OpenHands 的事件存储有 Filesystem / AWS / GoogleCloud 三种实现, 接口
 
 每条事件一个 JSON 文件, 命名包含时间戳保证按文件名排序就是按时间排序.
 """
+
 from __future__ import annotations
 
 import json
@@ -29,6 +30,7 @@ class Event:
         timestamp: unix 时间戳, 排序用
         payload: 业务负载, dict 形式
     """
+
     kind: str
     conversation_id: str
     payload: dict

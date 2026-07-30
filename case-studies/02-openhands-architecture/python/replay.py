@@ -3,9 +3,10 @@
 任何时候新进程启动, 不管对话之前跑过几轮, 只要事件文件还在,
 replay 一次就回到当前状态. 这就是为什么 OpenHands 服务器可以随便重启.
 """
+
 from __future__ import annotations
 
-from events import Event, load_all
+from events import load_all
 
 
 def replay_to_messages(conversation_id: str) -> list[dict]:

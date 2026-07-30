@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from domain.models import ToolDefinition
-from tools.base import Tool
 from tools.registry import ToolRegistry
 from tools.runtime import ToolRuntime
 from tools.world import ToolWorld

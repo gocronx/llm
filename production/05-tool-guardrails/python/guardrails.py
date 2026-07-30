@@ -39,9 +39,9 @@ class RateLimit:
 
 
 LIMITS: dict[str, RateLimit] = {
-    "low":    RateLimit(window_seconds=60, max_calls=30),
+    "low": RateLimit(window_seconds=60, max_calls=30),
     "medium": RateLimit(window_seconds=60, max_calls=10),
-    "high":   RateLimit(window_seconds=60, max_calls=3),
+    "high": RateLimit(window_seconds=60, max_calls=3),
 }
 
 _recent: dict[str, deque[float]] = {sev: deque() for sev in LIMITS}
@@ -86,8 +86,10 @@ def _check_rate(tool: str, _args: dict) -> str | None:
     while dq and dq[0] < cutoff:
         dq.popleft()
     if len(dq) >= limit.max_calls:
-        return (f"rate limit: {len(dq)} {sev}-severity calls in last "
-                f"{limit.window_seconds}s (max {limit.max_calls})")
+        return (
+            f"rate limit: {len(dq)} {sev}-severity calls in last "
+            f"{limit.window_seconds}s (max {limit.max_calls})"
+        )
     return None
 
 

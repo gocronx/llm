@@ -5,6 +5,7 @@ ironclaw/wit/tool.wit (host capability 白名单).
 最小版本: approved_dir 是 "人审过" 的 skill 集合, 装的时候验签 (这里简化为 signed_by 字段).
 没真接 WASM, 把"沙盒"概念落到 "只能调白名单 API" 上.
 """
+
 from __future__ import annotations
 
 import re
@@ -16,8 +17,12 @@ from skills import Skill, SkillRegistry, format_skill_md, parse_skill_md
 # ironclaw WIT 接口里的能力清单 (wit/tool.wit:18-106) 缩略版.
 # 装载 skill 时, skill 在 body 里申请的能力如果不在这白名单里, 拒装.
 ALLOWED_CAPABILITIES = {
-    "workspace-read", "workspace-write", "log",
-    "http-request", "tool-invoke", "secret-exists",
+    "workspace-read",
+    "workspace-write",
+    "log",
+    "http-request",
+    "tool-invoke",
+    "secret-exists",
 }
 
 # 信任的签名者集合. 真 ironclaw 用 sigstore / minisign 等.
@@ -41,8 +46,11 @@ class CuratedRegistry(SkillRegistry):
         for skill_dir in sorted(self.installed_dir.iterdir()):
             md = skill_dir / "SKILL.md"
             if md.is_file():
-                out.append(parse_skill_md(md.read_text(encoding="utf-8"),
-                                          fallback_name=skill_dir.name))
+                out.append(
+                    parse_skill_md(
+                        md.read_text(encoding="utf-8"), fallback_name=skill_dir.name
+                    )
+                )
         return out
 
     def list_available(self) -> list[Skill]:
@@ -51,7 +59,9 @@ class CuratedRegistry(SkillRegistry):
             return []
         out: list[Skill] = []
         for f in sorted(self.approved_dir.glob("*.md")):
-            out.append(parse_skill_md(f.read_text(encoding="utf-8"), fallback_name=f.stem))
+            out.append(
+                parse_skill_md(f.read_text(encoding="utf-8"), fallback_name=f.stem)
+            )
         return out
 
     def install(self, name: str) -> Optional[Skill]:
@@ -64,7 +74,9 @@ class CuratedRegistry(SkillRegistry):
 
         # 验签
         if s.signed_by not in TRUSTED_SIGNERS:
-            print(f"  [curated] 拒装: signed_by={s.signed_by!r} 不在信任列表 {TRUSTED_SIGNERS}")
+            print(
+                f"  [curated] 拒装: signed_by={s.signed_by!r} 不在信任列表 {TRUSTED_SIGNERS}"
+            )
             return None
 
         # 检查 skill 申请的能力 (扫 body 里的 capability 标记)
@@ -79,7 +91,9 @@ class CuratedRegistry(SkillRegistry):
         skill_dir.mkdir(parents=True, exist_ok=True)
         (skill_dir / "SKILL.md").write_text(format_skill_md(s), encoding="utf-8")
         cap_str = ", ".join(sorted(requested)) if requested else "(none)"
-        print(f"  [curated] 装 {name!r}, signed_by={s.signed_by}, capabilities=[{cap_str}]")
+        print(
+            f"  [curated] 装 {name!r}, signed_by={s.signed_by}, capabilities=[{cap_str}]"
+        )
         return s
 
     def _extract_capabilities(self, body: str) -> set[str]:
@@ -110,7 +124,7 @@ class CuratedRegistry(SkillRegistry):
             return []
 
         # 没 hint, 不自动装, 列候选供观察
-        print(f"  [curated] 可装的 (需用户 hint 才装):")
+        print("  [curated] 可装的 (需用户 hint 才装):")
         for s in installable:
             sig = f"signed_by={s.signed_by!r}" if s.signed_by else "未签名"
             print(f"      - {s.name}  [{sig}]  {s.description}")

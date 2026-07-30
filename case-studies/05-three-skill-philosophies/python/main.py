@@ -3,12 +3,12 @@
 设计意图: SkillRegistry 抽象基类让 4 个场景**不知道**底层用的是哪种哲学.
 切换哲学 = 换一个 Registry 实现, 业务逻辑零改动. (这是 case 03 多后端模式的延伸)
 """
+
 from __future__ import annotations
 
 import argparse
 import os
 import shutil
-import sys
 from pathlib import Path
 
 import httpx
@@ -63,8 +63,14 @@ def scenario_three_acquires() -> None:
         {"role": "system", "content": "你是简洁代码助手."},
         {"role": "user", "content": "写一个调外部 API 的客户端"},
         {"role": "assistant", "content": "好, 给你一个最小版本: ..."},
-        {"role": "user", "content": "请加 rate-limit + retry. 以后写所有 API 客户端都这样, 别每次问我."},
-        {"role": "assistant", "content": "明白. 这次的版本加上 token bucket 限速 + 指数退避 retry: ..."},
+        {
+            "role": "user",
+            "content": "请加 rate-limit + retry. 以后写所有 API 客户端都这样, 别每次问我.",
+        },
+        {
+            "role": "assistant",
+            "content": "明白. 这次的版本加上 token bucket 限速 + 指数退避 retry: ...",
+        },
     ]
 
     registries: dict[str, SkillRegistry] = {
@@ -78,7 +84,7 @@ def scenario_three_acquires() -> None:
         acquired = reg.acquire(transcript=transcript, user_hint=None)
         print(f"  本次 acquire 得到 {len(acquired)} 个 skill")
 
-    print(f"\n各自当前装着的 skill:")
+    print("\n各自当前装着的 skill:")
     for label, reg in registries.items():
         active = reg.list_active()
         names = [s.name for s in active]
@@ -91,8 +97,10 @@ def scenario_forage_threshold() -> None:
 
     _reset()
     # 默认阈值 0.6, catalog 里有一个 0.32 分的烂 skill, 应该被刷掉
-    reg = ForageRegistry(CATALOG_DIR, FORAGE_INSTALLED, ForageConfig(score_threshold=0.6))
-    print(f"score_threshold = 0.6")
+    reg = ForageRegistry(
+        CATALOG_DIR, FORAGE_INSTALLED, ForageConfig(score_threshold=0.6)
+    )
+    print("score_threshold = 0.6")
     print(f"catalog 里有 {len(list(CATALOG_DIR.glob('*.md')))} 个候选\n")
 
     reg.acquire()
@@ -104,9 +112,13 @@ def scenario_forage_threshold() -> None:
     print("→ 0.32 分的低质量 skill 被刷掉了 ✓")
 
     # 把阈值降到 0.3 再装, 看会不会装上烂 skill
-    print(f"\n现在降阈值到 0.2, 重装一次:")
+    print("\n现在降阈值到 0.2, 重装一次:")
     _reset()
-    reg2 = ForageRegistry(CATALOG_DIR, FORAGE_INSTALLED, ForageConfig(score_threshold=0.2, max_per_acquire=10))
+    reg2 = ForageRegistry(
+        CATALOG_DIR,
+        FORAGE_INSTALLED,
+        ForageConfig(score_threshold=0.2, max_per_acquire=10),
+    )
     reg2.acquire()
     active2 = reg2.list_active()
     print(f"\n装上的 skill ({len(active2)} 个):")
@@ -127,22 +139,22 @@ def scenario_curated_rejections() -> None:
         sig = f"signed_by={s.signed_by!r}" if s.signed_by else "**未签名**"
         print(f"  - {s.name}  [{sig}]")
 
-    print(f"\n[尝试 1] 装 secure-file-write (合法)")
+    print("\n[尝试 1] 装 secure-file-write (合法)")
     reg.install("secure-file-write")
 
-    print(f"\n[尝试 2] 装 sketchy-skill-unsigned (无签名)")
+    print("\n[尝试 2] 装 sketchy-skill-unsigned (无签名)")
     reg.install("sketchy-skill-unsigned")
 
-    print(f"\n[尝试 3] 装 nonexistent (catalog 里没有)")
+    print("\n[尝试 3] 装 nonexistent (catalog 里没有)")
     reg.install("nonexistent")
 
-    print(f"\n[尝试 4] 装 http-client-best-practices (合法)")
+    print("\n[尝试 4] 装 http-client-best-practices (合法)")
     reg.install("http-client-best-practices")
 
-    print(f"\n最终装上的:")
+    print("\n最终装上的:")
     for s in reg.list_active():
         print(f"  - {s.name}  signed_by={s.signed_by}")
-    print(f"\n→ 4 次尝试, 2 个通过 (有签名), 2 个被拒 (无签名 / 不存在) ✓")
+    print("\n→ 4 次尝试, 2 个通过 (有签名), 2 个被拒 (无签名 / 不存在) ✓")
 
 
 # ── 场景 4 · 三种 registry 同时给同一个新任务, 看 system prompt 差异 ────
@@ -154,7 +166,10 @@ def scenario_compare_system_prompts() -> None:
 
     # 各自先 acquire 一次, 用 demo 准备的 input
     transcript = [
-        {"role": "user", "content": "以后写 JSON 都 indent=2 sort_keys=True, 别老搞紧凑格式."},
+        {
+            "role": "user",
+            "content": "以后写 JSON 都 indent=2 sort_keys=True, 别老搞紧凑格式.",
+        },
         {"role": "assistant", "content": "记住了."},
     ]
 
@@ -174,7 +189,9 @@ def scenario_compare_system_prompts() -> None:
     for label, reg in [("auto", auto), ("forage", forage), ("curated", curated)]:
         sp = reg.build_system_prompt()
         names = [s.name for s in reg.list_active()]
-        print(f"  {label}: {len(names)} skill, prompt 长度 {len(sp)} 字符. names={names}")
+        print(
+            f"  {label}: {len(names)} skill, prompt 长度 {len(sp)} 字符. names={names}"
+        )
 
     print("\n[抽样: auto-evolve 注入的 prompt 头几行]")
     print(_indent(auto.build_system_prompt()[:300], "    "))

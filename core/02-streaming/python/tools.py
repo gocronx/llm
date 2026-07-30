@@ -1,5 +1,6 @@
 """tools.py —— 工具注册表，沿用 01 demo 的写法。
 这里只放一个 `get_weather`，演示流式 + 工具调用的 delta 累积就够了。"""
+
 from __future__ import annotations
 
 import json
@@ -12,18 +13,21 @@ def tool(schema: dict):
     def deco(fn: Callable) -> Callable:
         TOOLS[schema["name"]] = (fn, schema)
         return fn
+
     return deco
 
 
-@tool({
-    "name": "get_weather",
-    "description": "获取指定城市的天气",
-    "parameters": {
-        "type": "object",
-        "properties": {"city": {"type": "string"}},
-        "required": ["city"],
-    },
-})
+@tool(
+    {
+        "name": "get_weather",
+        "description": "获取指定城市的天气",
+        "parameters": {
+            "type": "object",
+            "properties": {"city": {"type": "string"}},
+            "required": ["city"],
+        },
+    }
+)
 def get_weather(city: str) -> dict:
     db = {"北京": (15, "晴"), "上海": (20, "多云"), "深圳": (25, "小雨")}
     t, cond = db.get(city, (18, "数据不可用"))

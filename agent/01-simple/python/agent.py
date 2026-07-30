@@ -7,6 +7,7 @@ Agent 不是魔法，就是把 01 demo 的"一次 function call 往返"包成多
 终止条件：LLM 给出 content（不带 tool_calls）即视为最终答案。
 失败兜底：到 max_iterations 仍未给答案，返回最后一次内容（不抛异常，方便上游）。
 """
+
 from __future__ import annotations
 
 import json
@@ -25,6 +26,7 @@ SYSTEM = """你是一个会用工具的助手。
 @dataclass
 class Step:
     """记录一次工具调用，便于调试/追溯。"""
+
     tool: str
     args: dict
     result: str
@@ -46,8 +48,11 @@ class Agent:
         last_content = ""
         for _ in range(self.max_iterations):
             resp = self.client.chat.completions.create(
-                model=self.model, messages=messages, tools=schemas(),
-                temperature=0.3, max_tokens=600,
+                model=self.model,
+                messages=messages,
+                tools=schemas(),
+                temperature=0.3,
+                max_tokens=600,
             )
             msg = resp.choices[0].message
             last_content = msg.content or ""
@@ -64,6 +69,8 @@ class Agent:
                 self.steps.append(step)
                 if self.on_step:
                     self.on_step(step)
-                messages.append({"role": "tool", "tool_call_id": tc.id, "content": result})
+                messages.append(
+                    {"role": "tool", "tool_call_id": tc.id, "content": result}
+                )
 
         return last_content or "(达到最大迭代次数仍未给出答案)"

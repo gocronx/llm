@@ -1,4 +1,5 @@
 """main.py —— demo only：同一组对话喂给四种 memory，看哪种还记得早期事实。"""
+
 from __future__ import annotations
 
 import os
@@ -46,8 +47,10 @@ def main() -> None:
     run("Full（全留）", Full(SYSTEM))
     run("Window(k=4)（只留最近 4 条）", Window(SYSTEM, k=4))
     run("Tokens(max=200)（token 预算）", Tokens(SYSTEM, max_tokens=200))
-    run("Summary(k=4)（攒 4 条总结一次）",
-        Summary(SYSTEM, summarize_fn=make_summarizer(_client, _model), k=4))
+    run(
+        "Summary(k=4)（攒 4 条总结一次）",
+        Summary(SYSTEM, summarize_fn=make_summarizer(_client, _model), k=4),
+    )
 
 
 if __name__ == "__main__":

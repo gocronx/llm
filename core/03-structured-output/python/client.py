@@ -4,6 +4,7 @@
 让 OpenAI 在 token 解码时做约束（grammar-constrained decoding），保证返回
 就是合法 JSON 且严格符合 schema。比"prompt 里写一句请返回 JSON"靠谱得多。
 """
+
 from __future__ import annotations
 
 import json
@@ -12,8 +13,14 @@ from typing import Any
 from openai import OpenAI
 
 
-def extract(client: OpenAI, model: str, system: str, user: str, schema: dict,
-            name: str = "result") -> dict[str, Any]:
+def extract(
+    client: OpenAI,
+    model: str,
+    system: str,
+    user: str,
+    schema: dict,
+    name: str = "result",
+) -> dict[str, Any]:
     """约束 LLM 必须按 schema 返回 JSON，直接返回 parse 后的 dict。"""
     resp = client.chat.completions.create(
         model=model,

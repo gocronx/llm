@@ -1,4 +1,5 @@
 """test.py —— 治理 5 函数 + govern() 组合的单元测试. 不调外网."""
+
 from __future__ import annotations
 
 from governance import (
@@ -28,7 +29,7 @@ def test_drop_orphan() -> bool:
     """孤儿 tool (没匹配 assistant.tool_calls) 必须被删."""
     msgs = [
         {"role": "user", "content": "hi"},
-        _tool("orphan-1", content="孤儿 result"),       # ← 这条要删
+        _tool("orphan-1", content="孤儿 result"),  # ← 这条要删
         _asst("c1"),
         _tool("c1", content="正常 result"),
     ]
@@ -46,8 +47,12 @@ def test_backfill_missing() -> bool:
         {"role": "user", "content": "继续"},
     ]
     out = backfill_missing_tool_results(msgs)
-    ok = any(m.get("role") == "tool" and m.get("tool_call_id") == "c1"
-             and "unavailable" in m.get("content", "") for m in out)
+    ok = any(
+        m.get("role") == "tool"
+        and m.get("tool_call_id") == "c1"
+        and "unavailable" in m.get("content", "")
+        for m in out
+    )
     print(f"{'✓' if ok else '✗'} backfill_missing (len {len(msgs)} -> {len(out)})")
     return ok
 
@@ -58,7 +63,9 @@ def test_microcompact() -> bool:
     msgs = [_asst(f"c{i}") for i in range(5)]
     msgs += [_tool(f"c{i}", name="search_products", content=big) for i in range(5)]
     out = microcompact(msgs, keep_recent=2)
-    omitted = sum(1 for m in out if m.get("role") == "tool" and "omitted" in m.get("content", ""))
+    omitted = sum(
+        1 for m in out if m.get("role") == "tool" and "omitted" in m.get("content", "")
+    )
     ok = omitted == 3  # 5 个 tool, 保留最近 2 个, 压缩 3 个
     print(f"{'✓' if ok else '✗'} microcompact ({omitted}/5 compacted)")
     return ok
@@ -95,7 +102,9 @@ def test_snip_history() -> bool:
         msgs.append({"role": "assistant", "content": f"答案 {i}: " + "y" * 500})
 
     before = estimate_total_tokens(msgs)
-    out = snip_history(msgs, context_window_tokens=4000, reserve_for_output=512, safety_buffer=256)
+    out = snip_history(
+        msgs, context_window_tokens=4000, reserve_for_output=512, safety_buffer=256
+    )
     after = estimate_total_tokens(out)
     ok = (
         after < before
@@ -103,7 +112,9 @@ def test_snip_history() -> bool:
         and any(m["role"] == "user" for m in out[:3])
         and len(out) < len(msgs)
     )
-    print(f"{'✓' if ok else '✗'} snip_history ({len(msgs)}msgs/{before}tok -> {len(out)}msgs/{after}tok)")
+    print(
+        f"{'✓' if ok else '✗'} snip_history ({len(msgs)}msgs/{before}tok -> {len(out)}msgs/{after}tok)"
+    )
     return ok
 
 
@@ -127,16 +138,24 @@ def test_govern_pipeline() -> bool:
     out = govern(msgs, context_window_tokens=10_000, max_tool_result_chars=2000)
 
     has_orphan = any(m.get("tool_call_id") == "ORPHAN" for m in out)
-    declared = {tc["id"] for m in out if m.get("role") == "assistant"
-                for tc in (m.get("tool_calls") or [])}
+    declared = {
+        tc["id"]
+        for m in out
+        if m.get("role") == "assistant"
+        for tc in (m.get("tool_calls") or [])
+    }
     fulfilled = {m.get("tool_call_id") for m in out if m.get("role") == "tool"}
     pairs_ok = declared.issubset(fulfilled)
-    oversize = any(m.get("role") == "tool" and len(m.get("content") or "") > 2000 for m in out)
+    oversize = any(
+        m.get("role") == "tool" and len(m.get("content") or "") > 2000 for m in out
+    )
     within_budget = estimate_total_tokens(out) <= (10_000 - 1024 - 1024)
 
     ok = (not has_orphan) and pairs_ok and (not oversize) and within_budget
-    print(f"{'✓' if ok else '✗'} govern pipeline "
-          f"(orphan={has_orphan}, pairs_ok={pairs_ok}, oversize={oversize}, in_budget={within_budget})")
+    print(
+        f"{'✓' if ok else '✗'} govern pipeline "
+        f"(orphan={has_orphan}, pairs_ok={pairs_ok}, oversize={oversize}, in_budget={within_budget})"
+    )
     return ok
 
 

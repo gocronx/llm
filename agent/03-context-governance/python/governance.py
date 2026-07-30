@@ -17,22 +17,30 @@
 每个函数都是纯函数 (不改入参), 顺序无关 (但建议 drop→backfill→microcompact→budget→snip 这个顺序,
 后一步可能让前一步重新出现孤儿, 所以 snip 后再 drop+backfill 一次, 见 govern()).
 """
+
 from __future__ import annotations
 
 from typing import Any
 
 # ---- 调参常量（贴近 nanobot 默认值，留出微调空间）----
 BACKFILL_CONTENT = "[Tool result unavailable — call was interrupted or lost]"
-MICROCOMPACT_KEEP_RECENT = 10   # 最近 N 个可压缩 tool result 保留原文
-MICROCOMPACT_MIN_CHARS = 500    # 小于这个长度的 tool result 不值得压
-SNIP_SAFETY_BUFFER = 1024       # 预留给 max_tokens 输出 + tools schema 的缓冲
+MICROCOMPACT_KEEP_RECENT = 10  # 最近 N 个可压缩 tool result 保留原文
+MICROCOMPACT_MIN_CHARS = 500  # 小于这个长度的 tool result 不值得压
+SNIP_SAFETY_BUFFER = 1024  # 预留给 max_tokens 输出 + tools schema 的缓冲
 
 # 哪些工具的 result 老了可以丢只留摘要 —— 调用方按需扩展。
 # 直觉：返回大块只读数据的 (文件/网页/搜索结果) 都可压；带副作用的 (写文件/下单) 别压。
-COMPACTABLE_TOOLS: frozenset[str] = frozenset({
-    "read_file", "exec", "grep", "web_search", "web_fetch", "list_dir",
-    "search_products",  # 我们的 demo tool
-})
+COMPACTABLE_TOOLS: frozenset[str] = frozenset(
+    {
+        "read_file",
+        "exec",
+        "grep",
+        "web_search",
+        "web_fetch",
+        "list_dir",
+        "search_products",  # 我们的 demo tool
+    }
+)
 
 
 def estimate_message_tokens(msg: dict[str, Any]) -> int:
@@ -77,7 +85,9 @@ def drop_orphan_tool_results(messages: list[dict[str, Any]]) -> list[dict[str, A
     return updated if updated is not None else messages
 
 
-def backfill_missing_tool_results(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def backfill_missing_tool_results(
+    messages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """assistant 说了 tool_call 但对应 tool result 丢失 → 补一条占位.
 
     场景：LLM 返回 tool_calls 后, 工具执行崩了, 历史里只有 assistant 没有 tool。
@@ -106,12 +116,15 @@ def backfill_missing_tool_results(messages: list[dict[str, Any]]) -> list[dict[s
         insert_at = assistant_idx + 1 + offset
         while insert_at < len(updated) and updated[insert_at].get("role") == "tool":
             insert_at += 1
-        updated.insert(insert_at, {
-            "role": "tool",
-            "tool_call_id": call_id,
-            "name": name,
-            "content": BACKFILL_CONTENT,
-        })
+        updated.insert(
+            insert_at,
+            {
+                "role": "tool",
+                "tool_call_id": call_id,
+                "name": name,
+                "content": BACKFILL_CONTENT,
+            },
+        )
         offset += 1
     return updated
 
@@ -127,13 +140,16 @@ def microcompact(
     跟 snip 的区别: snip 是"砍掉", microcompact 是"留壳去肉" —— LLM 还能看到这步发生过,
     但不再消耗大块 token. 适合 read_file / web_search 这类"只读外部数据"类工具."""
     compactable_indices = [
-        i for i, m in enumerate(messages)
+        i
+        for i, m in enumerate(messages)
         if m.get("role") == "tool" and m.get("name") in compactable_tools
     ]
     if len(compactable_indices) <= keep_recent:
         return messages
 
-    stale = compactable_indices[:-keep_recent] if keep_recent > 0 else compactable_indices
+    stale = (
+        compactable_indices[:-keep_recent] if keep_recent > 0 else compactable_indices
+    )
     updated: list[dict[str, Any]] | None = None
     for idx in stale:
         content = messages[idx].get("content")
@@ -196,7 +212,7 @@ def snip_history(
         (i for i, m in enumerate(non_system) if m.get("role") == "user"), None
     )
     if first_user_idx is None:
-        return messages   # 退化: 没有 user 不动, 让上层处理
+        return messages  # 退化: 没有 user 不动, 让上层处理
     first_user = non_system[first_user_idx]
 
     system_tokens = sum(estimate_message_tokens(m) for m in system_msgs)
@@ -241,19 +257,21 @@ def govern(
 ) -> list[dict[str, Any]]:
     """5 步治理一气呵成. 顺序:
 
-      1. drop_orphan_tool_results    清结构 (tool 没爹)
-      2. backfill_missing_tool_results 补结构 (tool_call 没儿)
-      3. microcompact                压老果
-      4. apply_tool_result_budget    剪长果
-      5. snip_history                兜总量
-      6. drop_orphan + backfill 再来一次 (snip 可能产生新孤儿)
+    1. drop_orphan_tool_results    清结构 (tool 没爹)
+    2. backfill_missing_tool_results 补结构 (tool_call 没儿)
+    3. microcompact                压老果
+    4. apply_tool_result_budget    剪长果
+    5. snip_history                兜总量
+    6. drop_orphan + backfill 再来一次 (snip 可能产生新孤儿)
     """
     out = drop_orphan_tool_results(messages)
     out = backfill_missing_tool_results(out)
     out = microcompact(out, keep_recent=microcompact_keep_recent)
     out = apply_tool_result_budget(out, max_tool_result_chars=max_tool_result_chars)
     if context_window_tokens:
-        out = snip_history(out, context_window_tokens, reserve_for_output=reserve_for_output)
+        out = snip_history(
+            out, context_window_tokens, reserve_for_output=reserve_for_output
+        )
     # snip 可能让 assistant.tool_calls 被半截砍掉, 再走一次结构修复
     out = drop_orphan_tool_results(out)
     out = backfill_missing_tool_results(out)

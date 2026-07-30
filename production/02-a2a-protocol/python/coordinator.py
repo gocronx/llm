@@ -6,6 +6,7 @@
   2) decompose：让 LLM 把用户请求拆成可派发的子任务（指定 agent + task_type + input）
   3) dispatch：并发把每个子任务 POST 到对应 agent 的 /tasks
 """
+
 from __future__ import annotations
 
 import argparse
@@ -62,7 +63,7 @@ def discover_agents() -> list[AgentCard]:
 
 _DECOMPOSE_SYSTEM = (
     "You are a task router. Given a user request and a list of available agents, "
-    "output ONLY a JSON array of tasks: [{\"agent\":\"<name>\",\"task_type\":\"<cap>\",\"input\":{...}}]. "
+    'output ONLY a JSON array of tasks: [{"agent":"<name>","task_type":"<cap>","input":{...}}]. '
     "Return [] if no specialist matches. Multiple tasks run in parallel — include all that help. "
     "Do not explain. Start with [ end with ]."
 )
@@ -72,9 +73,9 @@ def _input_hint() -> str:
     """告诉 LLM 每个 task_type 期待的 input 字段。"""
     return (
         "Task input formats:\n"
-        "- translate: {\"text\": <str>, \"target\": \"en\"|\"zh\"}\n"
-        "- review-code: {\"code\": <str>, \"language\": <str>}\n"
-        "- summarize: {\"text\": <str>, \"style\": \"paragraph\"|\"bullets\", \"max_sentences\": <int>}"
+        '- translate: {"text": <str>, "target": "en"|"zh"}\n'
+        '- review-code: {"code": <str>, "language": <str>}\n'
+        '- summarize: {"text": <str>, "style": "paragraph"|"bullets", "max_sentences": <int>}'
     )
 
 
@@ -87,8 +88,10 @@ def decompose(user_request: str, cards: list[AgentCard]) -> list[dict]:
         model=MODEL_ID,
         messages=[
             {"role": "system", "content": _DECOMPOSE_SYSTEM},
-            {"role": "user",
-             "content": f"Agents:\n{catalog}\n\n{_input_hint()}\n\nRequest:\n{user_request}\n\nJSON 数组："},
+            {
+                "role": "user",
+                "content": f"Agents:\n{catalog}\n\n{_input_hint()}\n\nRequest:\n{user_request}\n\nJSON 数组：",
+            },
         ],
         temperature=0,
         max_tokens=600,
@@ -99,12 +102,14 @@ def decompose(user_request: str, cards: list[AgentCard]) -> list[dict]:
 
 # ---- 派发 ----
 
+
 def dispatch(task: dict, cards: list[AgentCard]) -> TaskResponse:
     by_name = {c.name: c for c in cards}
     target = by_name.get(task.get("agent", ""))
     if target is None:
-        return TaskResponse(task_id="-", state="failed",
-                            error=f"unknown agent {task.get('agent')!r}")
+        return TaskResponse(
+            task_id="-", state="failed", error=f"unknown agent {task.get('agent')!r}"
+        )
     body = TaskRequest(
         task_id=f"task_{abs(hash(repr(task.get('input', {})) + task['task_type'])) % 100000}",
         task_type=task.get("task_type", ""),
@@ -112,7 +117,9 @@ def dispatch(task: dict, cards: list[AgentCard]) -> TaskResponse:
         requester="coordinator",
     ).model_dump()
     try:
-        r = _http.post(f"{target.endpoint}/tasks", json=body, headers=_auth_headers(), timeout=180)
+        r = _http.post(
+            f"{target.endpoint}/tasks", json=body, headers=_auth_headers(), timeout=180
+        )
         r.raise_for_status()
         return TaskResponse(**r.json())
     except Exception as e:

@@ -1,4 +1,5 @@
 """util.py —— 共享小工具。"""
+
 from __future__ import annotations
 
 import json
@@ -17,7 +18,7 @@ def extract_json_array(text: str) -> list:
                 depth -= 1
                 if depth == 0:
                     try:
-                        return json.loads(text[start: end + 1])
+                        return json.loads(text[start : end + 1])
                     except json.JSONDecodeError:
                         break
     return []

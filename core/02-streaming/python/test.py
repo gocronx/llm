@@ -1,6 +1,7 @@
 """test.py —— 简单冒烟测试：
 1) 纯文本流式至少要 yield 出若干个 chunk（不能是一坨大块）。
 2) 流式 + tool 场景里 get_weather 被调到，且最终文本里包含 25 或 "晴"。"""
+
 from __future__ import annotations
 
 import os
@@ -37,7 +38,9 @@ def test_stream_with_tools() -> bool:
         elif ev["type"] == "text":
             final_text += ev["delta"]
     ok = tool_called and ("15" in final_text or "晴" in final_text)
-    print(f"{'✓' if ok else '✗'} stream+tools: tool_called={tool_called} text={final_text[:40]!r}")
+    print(
+        f"{'✓' if ok else '✗'} stream+tools: tool_called={tool_called} text={final_text[:40]!r}"
+    )
     return ok
 
 

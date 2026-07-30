@@ -1,5 +1,12 @@
 [lint]
+external = [
+    "E402", # intentional path bootstrap before local imports
+    "N802", # framework-required method names such as do_POST
+]
 select = [
+    "F",       # reject unused imports, undefined names, and dead assignments
     "I",       # imports must be sorted and grouped
+    "PGH004",  # type: ignore must name the suppressed error code
     "PLC0415", # imports must be at module top level
+    "RUF100",  # reject stale noqa directives
 ]

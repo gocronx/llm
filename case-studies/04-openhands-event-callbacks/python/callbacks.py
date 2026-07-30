@@ -3,17 +3,17 @@
 对标 OpenHands 的 event_callback_models.py:40-48 (ABC) +
 set_title_callback_processor.py (业务实现) + event_callback_models.py:51-70 (Logging).
 """
+
 from __future__ import annotations
 
 import asyncio
 import json
-import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from events import Event
 
@@ -31,6 +31,7 @@ class CallbackResult:
     None 不算 Result —— 它表示 "这次什么都没做, callback 保持 ACTIVE 等下次匹配事件".
     这是 OpenHands 处理 "未就绪" 状态的设计 (SetTitleCallbackProcessor 等 title 没好时返回 None).
     """
+
     status: ResultStatus
     detail: str = ""
     timestamp: float = field(default_factory=time.time)
@@ -52,8 +53,7 @@ class EventCallbackProcessor(ABC):
         self,
         conversation_id: str,
         event: Event,
-    ) -> Optional[CallbackResult]:
-        ...
+    ) -> Optional[CallbackResult]: ...
 
 
 # ── Processor 1: Logging ──────────────────────────────────────────────
@@ -62,6 +62,7 @@ class LoggingProcessor(EventCallbackProcessor):
 
     最简单的样板: 把事件打印一行, 永远返回 SUCCESS.
     """
+
     type_id = "logging"
 
     def __init__(self, label: str = "LOG") -> None:
@@ -69,7 +70,9 @@ class LoggingProcessor(EventCallbackProcessor):
 
     async def __call__(self, conversation_id: str, event: Event) -> CallbackResult:
         text_preview = json.dumps(event.payload, ensure_ascii=False)[:60]
-        print(f"    [{self.label}] {event.kind} on {conversation_id[:8]}: {text_preview}")
+        print(
+            f"    [{self.label}] {event.kind} on {conversation_id[:8]}: {text_preview}"
+        )
         return CallbackResult(status=ResultStatus.SUCCESS)
 
 
@@ -84,18 +87,23 @@ class TitleSetterProcessor(EventCallbackProcessor):
       - 跑完一次自动 disable (set disabled=True), 派发器下次扫描跳过
       - 如果 LLM 没拿到合理 title (返回 None), 保持 ACTIVE 等下次 user_message 重试
     """
+
     type_id = "title_setter"
 
     def __init__(self, client, model: str, title_dir: Path) -> None:
         self.client = client
         self.model = model
         self.title_dir = title_dir
-        self.disabled = False   # self-DISABLE 状态
+        self.disabled = False  # self-DISABLE 状态
 
-    async def __call__(self, conversation_id: str, event: Event) -> Optional[CallbackResult]:
+    async def __call__(
+        self, conversation_id: str, event: Event
+    ) -> Optional[CallbackResult]:
         # 只处理 user_message 类型事件 (OpenHands 也是 type 筛选)
         if event.kind != "user_message":
-            return CallbackResult(status=ResultStatus.SUCCESS, detail="not a user_message, skipped")
+            return CallbackResult(
+                status=ResultStatus.SUCCESS, detail="not a user_message, skipped"
+            )
 
         # 把 OpenAI 调用包成 sync (我们 demo 用 asyncio.to_thread 走子线程, 避免阻塞 event loop)
         user_text = event.payload.get("text", "")
@@ -119,8 +127,10 @@ class TitleSetterProcessor(EventCallbackProcessor):
 
         # 落盘 + self-DISABLE
         self.title_dir.mkdir(parents=True, exist_ok=True)
-        (self.title_dir / f"{conversation_id}.title").write_text(title, encoding="utf-8")
-        self.disabled = True   # OpenHands 是把 callback.status 改 DISABLED, 等价
+        (self.title_dir / f"{conversation_id}.title").write_text(
+            title, encoding="utf-8"
+        )
+        self.disabled = True  # OpenHands 是把 callback.status 改 DISABLED, 等价
         return CallbackResult(status=ResultStatus.SUCCESS, detail=f"title={title!r}")
 
     def _gen_title_sync(self, first_user_message: str) -> str:
@@ -129,15 +139,21 @@ class TitleSetterProcessor(EventCallbackProcessor):
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {"role": "system", "content": (
-                    "You generate concise conversation titles. Reply with ONLY the title text, "
-                    "no quotes, no explanation, no leading 'Title:', under 60 characters, in the "
-                    "input's language. If unsure, still give your best 3-8 word guess."
-                )},
-                {"role": "user", "content": (
-                    f"User started a conversation with:\n{first_user_message}\n\n"
-                    "Title:"
-                )},
+                {
+                    "role": "system",
+                    "content": (
+                        "You generate concise conversation titles. Reply with ONLY the title text, "
+                        "no quotes, no explanation, no leading 'Title:', under 60 characters, in the "
+                        "input's language. If unsure, still give your best 3-8 word guess."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"User started a conversation with:\n{first_user_message}\n\n"
+                        "Title:"
+                    ),
+                },
             ],
             temperature=0.2,
             max_tokens=40,  # 强制简短
@@ -159,6 +175,7 @@ class WebhookProcessor(EventCallbackProcessor):
     所以这种 callback 务必要做幂等性 —— 但 OpenHands 自己**没做**,
     我们 demo 也没做, 见 BENCHMARK.md 升级清单 #5.
     """
+
     type_id = "webhook"
 
     def __init__(self, sink_dir: Path, event_kind_filter: Optional[str] = None) -> None:
@@ -186,12 +203,15 @@ class WebhookProcessor(EventCallbackProcessor):
         )
         # 真生产里这里会是:
         #   await self.http_client.post(self.url, json=payload, timeout=10)
-        return CallbackResult(status=ResultStatus.SUCCESS, detail=f"delivered to {fname}")
+        return CallbackResult(
+            status=ResultStatus.SUCCESS, detail=f"delivered to {fname}"
+        )
 
 
 # ── Processor 4: 故意失败 (给场景 4 演示失败隔离用) ───────────────────
 class FailingProcessor(EventCallbackProcessor):
     """专门 raise Exception 的 processor, 用来演示派发器的容错隔离."""
+
     type_id = "failing"
 
     async def __call__(self, conversation_id: str, event: Event):

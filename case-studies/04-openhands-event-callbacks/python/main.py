@@ -5,6 +5,7 @@
     python main.py --scenario 3       # 只跑某个
     python main.py --cleanup          # 清理 .events/ .titles/ .webhook-sink/ audit.jsonl
 """
+
 from __future__ import annotations
 
 import argparse
@@ -12,7 +13,6 @@ import asyncio
 import json
 import os
 import shutil
-import sys
 import time
 import uuid
 from pathlib import Path
@@ -56,14 +56,18 @@ def _new_conv() -> str:
 
 
 def _emit_user(disp: CallbackDispatcher, conv_id: str, text: str) -> events.Event:
-    ev = events.Event(kind="user_message", conversation_id=conv_id, payload={"text": text})
+    ev = events.Event(
+        kind="user_message", conversation_id=conv_id, payload={"text": text}
+    )
     events.append(ev)
     disp.emit(ev)
     return ev
 
 
 def _emit_assistant(disp: CallbackDispatcher, conv_id: str, text: str) -> events.Event:
-    ev = events.Event(kind="assistant_message", conversation_id=conv_id, payload={"text": text})
+    ev = events.Event(
+        kind="assistant_message", conversation_id=conv_id, payload={"text": text}
+    )
     events.append(ev)
     disp.emit(ev)
     return ev
@@ -91,11 +95,15 @@ async def scenario_fanout() -> None:
     _emit_user(disp, conv, "hi")
     await _drain(disp)
 
-    print(f"\nwebhook sink 收到的文件: {[p.name for p in WEBHOOK_SINK.iterdir() if p.is_file()]}")
+    print(
+        f"\nwebhook sink 收到的文件: {[p.name for p in WEBHOOK_SINK.iterdir() if p.is_file()]}"
+    )
     records = disp.audit_records()
     print(f"audit log 记录数: {len(records)}")
     for r in records[-3:]:
-        print(f"  callback={r.callback_id[:6]} status={r.status} detail={r.detail[:50]}")
+        print(
+            f"  callback={r.callback_id[:6]} status={r.status} detail={r.detail[:50]}"
+        )
     print("→ 3 个 callback 都跑了, 互不知道彼此, 并发执行 ✓")
 
 
@@ -154,7 +162,11 @@ async def scenario_per_event_kind() -> None:
     _emit_assistant(disp, conv, "a2")
     await _drain(disp)
 
-    files = sorted([p for p in WEBHOOK_SINK.iterdir() if p.is_file()]) if WEBHOOK_SINK.exists() else []
+    files = (
+        sorted([p for p in WEBHOOK_SINK.iterdir() if p.is_file()])
+        if WEBHOOK_SINK.exists()
+        else []
+    )
     print(f"\nwebhook 收到 {len(files)} 个事件")
     if len(files) == 1:
         print("→ event_kind 过滤生效, 只 1 个 user_message 触发 ✓")
@@ -170,7 +182,7 @@ async def scenario_failure_isolation() -> None:
     conv = _new_conv()
 
     disp.register(LoggingProcessor(label="BEFORE-FAIL"))
-    disp.register(FailingProcessor())   # 故意 raise
+    disp.register(FailingProcessor())  # 故意 raise
     disp.register(LoggingProcessor(label="AFTER-FAIL"))
     print("注册: BEFORE-FAIL logger | FailingProcessor (会 raise) | AFTER-FAIL logger")
 
@@ -179,9 +191,11 @@ async def scenario_failure_isolation() -> None:
     await _drain(disp)
 
     recent = disp.audit_records()[-3:]
-    print(f"\naudit log 最近 3 条:")
+    print("\naudit log 最近 3 条:")
     for r in recent:
-        print(f"  callback={r.callback_id[:6]} status={r.status:8s} detail={r.detail[:60]}")
+        print(
+            f"  callback={r.callback_id[:6]} status={r.status:8s} detail={r.detail[:60]}"
+        )
 
     success = sum(1 for r in recent if r.status == "SUCCESS")
     errors = sum(1 for r in recent if r.status == "ERROR")
@@ -237,6 +251,7 @@ async def scenario_timeout() -> None:
 
     class HangingProcessor:
         """一个永远 hang 的 processor."""
+
         async def __call__(self, conversation_id, event):
             await asyncio.sleep(60)  # 故意挂 60 秒
             return None
@@ -245,7 +260,7 @@ async def scenario_timeout() -> None:
     disp.register(LoggingProcessor(label="HEALTHY"))
     disp.register(HangingProcessor())  # 这个会 hang
     print("注册: HEALTHY logger + HangingProcessor (会 sleep 60 秒)")
-    print(f"per_callback_timeout = 2.0 秒")
+    print("per_callback_timeout = 2.0 秒")
 
     conv = _new_conv()
     print("\n[发事件, 看 hang 的 callback 是否被 timeout 兜住]")
@@ -310,7 +325,9 @@ def main() -> None:
     asyncio.run(runner())
 
     _print_section("结束")
-    print(f"audit log: {AUDIT_LOG} ({len(AUDIT_LOG.read_text().splitlines()) if AUDIT_LOG.exists() else 0} 条)")
+    print(
+        f"audit log: {AUDIT_LOG} ({len(AUDIT_LOG.read_text().splitlines()) if AUDIT_LOG.exists() else 0} 条)"
+    )
     print("清理: python main.py --cleanup")
 
 

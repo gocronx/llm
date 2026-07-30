@@ -9,6 +9,7 @@
   - 我们改成让 LLM 直接输出 JSON, 主程序拿 JSON 走 skills.save()
     (没用 function calling 是因为这里目的是看清机制, 越少耦合越好)
 """
+
 from __future__ import annotations
 
 import json

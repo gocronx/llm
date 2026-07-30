@@ -1,4 +1,5 @@
 """main.py —— demo only：三种路由策略在同一个问题上的对比。"""
+
 from __future__ import annotations
 
 import os
@@ -8,7 +9,7 @@ import httpx
 from dotenv import load_dotenv
 from loader import load_skills_cached
 from openai import OpenAI
-from router import compose, route_keyword, route_llm, run_implicit
+from router import route_keyword, route_llm, run_implicit
 
 load_dotenv()
 

@@ -4,6 +4,7 @@ SKILL.md 格式：YAML frontmatter（name / description / triggers）+ markdown 
 约定：name 唯一，触发关键词 triggers 是写给 keyword 路由用的，description 是给 LLM 路由
 和 implicit-tool 模式读的"目录条目"。
 """
+
 from __future__ import annotations
 
 import re
@@ -35,13 +36,15 @@ def load_skills(skills_dir: Path) -> list[Skill]:
         if not m:
             continue
         meta = yaml.safe_load(m.group(1)) or {}
-        skills.append(Skill(
-            name=meta["name"],
-            description=meta.get("description", ""),
-            triggers=meta.get("triggers", []),
-            body=m.group(2),
-            path=path,
-        ))
+        skills.append(
+            Skill(
+                name=meta["name"],
+                description=meta.get("description", ""),
+                triggers=meta.get("triggers", []),
+                body=m.group(2),
+                path=path,
+            )
+        )
     return skills
 
 

@@ -1,5 +1,6 @@
 """tools.py —— 工具注册表：函数本体和它的 JSON Schema 配在一起。
 新增工具只在这里加一项；client / main / test 都不用改。"""
+
 from __future__ import annotations
 
 import json
@@ -11,24 +12,32 @@ TOOLS: dict[str, tuple[Callable, dict]] = {}
 
 def tool(schema: dict):
     """装饰器：注册一个 LLM 可调用的工具。"""
+
     def deco(fn: Callable) -> Callable:
         TOOLS[schema["name"]] = (fn, schema)
         return fn
+
     return deco
 
 
-@tool({
-    "name": "get_weather",
-    "description": "获取指定城市的天气",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "city": {"type": "string", "description": "城市名，如：北京"},
-            "unit": {"type": "string", "enum": ["celsius", "fahrenheit"], "default": "celsius"},
+@tool(
+    {
+        "name": "get_weather",
+        "description": "获取指定城市的天气",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string", "description": "城市名，如：北京"},
+                "unit": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "default": "celsius",
+                },
+            },
+            "required": ["city"],
         },
-        "required": ["city"],
-    },
-})
+    }
+)
 def get_weather(city: str, unit: str = "celsius") -> dict:
     db = {"北京": (25, "晴"), "上海": (28, "多云"), "深圳": (30, "小雨")}
     c, cond = db.get(city, (20, "数据不可用"))
@@ -36,38 +45,49 @@ def get_weather(city: str, unit: str = "celsius") -> dict:
     return {"city": city, "temperature": temp, "unit": unit, "condition": cond}
 
 
-@tool({
-    "name": "calculate",
-    "description": "执行四则运算",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "op": {"type": "string", "enum": ["add", "sub", "mul", "div"]},
-            "a": {"type": "number"},
-            "b": {"type": "number"},
+@tool(
+    {
+        "name": "calculate",
+        "description": "执行四则运算",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "op": {"type": "string", "enum": ["add", "sub", "mul", "div"]},
+                "a": {"type": "number"},
+                "b": {"type": "number"},
+            },
+            "required": ["op", "a", "b"],
         },
-        "required": ["op", "a", "b"],
-    },
-})
+    }
+)
 def calculate(op: str, a: float, b: float) -> dict:
     if op == "div" and b == 0:
         return {"error": "division by zero"}
-    return {"result": {"add": a + b, "sub": a - b, "mul": a * b, "div": a / b if b else None}[op]}
+    return {
+        "result": {
+            "add": a + b,
+            "sub": a - b,
+            "mul": a * b,
+            "div": a / b if b else None,
+        }[op]
+    }
 
 
 # 让 LLM 自己拆"价格 500 以上" -> min_price=500，不要在 Python 里重新做 NLP。
-@tool({
-    "name": "search_products",
-    "description": "搜索产品。可按关键词和价格区间过滤。",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "query": {"type": "string", "description": "关键词，留空匹配全部"},
-            "min_price": {"type": "number"},
-            "max_price": {"type": "number"},
+@tool(
+    {
+        "name": "search_products",
+        "description": "搜索产品。可按关键词和价格区间过滤。",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "关键词，留空匹配全部"},
+                "min_price": {"type": "number"},
+                "max_price": {"type": "number"},
+            },
         },
-    },
-})
+    }
+)
 def search_products(
     query: str = "",
     min_price: float = 0,
@@ -78,7 +98,11 @@ def search_products(
         {"id": 2, "name": "机械键盘", "price": 599},
         {"id": 3, "name": "无线鼠标", "price": 199},
     ]
-    hits = [p for p in products if (not query or query in p["name"]) and min_price <= p["price"] <= max_price]
+    hits = [
+        p
+        for p in products
+        if (not query or query in p["name"]) and min_price <= p["price"] <= max_price
+    ]
     return {"count": len(hits), "results": hits}
 
 

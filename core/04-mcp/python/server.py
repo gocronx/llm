@@ -5,9 +5,9 @@ MCP 的核心抽象：server 暴露一组 tools/resources/prompts，client 通�
 来发现和调用。stdio 是最简单的传输：client 把 server 当子进程拉起来，
 stdin/stdout 跑 NDJSON 协议。
 """
+
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 

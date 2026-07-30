@@ -9,6 +9,7 @@
 
 可组合：技术不是互斥的，生产里 system_prompt + few_shot + structured 经常一起用。
 """
+
 from __future__ import annotations
 
 import json
@@ -25,8 +26,12 @@ def baseline(client: OpenAI, model: str, user_input: str) -> str:
     return resp.choices[0].message.content or ""
 
 
-def system_prompt(client: OpenAI, model: str, user_input: str,
-                  role: str = "你是一个简短的助手，每次只用一句话回答。") -> str:
+def system_prompt(
+    client: OpenAI,
+    model: str,
+    user_input: str,
+    role: str = "你是一个简短的助手，每次只用一句话回答。",
+) -> str:
     resp = client.chat.completions.create(
         model=model,
         messages=[
@@ -38,8 +43,12 @@ def system_prompt(client: OpenAI, model: str, user_input: str,
     return resp.choices[0].message.content or ""
 
 
-def few_shot(client: OpenAI, model: str, user_input: str,
-             examples: list[tuple[str, str]] | None = None) -> str:
+def few_shot(
+    client: OpenAI,
+    model: str,
+    user_input: str,
+    examples: list[tuple[str, str]] | None = None,
+) -> str:
     """examples = [(user_msg, assistant_msg), ...]。
     每对放成两条 message，最后接真问题。模型从示例学输出格式比 prompt 里写"请按以下格式"靠谱。"""
     examples = examples or [
@@ -70,7 +79,9 @@ def chain_of_thought(client: OpenAI, model: str, user_input: str) -> str:
     return resp.choices[0].message.content or ""
 
 
-def structured(client: OpenAI, model: str, user_input: str, schema: dict, name: str = "out") -> dict:
+def structured(
+    client: OpenAI, model: str, user_input: str, schema: dict, name: str = "out"
+) -> dict:
     """强制 JSON 输出。这是最稳的"控制输出"方式，比 prompt 里写"请返回 JSON"准 100%。"""
     resp = client.chat.completions.create(
         model=model,

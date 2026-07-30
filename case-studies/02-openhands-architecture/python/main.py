@@ -20,13 +20,11 @@
 每次运行都是新 Python 进程. 对话状态完全来自磁盘 replay.
 对应 ANALYSIS.md 的"图 2 · 重启复活".
 """
+
 from __future__ import annotations
 
 import argparse
-import json
 import os
-import sys
-import time
 from datetime import datetime
 
 import events
@@ -62,13 +60,17 @@ def send_message(conv_id: str, user_text: str) -> None:
 
     # 2. 从事件流 replay 出当前对话状态 (Agent Server 层做的事)
     history = replay_to_messages(conv_id)
-    messages = [{"role": "system", "content": "你是简洁有用的助手. 中文回答, 别说教."}] + history
+    messages = [
+        {"role": "system", "content": "你是简洁有用的助手. 中文回答, 别说教."}
+    ] + history
 
     print(f"[历史: {len(history)} 条消息从事件流 replay 出来]")
 
     # 3. 调 LLM
     client, model = _make_client()
-    resp = client.chat.completions.create(model=model, messages=messages, temperature=0.7)
+    resp = client.chat.completions.create(
+        model=model, messages=messages, temperature=0.7
+    )
     reply = resp.choices[0].message.content or ""
 
     # 4. 持久化 assistant 事件
@@ -95,8 +97,12 @@ def inspect(conv_id: str) -> None:
     print(f"总事件数: {info['total_events']}")
     print(f"按类型: {info['by_kind']}")
     if info["first_event_at"]:
-        print(f"首事件: {datetime.fromtimestamp(info['first_event_at']).isoformat(timespec='seconds')}")
-        print(f"末事件: {datetime.fromtimestamp(info['last_event_at']).isoformat(timespec='seconds')}")
+        print(
+            f"首事件: {datetime.fromtimestamp(info['first_event_at']).isoformat(timespec='seconds')}"
+        )
+        print(
+            f"末事件: {datetime.fromtimestamp(info['last_event_at']).isoformat(timespec='seconds')}"
+        )
     print()
     print("== 事件流 ==")
     for i, ev in enumerate(events.load_all(conv_id), 1):

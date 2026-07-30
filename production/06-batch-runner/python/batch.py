@@ -5,14 +5,18 @@
   - 断点续跑：每个 job 成功就 append 一行到 output JSONL。重启时读 output 跳过已成功的 id。
   - 失败不入"已完成"：失败的 job 重启时会重跑（不要 silently 把 error 当 done）。
 """
+
 from __future__ import annotations
 
 import json
 import os
 import time
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
+from functools import cache
 from pathlib import Path
+from typing import TypedDict
 
 import httpx
 from dotenv import load_dotenv
@@ -30,15 +34,6 @@ from tenacity import (
     stop_after_attempt,
     wait_exponential,
 )
-
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-
-API_BASE_URL = os.environ["API_BASE_URL"]
-API_KEY = os.getenv("API_KEY", "not-needed")
-MODEL_ID = os.environ["MODEL_ID"]
-
-_http = httpx.Client(trust_env=False, timeout=60.0)
-_client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY, http_client=_http)
 
 MAX_ATTEMPTS = 3
 MAX_OUTPUT_TOKENS = 150
@@ -65,12 +60,42 @@ class Result:
     tokens: int
 
 
+class BatchSummary(TypedDict):
+    """Aggregate metrics returned after a batch run."""
+
+    total: int
+    ran: int
+    ok: int
+    failed: int
+    elapsed_s: int
+    tokens: int
+    avg_attempts: float
+    throughput_per_min: float
+
+
+ProgressCallback = Callable[[Result, int, int], None]
+
+
+@cache
+def _llm_dependencies() -> tuple[OpenAI, str]:
+    """Create network dependencies lazily so file-only helpers stay importable."""
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    http_client = httpx.Client(trust_env=False, timeout=60.0)
+    client = OpenAI(
+        base_url=os.environ["API_BASE_URL"],
+        api_key=os.getenv("API_KEY", "not-needed"),
+        http_client=http_client,
+    )
+    return client, os.environ["MODEL_ID"]
+
+
 def _single_call(prompt: str) -> tuple[str, int]:
     """一次 LLM 调用。SDK 的 APIConnectionError / APITimeoutError / RateLimitError
     都翻译成 TransientError；其它（400/401）让 tenacity 不重试地往外抛。"""
+    client, model = _llm_dependencies()
     try:
-        resp = _client.chat.completions.create(
-            model=MODEL_ID,
+        resp = client.chat.completions.create(
+            model=model,
             messages=[{"role": "user", "content": prompt}],
             temperature=0,
             max_tokens=MAX_OUTPUT_TOKENS,
@@ -114,11 +139,24 @@ def run_one(job: Job) -> Result:
 
     elapsed_ms = int((time.time() - started) * 1000)
     if answer is None:
-        return Result(id=job.id, prompt=job.prompt, answer=None,
-                      error=str(last_exc), elapsed_ms=elapsed_ms,
-                      attempts=attempts, tokens=0)
-    return Result(id=job.id, prompt=job.prompt, answer=answer, error=None,
-                  elapsed_ms=elapsed_ms, attempts=attempts, tokens=tokens)
+        return Result(
+            id=job.id,
+            prompt=job.prompt,
+            answer=None,
+            error=str(last_exc),
+            elapsed_ms=elapsed_ms,
+            attempts=attempts,
+            tokens=0,
+        )
+    return Result(
+        id=job.id,
+        prompt=job.prompt,
+        answer=answer,
+        error=None,
+        elapsed_ms=elapsed_ms,
+        attempts=attempts,
+        tokens=tokens,
+    )
 
 
 def load_jobs(path: Path) -> list[Job]:
@@ -153,16 +191,34 @@ def append_result(out_path: Path, result: Result) -> None:
         f.write(json.dumps(asdict(result), ensure_ascii=False) + "\n")
 
 
-def run_batch(jobs: list[Job], out_path: Path, concurrency: int = 4,
-              resume: bool = True, on_progress: object = None) -> dict:
+def run_batch(
+    jobs: list[Job],
+    out_path: Path,
+    concurrency: int = 4,
+    resume: bool = True,
+    on_progress: ProgressCallback | None = None,
+) -> BatchSummary:
+    """Run pending jobs concurrently and checkpoint every completed result."""
+    if concurrency < 1:
+        raise ValueError("concurrency must be at least 1")
+    ids = [job.id for job in jobs]
+    if len(ids) != len(set(ids)):
+        raise ValueError("job ids must be unique")
     done = load_done(out_path) if resume else set()
     todo = [j for j in jobs if j.id not in done]
     print(f"  jobs: {len(jobs)} total, {len(done)} already done, {len(todo)} to run")
     print(f"  concurrency: {concurrency}")
     if not todo:
-        return {"total": len(jobs), "ran": 0, "ok": len(done), "failed": 0,
-                "elapsed_s": 0, "tokens": 0, "avg_attempts": 0,
-                "throughput_per_min": 0.0}
+        return {
+            "total": len(jobs),
+            "ran": 0,
+            "ok": len(done),
+            "failed": 0,
+            "elapsed_s": 0,
+            "tokens": 0,
+            "avg_attempts": 0,
+            "throughput_per_min": 0.0,
+        }
 
     started = time.time()
     ok = failed = total_tokens = total_attempts = 0
@@ -182,10 +238,13 @@ def run_batch(jobs: list[Job], out_path: Path, concurrency: int = 4,
                 status = "✗"
             elapsed = int(time.time() - started)
             eta = int(elapsed * (len(todo) - i) / max(i, 1))
-            print(f"  [{i:3d}/{len(todo)}] {status} {r.id:<8} "
-                  f"{r.elapsed_ms:>5}ms attempts={r.attempts}  "
-                  f"elapsed={elapsed}s eta={eta}s", flush=True)
-            if on_progress:
+            print(
+                f"  [{i:3d}/{len(todo)}] {status} {r.id:<8} "
+                f"{r.elapsed_ms:>5}ms attempts={r.attempts}  "
+                f"elapsed={elapsed}s eta={eta}s",
+                flush=True,
+            )
+            if on_progress is not None:
                 on_progress(r, i, len(todo))
 
     elapsed_s = max(int(time.time() - started), 1)

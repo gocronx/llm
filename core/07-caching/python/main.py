@@ -1,4 +1,5 @@
 """main.py —— demo only：对比 Exact / Semantic 在"几乎相同问题"上的命中率。"""
+
 from __future__ import annotations
 
 import os
@@ -43,8 +44,10 @@ def run(label: str, cached: Cached) -> None:
 
 def main() -> None:
     run("Exact（完全相同才命中）", Cached(_openai, _model, Exact()))
-    run("Semantic(threshold=0.5)（前 4 句应该串起来）",
-        Cached(_openai, _model, Semantic(threshold=0.5)))
+    run(
+        "Semantic(threshold=0.5)（前 4 句应该串起来）",
+        Cached(_openai, _model, Semantic(threshold=0.5)),
+    )
 
 
 if __name__ == "__main__":

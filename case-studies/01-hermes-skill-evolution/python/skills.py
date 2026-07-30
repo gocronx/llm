@@ -6,6 +6,7 @@
   3. 写一个新 skill / 覆盖现有 skill
   4. 把 skill 列表拼成 system prompt 片段
 """
+
 from __future__ import annotations
 
 import re
@@ -22,9 +23,10 @@ SKILLS_DIR = Path(__file__).parent / ".skills"
 @dataclass
 class Skill:
     """一个 skill 等于一份 markdown 文档."""
-    name: str         # 用作目录名 / 唯一 id（kebab-case）
+
+    name: str  # 用作目录名 / 唯一 id（kebab-case）
     description: str  # 一行话，决定下次什么场景下 LLM 会去读全文
-    body: str         # SKILL.md 的正文 markdown
+    body: str  # SKILL.md 的正文 markdown
 
 
 # ── frontmatter 解析 ──────────────────────────────────────────────────

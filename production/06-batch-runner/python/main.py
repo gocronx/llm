@@ -1,9 +1,10 @@
 """main.py —— CLI 包装：跑 data/sample.jsonl → 写 results/out.jsonl。
 
-   python main.py --concurrency 8
-   python main.py --no-resume    # 忽略之前的 output，从头跑
-   python main.py --limit 10     # 只跑前 10 个 job（debug）
+python main.py --concurrency 8
+python main.py --no-resume    # 忽略之前的 output，从头跑
+python main.py --limit 10     # 只跑前 10 个 job（debug）
 """
+
 from __future__ import annotations
 
 import argparse

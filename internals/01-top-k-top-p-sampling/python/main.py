@@ -6,6 +6,7 @@
   - min_p=0.3 → 砍掉相对最高太小的尾巴
   - temperature 高 → 接近均匀; 低 → 接近贪心
 """
+
 from __future__ import annotations
 
 from collections import Counter
@@ -39,8 +40,16 @@ def main() -> None:
     run("top_k=3", temperature=1.0, top_k=3, top_p=1.0, min_p=0.0)
     run("top_p=0.5", temperature=1.0, top_k=0, top_p=0.5, min_p=0.0)
     run("min_p=0.3 (砍长尾)", temperature=1.0, top_k=0, top_p=1.0, min_p=0.3)
-    run("low temperature=0.3 (接近贪心)", temperature=0.3, top_k=0, top_p=1.0, min_p=0.0)
-    run("high temperature=3.0 (接近均匀)", temperature=3.0, top_k=0, top_p=1.0, min_p=0.0)
+    run(
+        "low temperature=0.3 (接近贪心)", temperature=0.3, top_k=0, top_p=1.0, min_p=0.0
+    )
+    run(
+        "high temperature=3.0 (接近均匀)",
+        temperature=3.0,
+        top_k=0,
+        top_p=1.0,
+        min_p=0.0,
+    )
 
 
 if __name__ == "__main__":

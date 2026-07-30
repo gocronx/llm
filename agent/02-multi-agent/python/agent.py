@@ -1,6 +1,7 @@
 """agent.py —— 单 Agent：name + role(system prompt) + 一次 LLM 调用。
 不带 function call（多 agent 协作的主要复杂度在 orchestration，单 agent 就保持纯文本）。
 整文件 cp 进项目即可。"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -11,7 +12,7 @@ from openai import OpenAI
 @dataclass
 class Agent:
     name: str
-    role: str       # 这个 agent 的 system prompt（角色 + 指令）
+    role: str  # 这个 agent 的 system prompt（角色 + 指令）
     client: OpenAI
     model: str
     temperature: float = 0.3

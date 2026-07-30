@@ -20,10 +20,13 @@ def _make_response(status_code: int, body: dict | None = None) -> requests.Respo
 
 
 def _ok_response(answer: str = "ok") -> requests.Response:
-    return _make_response(200, {
-        "choices": [{"message": {"content": answer}}],
-        "usage": {"total_tokens": 10},
-    })
+    return _make_response(
+        200,
+        {
+            "choices": [{"message": {"content": answer}}],
+            "usage": {"total_tokens": 10},
+        },
+    )
 
 
 def _http_error_response(status_code: int) -> requests.Response:
@@ -74,8 +77,7 @@ class FailoverTests(unittest.TestCase):
         self.assertEqual([m.tier for m in result.failed_over_from], ["cheap", "mid"])
 
     def test_all_tiers_fail_raises_AllTiersFailed(self) -> None:
-        with patch("router.requests.post",
-                   return_value=_http_error_response(503)):
+        with patch("router.requests.post", return_value=_http_error_response(503)):
             with self.assertRaises(router.AllTiersFailed):
                 router.route_always("cheap", "hello")
 
@@ -122,6 +124,7 @@ class FailoverTests(unittest.TestCase):
 
     def test_cascade_failover_then_escalation_both_recorded(self) -> None:
         """cheap fails → failover to mid → mid gives '' (weak) → escalate to premium."""
+
         def fake_post(url, **kwargs):
             mid = kwargs["json"]["model"]
             if mid == BY_TIER["cheap"].id:

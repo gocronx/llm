@@ -39,20 +39,22 @@ LLM 调 `super_search_v2(...)`, 但 tools 里只注册了 `web_search`. 老 ReAc
 
 这是 LLM-era error handling 跟传统的根本区别. 传统: catch → log → retry/raise. LLM-era: error → tool message → continue loop, LLM 看到 error 自我修复.
 """
+
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 
 @dataclass
 class RecoveryConfig:
     """各项检测的阈值."""
-    max_repeated_tool_calls: int = 3       # 同 tool+args 连续超此次数 → 注入 stop 提示
-    min_response_length: int = 10           # 短于此被认为"empty response"
-    force_summary_on_empty: bool = True     # empty response 时是否强制合成 summary
-    force_summary_after_n_tools: int = 8    # 连续调 N 个 tool 仍无 content → 强制总结
+
+    max_repeated_tool_calls: int = 3  # 同 tool+args 连续超此次数 → 注入 stop 提示
+    min_response_length: int = 10  # 短于此被认为"empty response"
+    force_summary_on_empty: bool = True  # empty response 时是否强制合成 summary
+    force_summary_after_n_tools: int = 8  # 连续调 N 个 tool 仍无 content → 强制总结
 
 
 @dataclass
@@ -83,7 +85,9 @@ class ToolCallRecovery:
             return True
         return len(content.strip()) < self.config.min_response_length
 
-    def detect_repeated_tool_call(self, messages: list[dict]) -> tuple[bool, str | None]:
+    def detect_repeated_tool_call(
+        self, messages: list[dict]
+    ) -> tuple[bool, str | None]:
         """看末尾 N 次 assistant.tool_calls 是不是完全相同的 (name+args).
 
         返回 (是否检测到, 重复的 tool 名 / None)."""
@@ -115,7 +119,10 @@ class ToolCallRecovery:
             if m.get("role") == "tool":
                 count += 1
             elif m.get("role") == "assistant":
-                if m.get("content") and len(m["content"].strip()) > self.config.min_response_length:
+                if (
+                    m.get("content")
+                    and len(m["content"].strip()) > self.config.min_response_length
+                ):
                     break  # 有过实质 content 中断, 重置计数
                 # assistant.tool_calls 且无 content, 继续
                 continue
@@ -149,8 +156,9 @@ class ToolCallRecovery:
             tool_results.append((name, content))
 
         if not tool_results and error_messages:
-            return ("I tried to complete the task but encountered errors: "
-                    + "; ".join(error_messages[-3:]))
+            return "I tried to complete the task but encountered errors: " + "; ".join(
+                error_messages[-3:]
+            )
 
         if not tool_results:
             return "I attempted some tool calls but didn't get usable results. Could you clarify the request?"
@@ -183,16 +191,22 @@ class ToolCallRecovery:
     def wrap_tool_error(self, tool_name: str, error: Exception) -> str:
         """工具抛异常时, 不 raise, 包装成 LLM-readable error."""
         self.stats.tool_errors_fed_back += 1
-        return json.dumps({"error": f"{type(error).__name__}: {error}", "tool": tool_name}, ensure_ascii=False)
+        return json.dumps(
+            {"error": f"{type(error).__name__}: {error}", "tool": tool_name},
+            ensure_ascii=False,
+        )
 
     def handle_unknown_tool(self, tool_name: str, available: list[str]) -> str:
         """LLM 调了不存在的工具, 提示它 available 列表."""
         self.stats.unknown_tool_errors += 1
-        return json.dumps({
-            "error": f"unknown tool: '{tool_name}'",
-            "available_tools": available[:20],
-            "hint": "Use one of available_tools, or stop calling tools if you have enough info.",
-        }, ensure_ascii=False)
+        return json.dumps(
+            {
+                "error": f"unknown tool: '{tool_name}'",
+                "available_tools": available[:20],
+                "hint": "Use one of available_tools, or stop calling tools if you have enough info.",
+            },
+            ensure_ascii=False,
+        )
 
     def should_force_summary(self, messages: list[dict]) -> bool:
         """末尾连续 N 个 tool message 都没 LLM 实质 content → 强制总结."""

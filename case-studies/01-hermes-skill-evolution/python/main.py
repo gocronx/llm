@@ -14,6 +14,7 @@
   - reviewer 写出来的 skill 内容是否抓到了重点
   - Round 2 模型有没有自觉应用 skill
 """
+
 from __future__ import annotations
 
 import os

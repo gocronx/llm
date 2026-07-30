@@ -4,6 +4,7 @@
 应用层：照决策执行工具，把结果作为 role=tool 消息回灌。
 第二轮：LLM 看着工具结果生成最终自然语言回答。
 """
+
 from __future__ import annotations
 
 import json
@@ -16,7 +17,9 @@ def run(client: OpenAI, model: str, user_msg: str) -> str:
     """一次 function-call 往返。返回 LLM 的最终回答。"""
     messages: list[dict] = [{"role": "user", "content": user_msg}]
 
-    first = client.chat.completions.create(model=model, messages=messages, tools=schemas())
+    first = client.chat.completions.create(
+        model=model, messages=messages, tools=schemas()
+    )
     msg = first.choices[0].message
 
     if not msg.tool_calls:

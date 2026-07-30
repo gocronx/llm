@@ -1,4 +1,5 @@
 """test.py —— 单元测试四种挡灾路径，全部用 fakesrv，确定性可重复。"""
+
 from __future__ import annotations
 
 import time
@@ -10,15 +11,22 @@ from resilient import Breaker, Endpoint, Resilient
 
 
 def _client(base_url: str) -> OpenAI:
-    return OpenAI(base_url=base_url, api_key="x",
-                  http_client=httpx.Client(trust_env=False, timeout=2.0))
+    return OpenAI(
+        base_url=base_url,
+        api_key="x",
+        http_client=httpx.Client(trust_env=False, timeout=2.0),
+    )
 
 
 def test_retry_after_500() -> bool:
     """2 次 500 后第 3 次成功，应当返回成功内容。"""
     with FakeServer() as srv:
-        srv.script("/chat/completions",
-                   (500, None, "boom"), (500, None, "boom"), (200, None, "ok"))
+        srv.script(
+            "/chat/completions",
+            (500, None, "boom"),
+            (500, None, "boom"),
+            (200, None, "ok"),
+        )
         out = Resilient([Endpoint(_client(srv.base_url), "fake")]).chat("hi")
     ok = out == "ok"
     print(f"{'✓' if ok else '✗'} retry-on-500: {out!r}")
@@ -42,10 +50,12 @@ def test_fallback() -> bool:
     with FakeServer() as a, FakeServer() as b:
         a.script("/chat/completions", *[(500, None, "x")] * 6)
         b.script("/chat/completions", (200, None, "secondary"))
-        out = Resilient([
-            Endpoint(_client(a.base_url), "f", label="p"),
-            Endpoint(_client(b.base_url), "f", label="s"),
-        ]).chat("hi")
+        out = Resilient(
+            [
+                Endpoint(_client(a.base_url), "f", label="p"),
+                Endpoint(_client(b.base_url), "f", label="s"),
+            ]
+        ).chat("hi")
     ok = out == "secondary"
     print(f"{'✓' if ok else '✗'} fallback: {out!r}")
     return ok
@@ -63,12 +73,14 @@ def test_breaker_opens() -> bool:
 
 
 def main() -> None:
-    passed = sum([
-        test_retry_after_500(),
-        test_respect_retry_after(),
-        test_fallback(),
-        test_breaker_opens(),
-    ])
+    passed = sum(
+        [
+            test_retry_after_500(),
+            test_respect_retry_after(),
+            test_fallback(),
+            test_breaker_opens(),
+        ]
+    )
     print(f"\n{passed}/4 passed")
 
 

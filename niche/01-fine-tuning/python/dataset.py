@@ -6,6 +6,7 @@
 SYSTEM_PROMPT 必须和推理时一致 —— mlx-lm 的 chat template 会把 system 当
 context 前缀做 LoRA 适配，训练/推理 system 不同等于换了任务。
 """
+
 from __future__ import annotations
 
 import json
@@ -21,22 +22,27 @@ SYSTEM_PROMPT = (
 )
 
 RESOURCES = [
-    ("users",         ["id", "email", "name", "created_at"], "email"),
-    ("posts",         ["id", "title", "author_id", "content", "published", "created_at"], "title"),
-    ("orders",        ["id", "user_id", "total", "status", "created_at"], None),
-    ("products",      ["id", "sku", "name", "price", "stock"], "sku"),
-    ("comments",      ["id", "post_id", "author_id", "body", "created_at"], None),
-    ("articles",      ["id", "slug", "title", "content", "tags"], "slug"),
-    ("tasks",         ["id", "owner_id", "title", "done", "due_at"], None),
-    ("invoices",      ["id", "order_id", "amount", "paid", "issued_at"], None),
-    ("categories",    ["id", "name", "parent_id"], "name"),
+    ("users", ["id", "email", "name", "created_at"], "email"),
+    (
+        "posts",
+        ["id", "title", "author_id", "content", "published", "created_at"],
+        "title",
+    ),
+    ("orders", ["id", "user_id", "total", "status", "created_at"], None),
+    ("products", ["id", "sku", "name", "price", "stock"], "sku"),
+    ("comments", ["id", "post_id", "author_id", "body", "created_at"], None),
+    ("articles", ["id", "slug", "title", "content", "tags"], "slug"),
+    ("tasks", ["id", "owner_id", "title", "done", "due_at"], None),
+    ("invoices", ["id", "order_id", "amount", "paid", "issued_at"], None),
+    ("categories", ["id", "name", "parent_id"], "name"),
     ("notifications", ["id", "user_id", "kind", "read", "created_at"], None),
-    ("sessions",      ["id", "user_id", "token", "expires_at"], "token"),
-    ("addresses",     ["id", "user_id", "country", "city", "zip"], None),
+    ("sessions", ["id", "user_id", "token", "expires_at"], "token"),
+    ("addresses", ["id", "user_id", "country", "city", "zip"], None),
 ]
 
 
 # ---- 7 种 CRUD 模板生成器（每个返回 (instruction, code)） ----
+
 
 def _get_one(r, _f, _u):
     code = f"""from saber.web import handler, Response
@@ -81,7 +87,8 @@ def _create(r, fields, unique):
     if existing is not None:
         raise Conflict(f'{r[:-1]} with {unique} {{body["{unique}"]!r}} already exists')
 """
-        if unique else ""
+        if unique
+        else ""
     )
     code = f"""from saber.web import handler, Response
 from saber.db import Q
@@ -133,8 +140,13 @@ def count_{r}(req):
     return f"用 Saber 写一个 handler：返回 {r} 表中 {field} 等于指定值的记录数。", code
 
 
-GENERATORS = {"get_one": _get_one, "list": _list, "create": _create,
-              "delete": _delete, "count": _count}
+GENERATORS = {
+    "get_one": _get_one,
+    "list": _list,
+    "create": _create,
+    "delete": _delete,
+    "count": _count,
+}
 
 
 def build_samples(seed: int = 42) -> list[dict]:
@@ -144,18 +156,21 @@ def build_samples(seed: int = 42) -> list[dict]:
     for kind, fn in GENERATORS.items():
         for resource, fields, unique in RESOURCES:
             instr, code = fn(resource, fields, unique)
-            samples.append({
-                "id": f"{kind}_{resource}",
-                "kind": kind,
-                "instruction": instr,
-                "code": code.strip(),
-            })
+            samples.append(
+                {
+                    "id": f"{kind}_{resource}",
+                    "kind": kind,
+                    "instruction": instr,
+                    "code": code.strip(),
+                }
+            )
     random.shuffle(samples)
     return samples
 
 
-def stratified_split(samples: list[dict], valid_ratio: float = 0.1, test_ratio: float = 0.1
-                     ) -> tuple[list[dict], list[dict], list[dict]]:
+def stratified_split(
+    samples: list[dict], valid_ratio: float = 0.1, test_ratio: float = 0.1
+) -> tuple[list[dict], list[dict], list[dict]]:
     """按 kind 分层切分，保证 train/valid/test 里每种 kind 都有样本。"""
     by_kind: dict[str, list[dict]] = {}
     for s in samples:
@@ -168,7 +183,7 @@ def stratified_split(samples: list[dict], valid_ratio: float = 0.1, test_ratio: 
         n_valid = max(1, int(n * valid_ratio))
         train.extend(group[: n - n_test - n_valid])
         valid.extend(group[n - n_test - n_valid : n - n_test])
-        test.extend(group[n - n_test:])
+        test.extend(group[n - n_test :])
     for ds in (train, valid, test):
         random.shuffle(ds)
     return train, valid, test
@@ -176,14 +191,18 @@ def stratified_split(samples: list[dict], valid_ratio: float = 0.1, test_ratio: 
 
 def to_chat(sample: dict) -> dict:
     """转 MLX chat 格式（system / user / assistant 三轮）。"""
-    return {"messages": [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": sample["instruction"]},
-        {"role": "assistant", "content": sample["code"]},
-    ]}
+    return {
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": sample["instruction"]},
+            {"role": "assistant", "content": sample["code"]},
+        ]
+    }
 
 
-def write_splits(data_dir: Path, train: list[dict], valid: list[dict], test: list[dict]) -> None:
+def write_splits(
+    data_dir: Path, train: list[dict], valid: list[dict], test: list[dict]
+) -> None:
     """写 train/valid/test.jsonl 三份文件。test.jsonl 保留原始 instruction
     便于评估；train/valid 直接 MLX chat 格式。"""
     data_dir.mkdir(parents=True, exist_ok=True)

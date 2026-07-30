@@ -7,6 +7,7 @@
   - Demo: 主进程的 ReAct loop 直接调 sandbox.exec_in_sandbox()
           省掉 HTTP 那一层, 但保留 session_api_key 鉴权
 """
+
 from __future__ import annotations
 
 import json
@@ -37,8 +38,8 @@ BASH_TOOL = {
     "function": {
         "name": "bash",
         "description": "Run a shell command inside the sandbox. The command's cwd is the "
-                       "sandbox's isolated workspace. Use this to create files, run scripts, "
-                       "or inspect the workspace. NEVER use this to read paths outside the workspace.",
+        "sandbox's isolated workspace. Use this to create files, run scripts, "
+        "or inspect the workspace. NEVER use this to read paths outside the workspace.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -104,21 +105,23 @@ def run_agent(
             return (msg.content or "", tool_history)
 
         # 把 assistant 整条消息(含 tool_calls)写回历史
-        messages.append({
-            "role": "assistant",
-            "content": msg.content,
-            "tool_calls": [
-                {
-                    "id": tc.id,
-                    "type": "function",
-                    "function": {
-                        "name": tc.function.name,
-                        "arguments": tc.function.arguments,
-                    },
-                }
-                for tc in msg.tool_calls
-            ],
-        })
+        messages.append(
+            {
+                "role": "assistant",
+                "content": msg.content,
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments,
+                        },
+                    }
+                    for tc in msg.tool_calls
+                ],
+            }
+        )
 
         # 逐个执行工具
         for tc in msg.tool_calls:
@@ -140,12 +143,14 @@ def run_agent(
             else:
                 observation = f"unknown tool: {tc.function.name}"
 
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tc.id,
-                "name": tc.function.name,
-                "content": observation,
-            })
+            messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tc.id,
+                    "name": tc.function.name,
+                    "content": observation,
+                }
+            )
 
     # 跑满 iteration 还没结论, 强迫给个总结
     return ("(reached max iterations without final answer)", tool_history)

@@ -2,6 +2,7 @@
 
 跟 09 唯一区别: 每轮 LLM 调用前先 govern(messages), 拿治理后的版本去喂模型,
 **但 self.messages 保持原状** —— 治理是"喂模型的视角", 不是"我的记忆"."""
+
 from __future__ import annotations
 
 import json
@@ -27,10 +28,12 @@ class Agent:
     client: OpenAI
     model: str
     max_iterations: int = 20
-    context_window_tokens: int = 8000   # 故意调小, 让治理生效
-    max_tool_result_chars: int = 4000   # 故意调小
+    context_window_tokens: int = 8000  # 故意调小, 让治理生效
+    max_tool_result_chars: int = 4000  # 故意调小
     on_step: Callable[[Step], None] | None = None
-    on_govern: Callable[[int, int, int, int], None] | None = None  # (before_n, after_n, before_tok, after_tok)
+    on_govern: Callable[[int, int, int, int], None] | None = (
+        None  # (before_n, after_n, before_tok, after_tok)
+    )
     steps: list[Step] = field(default_factory=list)
     messages: list[dict] = field(default_factory=list)
 
@@ -49,13 +52,18 @@ class Agent:
             )
             if self.on_govern:
                 self.on_govern(
-                    len(self.messages), len(view),
-                    estimate_total_tokens(self.messages), estimate_total_tokens(view),
+                    len(self.messages),
+                    len(view),
+                    estimate_total_tokens(self.messages),
+                    estimate_total_tokens(view),
                 )
 
             resp = self.client.chat.completions.create(
-                model=self.model, messages=view, tools=schemas(),
-                temperature=0.3, max_tokens=600,
+                model=self.model,
+                messages=view,
+                tools=schemas(),
+                temperature=0.3,
+                max_tokens=600,
             )
             msg = resp.choices[0].message
             last_content = msg.content or ""
@@ -71,9 +79,13 @@ class Agent:
                 self.steps.append(step)
                 if self.on_step:
                     self.on_step(step)
-                self.messages.append({
-                    "role": "tool", "tool_call_id": tc.id,
-                    "name": tc.function.name, "content": result,
-                })
+                self.messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "name": tc.function.name,
+                        "content": result,
+                    }
+                )
 
         return last_content or "(达到最大迭代次数仍未给出答案)"

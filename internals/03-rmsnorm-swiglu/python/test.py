@@ -1,4 +1,5 @@
 """test.py —— RMSNorm + SiLU + SwiGLU 的数学性质验证."""
+
 from __future__ import annotations
 
 import time
@@ -12,7 +13,7 @@ def test_rmsnorm_output_norm() -> bool:
     np.random.seed(0)
     x = np.random.randn(8, 1024).astype(np.float32) * 5  # 大尺度输入
     out = rms_norm(x)
-    rms = np.sqrt((out ** 2).mean(axis=-1))
+    rms = np.sqrt((out**2).mean(axis=-1))
     ok = np.all(np.abs(rms - 1.0) < 0.01)
     print(f"✓ rmsnorm output RMS ≈ 1.0 (got [{rms.min():.4f}, {rms.max():.4f}])")
     return ok
@@ -25,7 +26,7 @@ def test_rmsnorm_with_weight() -> bool:
     out = rms_norm(x, weight=weight)
     out_no_w = rms_norm(x)
     ok = np.allclose(out, out_no_w * 2.5, atol=1e-5)
-    print(f"✓ rmsnorm with weight=2.5 scales output by 2.5")
+    print("✓ rmsnorm with weight=2.5 scales output by 2.5")
     return ok
 
 
@@ -36,7 +37,7 @@ def test_rmsnorm_invariant_to_scale() -> bool:
     a = rms_norm(x)
     b = rms_norm(x * 100.0)
     ok = np.allclose(a, b, atol=1e-4)
-    print(f"✓ rmsnorm scale-invariant (max diff {np.abs(a-b).max():.2e})")
+    print(f"✓ rmsnorm scale-invariant (max diff {np.abs(a - b).max():.2e})")
     return ok
 
 
@@ -73,10 +74,11 @@ def test_silu_known_values() -> bool:
     s = silu(x)
     print(f"  silu({x.tolist()}) = {s.round(4).tolist()}")
     ok = (
-        abs(s[2]) < 1e-5            # silu(0) = 0
+        abs(s[2]) < 1e-5  # silu(0) = 0
         and abs(s[4] - 10.0) < 0.01  # silu(10) ≈ 10
-        and abs(s[0]) < 0.01         # silu(-10) ≈ 0
-        and s[3] > 0.7 and s[3] < 0.8  # silu(1) ≈ 0.7311
+        and abs(s[0]) < 0.01  # silu(-10) ≈ 0
+        and s[3] > 0.7
+        and s[3] < 0.8  # silu(1) ≈ 0.7311
     )
     print(f"{'✓' if ok else '✗'} silu known values")
     return ok
@@ -91,9 +93,10 @@ def test_swiglu_shape_and_gating() -> bool:
     print(f"  up=  {up.flatten().tolist()}")
     print(f"  out= {out.round(4).flatten().tolist()}")
     ok = (
-        abs(out[0, 0]) < 1e-5         # gate=0 → silu(0)=0 → out=0
-        and abs(out[0, 2]) < 0.01     # gate=-100 → silu≈0 → out≈0
-        and out[0, 3] > 45 and out[0, 3] < 51   # gate=10, up=5 → silu(10)*5 ≈ 50
+        abs(out[0, 0]) < 1e-5  # gate=0 → silu(0)=0 → out=0
+        and abs(out[0, 2]) < 0.01  # gate=-100 → silu≈0 → out≈0
+        and out[0, 3] > 45
+        and out[0, 3] < 51  # gate=10, up=5 → silu(10)*5 ≈ 50
     )
     print(f"{'✓' if ok else '✗'} swiglu gating behavior")
     return ok
@@ -105,19 +108,22 @@ def test_rmsnorm_speed_advantage() -> bool:
     x = np.random.randn(32, 4096).astype(np.float32)
 
     # warm
-    rms_norm(x); layer_norm(x)
+    rms_norm(x)
+    layer_norm(x)
     N = 200
     t0 = time.perf_counter()
-    for _ in range(N): rms_norm(x)
+    for _ in range(N):
+        rms_norm(x)
     rms_ms = (time.perf_counter() - t0) * 1000
 
     t0 = time.perf_counter()
-    for _ in range(N): layer_norm(x)
+    for _ in range(N):
+        layer_norm(x)
     ln_ms = (time.perf_counter() - t0) * 1000
 
     print(f"  RMSNorm    {N} × (32, 4096): {rms_ms:.1f} ms")
     print(f"  LayerNorm  {N} × (32, 4096): {ln_ms:.1f} ms")
-    print(f"  ratio: RMSNorm 是 LayerNorm 的 {rms_ms/ln_ms*100:.0f}%")
+    print(f"  ratio: RMSNorm 是 LayerNorm 的 {rms_ms / ln_ms * 100:.0f}%")
     # 教学版 numpy 实现差距没 production C 那么大, 但应该有 30%+ 优势
     ok = rms_ms < ln_ms * 0.9
     print(f"{'✓' if ok else '⚠'} rmsnorm faster than layernorm (numpy 版差距比 C 版小)")

@@ -1,4 +1,5 @@
 """main.py —— demo only：跑 datasets/qa_testset.jsonl，输出报告。"""
+
 from __future__ import annotations
 
 import os

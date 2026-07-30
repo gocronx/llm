@@ -96,8 +96,9 @@ LLM 看到 available 列表会改用对的.
 .
 ├── python/
 │   ├── recovery.py    # 🟢 ToolCallRecovery: 4 类检测 + 4 类修复
+│   ├── react_loop.py  # 可复用的 ReAct 循环、工具执行和 inline parser
 │   ├── main.py        # 4 个场景 (empty/loop/exception/unknown) 完整 demo
-│   ├── test.py        # 11 个测试, 覆盖检测 + 修复 + 边界
+│   ├── test.py        # 13 个测试, 覆盖检测 + 修复 + parser + 执行循环
 │   └── requirements.txt
 └── README.md
 ```
@@ -108,7 +109,7 @@ LLM 看到 available 列表会改用对的.
 cd python && pip install -r requirements.txt    # 含 ddgs (DuckDuckGo 真搜索, 免 API key)
 cp .env.example .env  # 编辑填 API_KEY / MODEL_ID (场景 3 & 4 需要)
 
-python test.py    # 11/11 passed (mock, 不调外网)
+python test.py    # 13/13 passed (mock, 不调外网)
 python main.py    # 4 场景: 1+2 mock, 3+4 真 LLM + 真联网搜索
 ```
 

@@ -23,24 +23,27 @@ REGISTRY: list[Model] = [
     Model(
         tier="cheap",
         id=os.getenv("MODEL_CHEAP", "GLM-4.7-Flash-4bit"),
-        input_per_1k=0.0008,        # Anthropic Haiku 3.5: $0.80 / 1M
-        output_per_1k=0.004,         # $4.00 / 1M
+        input_per_1k=0.0008,  # Anthropic Haiku 3.5: $0.80 / 1M
+        output_per_1k=0.004,  # $4.00 / 1M
         quality=5,
         context_window=200_000,
     ),
     Model(
         tier="mid",
         id=os.getenv("MODEL_MID", "Qwen3.5-27B-Claude-4.6-Opus-Distilled-MLX-4bit"),
-        input_per_1k=0.003,          # Anthropic Sonnet 4: $3 / 1M
-        output_per_1k=0.015,          # $15 / 1M
+        input_per_1k=0.003,  # Anthropic Sonnet 4: $3 / 1M
+        output_per_1k=0.015,  # $15 / 1M
         quality=7,
         context_window=200_000,
     ),
     Model(
         tier="premium",
-        id=os.getenv("MODEL_PREMIUM", "Qwen3.6-40B-Claude-4.6-Opus-Deckard-Heretic-Uncensored-Thinking-8bit"),
-        input_per_1k=0.015,           # Anthropic Opus 4: $15 / 1M
-        output_per_1k=0.075,           # $75 / 1M
+        id=os.getenv(
+            "MODEL_PREMIUM",
+            "Qwen3.6-40B-Claude-4.6-Opus-Deckard-Heretic-Uncensored-Thinking-8bit",
+        ),
+        input_per_1k=0.015,  # Anthropic Opus 4: $15 / 1M
+        output_per_1k=0.075,  # $75 / 1M
         quality=9,
         context_window=200_000,
     ),

@@ -3,6 +3,7 @@
 `Cached.ask()` 先查 cache，命中直接返回；未命中调 LLM，结果写回 cache。
 hits/misses 计数留给观察"省了多少钱"。
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass

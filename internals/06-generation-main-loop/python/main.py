@@ -1,6 +1,7 @@
 """main.py —— demo: 跟 G01 sampling + G06 generation 联动. 模拟一次完整推理.
 
 加 emit 回调演示流式输出 (像 ChatGPT 那样一个一个 token 蹦出来)."""
+
 from __future__ import annotations
 
 import sys
@@ -13,6 +14,7 @@ from generation import MockModel, generate
 def make_top_k_sampler(temperature: float = 0.8, top_k: int = 10):
     """简化版 G01 sampling, 内嵌进 demo (避免跨目录 import)."""
     rng = np.random.default_rng(2025)
+
     def sample(logits: np.ndarray) -> int:
         if temperature <= 0:
             return int(np.argmax(logits))
@@ -24,6 +26,7 @@ def make_top_k_sampler(temperature: float = 0.8, top_k: int = 10):
         probs = e / e.sum()
         pick = int(rng.choice(len(probs), p=probs))
         return int(top_idx[pick])
+
     return sample
 
 
@@ -41,22 +44,28 @@ def main() -> None:
 
     print(f">>> 推理开始, prompt={prompt}")
     print(f"   (词表 {model.n_vocab}, ctx {model.ctx_size})")
-    print(f"   生成中 (流式):")
+    print("   生成中 (流式):")
     print("  ", end="")
 
-    out, stats = generate(model, prompt=prompt, max_tokens=20, sample_fn=sampler, emit_fn=stream_emit)
+    out, stats = generate(
+        model, prompt=prompt, max_tokens=20, sample_fn=sampler, emit_fn=stream_emit
+    )
 
     print(f"\n\n>>> 完成. 输出 {len(out)} token, 停止原因: {stats.stop_reason}")
-    print(f"   Prefill: {stats.prefill_ms:.2f} ms ({stats.prompt_tokens} prompt tokens)")
+    print(
+        f"   Prefill: {stats.prefill_ms:.2f} ms ({stats.prompt_tokens} prompt tokens)"
+    )
     print(f"   Decode:  {stats.decode_ms:.2f} ms ({stats.generated_tokens} generated)")
     print(f"   实际 token/s: {stats.tokens_per_sec:.1f} (因 demo 加了 sleep)")
     print()
 
     # 演示停止条件: EOS
     print(">>> 演示 EOS 停止")
+
     def eos_after_5(logits):
-        eos_after_5.count = getattr(eos_after_5, 'count', 0) + 1
+        eos_after_5.count = getattr(eos_after_5, "count", 0) + 1
         return 999 if eos_after_5.count >= 5 else int(np.argmax(logits))
+
     model2 = MockModel(n_vocab=1000)
     out, stats = generate(model2, [1], 100, eos_after_5, eos_token=999)
     print(f"   生成 {len(out)} token 后遇 EOS=999, stop_reason={stats.stop_reason}")
@@ -65,7 +74,9 @@ def main() -> None:
     print("\n>>> 演示 ctx_size 上限")
     model_small = MockModel(n_vocab=50, ctx_size=20)
     out, stats = generate(model_small, [1, 2, 3], 100, lambda l: 1)
-    print(f"   ctx_size=20, prompt=3, 实际生成 {len(out)} token, stop_reason={stats.stop_reason}")
+    print(
+        f"   ctx_size=20, prompt=3, 实际生成 {len(out)} token, stop_reason={stats.stop_reason}"
+    )
 
 
 if __name__ == "__main__":
