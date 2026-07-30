@@ -14,6 +14,7 @@ class ToolDefinition(TypedDict):
     name: str
     description: str
     input_schema: dict[str, object]
+    success_condition: str
 
 
 class ToolErrorInfo(TypedDict):

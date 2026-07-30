@@ -10,6 +10,7 @@ TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     {
         "name": "report.generate",
         "description": "Generate a report and save it to a local path.",
+        "success_condition": "output_path exists in observable_state.existing_files",
         "input_schema": {
             "type": "object",
             "properties": {"output_path": {"type": "string"}},
@@ -20,6 +21,7 @@ TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     {
         "name": "file.upload",
         "description": "Upload an existing local file.",
+        "success_condition": "path exists in observable_state.uploaded_files",
         "input_schema": {
             "type": "object",
             "properties": {"path": {"type": "string"}},
@@ -30,6 +32,7 @@ TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     {
         "name": "link.create",
         "description": "Create a share link for a file that has been uploaded.",
+        "success_condition": "path exists in observable_state.linked_files",
         "input_schema": {
             "type": "object",
             "properties": {"path": {"type": "string"}},
@@ -40,6 +43,7 @@ TOOL_DEFINITIONS: tuple[ToolDefinition, ...] = (
     {
         "name": "email.send",
         "description": "Email the share link associated with a file.",
+        "success_condition": "an email to `to` exists in observable_state.sent_emails",
         "input_schema": {
             "type": "object",
             "properties": {
@@ -70,6 +74,7 @@ class ToolSandbox:
     uploaded: set[str] = field(default_factory=set)
     links: dict[str, str] = field(default_factory=dict)
     sent_emails: list[str] = field(default_factory=list)
+    silently_drop_uploads: int = 0
 
     def tool_definitions(self) -> list[ToolDefinition]:
         """Return copies safe to include in an AI prompt."""
@@ -130,6 +135,9 @@ class ToolSandbox:
                     f"{path} does not exist",
                     retryable=False,
                 )
+            if self.silently_drop_uploads > 0:
+                self.silently_drop_uploads -= 1
+                return f"uploaded:{path}"
             self.uploaded.add(path)
             return f"uploaded:{path}"
 
@@ -162,11 +170,28 @@ class ToolSandbox:
             retryable=False,
         )
 
+    def verify_effect(self, step: Step) -> str | None:
+        """Check observable postconditions instead of trusting tool return values."""
+        tool = step["tool"]
+        args = step["args"]
+        if tool == "report.generate" and args["output_path"] not in self.files:
+            return f"report was not created: {args['output_path']}"
+        if tool == "file.upload" and args["path"] not in self.uploaded:
+            return f"upload was acknowledged but not persisted: {args['path']}"
+        if tool == "link.create" and args["path"] not in self.links:
+            return f"share link was not created: {args['path']}"
+        if tool == "email.send":
+            expected_prefix = f"{args['to']} -> "
+            if not any(email.startswith(expected_prefix) for email in self.sent_emails):
+                return f"email was not recorded for recipient: {args['to']}"
+        return None
+
     def observable_state(self) -> dict[str, list[str]]:
         return {
             "existing_files": sorted(self.files),
             "uploaded_files": sorted(self.uploaded),
             "linked_files": sorted(self.links),
+            "sent_emails": sorted(self.sent_emails),
         }
 
 

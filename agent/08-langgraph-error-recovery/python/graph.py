@@ -26,6 +26,13 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
         step = state["plan"][state["current_step"]]
         try:
             result = sandbox.execute(step)
+            postcondition_error = sandbox.verify_effect(step)
+            if postcondition_error is not None:
+                raise ToolExecutionError(
+                    "POSTCONDITION_FAILED",
+                    postcondition_error,
+                    retryable=True,
+                )
         except ToolExecutionError as error:
             recovery_attempts = state["recovery_attempts"] + 1
             context: FailureContext = {

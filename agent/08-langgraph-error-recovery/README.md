@@ -2,20 +2,22 @@
 
 这个案例回答一个具体问题：
 
-> Agent 执行多步任务时，某一步明确报错，怎样把报错和现场一起交给 AI 修正，并从失败步骤继续，而不是整单重跑？
+> Agent 执行多步任务时，某一步明确报错或表面成功但实际无效，怎样把报错和现场一起交给 AI 修正，并从失败步骤继续，而不是整单重跑？
 
 ## 一句话方案
 
-工具抛出结构化错误后，系统保存已完成进度，组装 `FailureContext` 交给 AI；AI 只返回恢复提案，提案通过护栏校验后，LangGraph 更新失败步骤并从检查点继续执行。
+工具抛出结构化错误，或工具虽返回成功但后置条件不成立时，系统保存已完成进度，组装 `FailureContext` 交给 AI；AI 只返回恢复提案，提案通过护栏校验后，LangGraph 更新失败步骤并从检查点继续执行。
 
 ```mermaid
 flowchart LR
-    A["执行步骤"] --> B{"执行结果"}
-    B -->|成功| C["提交步骤"]
+    A["执行步骤"] --> B{"工具是否报错"}
+    B -->|否| V{"后置条件成立"}
+    V -->|是| C["提交步骤"]
     C -->|还有任务| A
     C -->|全部完成| Z["结束"]
 
     B -->|显性失败| D["组装 FailureContext<br/>报错 + 失败步骤 + 现场"]
+    V -->|隐形失败| D
     D --> E["AI 生成恢复提案"]
     E --> F{"护栏校验"}
     F -->|通过| G["修正当前步骤"]
@@ -52,8 +54,27 @@ FailureContext
 ```
 
 `available_tools` 不是只有工具名称。每个工具都提供 `description`、必填参数、
-参数类型以及是否允许额外参数。AI 据此生成调用；提案返回后，执行端再使用同一份
+参数类型、是否允许额外参数以及 `success_condition`。AI 据此生成调用；提案返回后，执行端再使用同一份
 Schema 机械校验，避免模型猜错参数或偷偷加入未声明字段。
+
+## 隐形失败：返回成功不等于目标完成
+
+Demo 可以让第一次 `file.upload` 返回 `uploaded:...`，但故意不写入
+`uploaded_files`。执行图不会相信返回字符串，而是调用 `verify_effect()` 检查
+真实可观察状态。检查失败会产生可重试的 `POSTCONDITION_FAILED`，交给恢复规划器
+决定重试；第二次上传真正落状态后才允许提交该步骤。
+
+对应轨迹如下：
+
+```text
+OK generate_report
+FAILED upload_report: POSTCONDITION_FAILED — route to AI planner
+AI PROPOSAL retry
+OK upload_report
+OK create_link
+OK send_email
+DONE all steps committed
+```
 
 AI 返回结构化 `RecoveryProposal`：
 
@@ -118,6 +139,7 @@ DONE all steps committed
 | Checkpointer | 按 `thread_id` 保存任务进度 |
 | 节点重入 | 修正计划后重新进入失败步骤 |
 | Tool Schema | 同时约束 AI 规划和执行端参数校验 |
+| 后置条件 | 检测工具假成功、状态未落地等隐形失败 |
 | 恢复预算 | 连续失败超过 2 次后暂停并转人工处理 |
 
 LangGraph 解决的是**状态与流程编排**，不会自动理解业务错误。以下内容仍需应用定义：

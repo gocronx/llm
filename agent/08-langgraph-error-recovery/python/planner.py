@@ -17,7 +17,8 @@ SYSTEM_PROMPT = """\
 2. 只能使用 available_tools 中的工具，并严格遵守对应 input_schema。
 3. 不得绕过权限、审批或预算限制。
 4. replacement_step 必须保留失败步骤的 id，resume_from 必须等于失败步骤 id。
-5. 只返回 JSON RecoveryProposal，不执行任何工具。
+5. 工具返回成功但 success_condition 未满足时，只在错误标记 retryable 时重试。
+6. 只返回 JSON RecoveryProposal，不执行任何工具。
 
 RecoveryProposal:
 {
@@ -54,6 +55,13 @@ class RuleBasedRecoveryPlanner:
         error = context["error"]
         step = context["failed_step"]
         files = context["observed_state"]["existing_files"]
+
+        if error["retryable"]:
+            return {
+                "strategy": "retry",
+                "reason": "工具返回成功但后置条件未满足，先重试当前步骤。",
+                "resume_from": step["id"],
+            }
 
         if error["code"] == "FILE_NOT_FOUND" and files:
             return {

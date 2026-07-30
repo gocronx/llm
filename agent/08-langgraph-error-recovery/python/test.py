@@ -112,12 +112,32 @@ def test_recovery_budget_stops_failure_loop() -> bool:
     return True
 
 
+def test_silent_upload_failure_is_detected_and_retried() -> bool:
+    state = initial_state()
+    state["plan"][1]["args"]["path"] = "output/report.pdf"
+    sandbox = ToolSandbox(silently_drop_uploads=1)
+    graph = build_graph(sandbox, RuleBasedRecoveryPlanner())
+    result = graph.invoke(
+        state,
+        config={"configurable": {"thread_id": "test-silent-failure"}},
+    )
+
+    assert result["status"] == "completed"
+    assert "output/report.pdf" in sandbox.uploaded
+    assert any("POSTCONDITION_FAILED" in event for event in result["events"])
+    assert any("AI PROPOSAL retry" in event for event in result["events"])
+    assert len(sandbox.sent_emails) == 1
+    print("✓ 上传假成功 → 后置条件失败 → AI 重试 → 继续完成")
+    return True
+
+
 def main() -> None:
     tests = [
         test_file_error_is_repaired,
         test_unsafe_proposal_is_rejected,
         test_invalid_tool_args_are_rejected,
         test_recovery_budget_stops_failure_loop,
+        test_silent_upload_failure_is_detected_and_retried,
     ]
     passed = sum(test() for test in tests)
     print(f"\n{passed}/{len(tests)} passed")
