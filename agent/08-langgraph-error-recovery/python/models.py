@@ -45,6 +45,11 @@ class AgentState(TypedDict):
     plan: list[Step]
     current_step: int
     recovery_attempts: int
+    execution_count: int
+    no_progress_count: int
+    last_action_signature: str | None
+    repeated_action_count: int
+    started_at: float
     committed_steps: list[str]
     failure_context: FailureContext | None
     recovery_proposal: RecoveryProposal | None

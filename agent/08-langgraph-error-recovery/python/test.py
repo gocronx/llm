@@ -1,7 +1,7 @@
 """不调用真实 LLM 的 LangGraph 恢复测试。"""
 from __future__ import annotations
 
-from graph import build_graph, initial_state
+from graph import LoopGuardConfig, build_graph, initial_state
 from planner import RuleBasedRecoveryPlanner
 from tools import ToolSandbox
 
@@ -99,7 +99,11 @@ def test_recovery_budget_stops_failure_loop() -> bool:
             }
 
     sandbox = ToolSandbox()
-    graph = build_graph(sandbox, StillBrokenPlanner())
+    guard = LoopGuardConfig(
+        max_identical_actions=10,
+        max_no_progress=10,
+    )
+    graph = build_graph(sandbox, StillBrokenPlanner(), guard)
     result = graph.invoke(
         initial_state(),
         config={"configurable": {"thread_id": "test-budget"}},
@@ -131,6 +135,65 @@ def test_silent_upload_failure_is_detected_and_retried() -> bool:
     return True
 
 
+def test_repeated_action_loop_is_stopped() -> bool:
+    state = initial_state()
+    state["plan"][1]["args"]["path"] = "output/report.pdf"
+    sandbox = ToolSandbox(silently_drop_uploads=10)
+    graph = build_graph(sandbox, RuleBasedRecoveryPlanner())
+    result = graph.invoke(
+        state,
+        config={"configurable": {"thread_id": "test-repeated-action"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("repeated action" in event for event in result["events"])
+    print("✓ 连续相同工具调用达到阈值后停止")
+    return True
+
+
+def test_no_progress_loop_is_stopped() -> bool:
+    guard = LoopGuardConfig(max_no_progress=1)
+    graph = build_graph(ToolSandbox(), RuleBasedRecoveryPlanner(), guard)
+    result = graph.invoke(
+        initial_state(),
+        config={"configurable": {"thread_id": "test-no-progress"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("no observable progress" in event for event in result["events"])
+    print("✓ 外部状态无进展达到阈值后停止")
+    return True
+
+
+def test_runtime_budget_is_enforced() -> bool:
+    state = initial_state()
+    state["started_at"] = 0
+    graph = build_graph(ToolSandbox(), RuleBasedRecoveryPlanner())
+    result = graph.invoke(
+        state,
+        config={"configurable": {"thread_id": "test-runtime-budget"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("runtime budget" in event for event in result["events"])
+    print("✓ 总运行时间超限后停止")
+    return True
+
+
+def test_execution_budget_is_enforced() -> bool:
+    guard = LoopGuardConfig(max_total_executions=0)
+    graph = build_graph(ToolSandbox(), RuleBasedRecoveryPlanner(), guard)
+    result = graph.invoke(
+        initial_state(),
+        config={"configurable": {"thread_id": "test-execution-budget"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("execution budget" in event for event in result["events"])
+    print("✓ 总执行次数超限后停止")
+    return True
+
+
 def main() -> None:
     tests = [
         test_file_error_is_repaired,
@@ -138,6 +201,10 @@ def main() -> None:
         test_invalid_tool_args_are_rejected,
         test_recovery_budget_stops_failure_loop,
         test_silent_upload_failure_is_detected_and_retried,
+        test_repeated_action_loop_is_stopped,
+        test_no_progress_loop_is_stopped,
+        test_runtime_budget_is_enforced,
+        test_execution_budget_is_enforced,
     ]
     passed = sum(test() for test in tests)
     print(f"\n{passed}/{len(tests)} passed")

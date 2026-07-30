@@ -34,7 +34,10 @@ def main() -> None:
     graph = build_graph(sandbox, planner)
     result = graph.invoke(
         initial_state(),
-        config={"configurable": {"thread_id": "demo-run-1"}},
+        config={
+            "recursion_limit": 50,
+            "configurable": {"thread_id": "demo-run-1"},
+        },
     )
 
     print("\nLangGraph execution trace")

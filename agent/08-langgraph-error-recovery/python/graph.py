@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import time
+from dataclasses import dataclass
 from typing import Literal
 
 from langgraph.checkpoint.memory import InMemorySaver
@@ -17,13 +21,61 @@ from tools import ToolExecutionError, ToolSandbox, redact_args
 MAX_RECOVERY_ATTEMPTS = 2
 
 
-def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
+@dataclass(frozen=True)
+class LoopGuardConfig:
+    max_total_executions: int = 12
+    max_identical_actions: int = 3
+    max_no_progress: int = 3
+    max_runtime_seconds: float = 120.0
+
+
+def _fingerprint(state: dict[str, list[str]]) -> str:
+    payload = json.dumps(state, ensure_ascii=False, sort_keys=True)
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def _action_signature(step: Step) -> str:
+    args = json.dumps(step["args"], ensure_ascii=False, sort_keys=True)
+    return f"{step['tool']}:{args}"
+
+
+def build_graph(
+    sandbox: ToolSandbox,
+    planner: RecoveryPlanner,
+    loop_guard: LoopGuardConfig | None = None,
+):
     """Build the recovery graph around injected tool and planner adapters."""
+    guard = loop_guard or LoopGuardConfig()
 
     def execute_step(
         state: AgentState,
     ) -> Command[Literal["commit_step", "plan_recovery", "human_review"]]:
         step = state["plan"][state["current_step"]]
+        if time.time() - state["started_at"] >= guard.max_runtime_seconds:
+            return Command(
+                update={"events": ["LOOP GUARD runtime budget exhausted"]},
+                goto="human_review",
+            )
+        if state["execution_count"] >= guard.max_total_executions:
+            return Command(
+                update={"events": ["LOOP GUARD execution budget exhausted"]},
+                goto="human_review",
+            )
+
+        signature = _action_signature(step)
+        repeated_count = (
+            state["repeated_action_count"] + 1
+            if signature == state["last_action_signature"]
+            else 1
+        )
+        if repeated_count >= guard.max_identical_actions:
+            return Command(
+                update={"events": [f"LOOP GUARD repeated action: {signature}"]},
+                goto="human_review",
+            )
+
+        execution_count = state["execution_count"] + 1
+        before_fingerprint = _fingerprint(sandbox.observable_state())
         try:
             result = sandbox.execute(step)
             postcondition_error = sandbox.verify_effect(step)
@@ -34,6 +86,26 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
                     retryable=True,
                 )
         except ToolExecutionError as error:
+            after_fingerprint = _fingerprint(sandbox.observable_state())
+            no_progress_count = (
+                state["no_progress_count"] + 1
+                if before_fingerprint == after_fingerprint
+                else 0
+            )
+            execution_update = {
+                "execution_count": execution_count,
+                "last_action_signature": signature,
+                "repeated_action_count": repeated_count,
+                "no_progress_count": no_progress_count,
+            }
+            if no_progress_count >= guard.max_no_progress:
+                return Command(
+                    update={
+                        **execution_update,
+                        "events": ["LOOP GUARD no observable progress"],
+                    },
+                    goto="human_review",
+                )
             recovery_attempts = state["recovery_attempts"] + 1
             context: FailureContext = {
                 "goal": state["goal"],
@@ -66,6 +138,7 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
                     update={
                         "failure_context": context,
                         "recovery_attempts": recovery_attempts,
+                        **execution_update,
                         "events": ["RECOVERY BUDGET exhausted"],
                     },
                     goto="human_review",
@@ -74,6 +147,7 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
                 update={
                     "failure_context": context,
                     "recovery_attempts": recovery_attempts,
+                    **execution_update,
                     "status": "recovering",
                     "events": [
                         f"FAILED {step['id']}: {error.code} — route to AI planner"
@@ -83,7 +157,13 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
             )
 
         return Command(
-            update={"events": [f"OK {step['id']}: {result}"]},
+            update={
+                "execution_count": execution_count,
+                "last_action_signature": signature,
+                "repeated_action_count": repeated_count,
+                "no_progress_count": 0,
+                "events": [f"OK {step['id']}: {result}"],
+            },
             goto="commit_step",
         )
 
@@ -244,6 +324,11 @@ def initial_state() -> AgentState:
         "plan": plan,
         "current_step": 0,
         "recovery_attempts": 0,
+        "execution_count": 0,
+        "no_progress_count": 0,
+        "last_action_signature": None,
+        "repeated_action_count": 0,
+        "started_at": time.time(),
         "committed_steps": [],
         "failure_context": None,
         "recovery_proposal": None,
