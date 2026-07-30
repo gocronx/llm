@@ -4,10 +4,9 @@ from __future__ import annotations
 import os
 
 import httpx
+from client import run
 from dotenv import load_dotenv
 from openai import OpenAI
-
-from client import run
 
 load_dotenv()
 

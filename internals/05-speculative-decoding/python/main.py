@@ -12,7 +12,6 @@ from speculative import (
     speculative_decode,
 )
 
-
 # 模拟 target/draft 的执行时间 (真实是 GPU forward, 这里用 sleep 近似)
 TARGET_MS = 10.0   # 70B 大模型一次 forward
 DRAFT_MS = 1.0     # 小 draft 模型 / MTP head

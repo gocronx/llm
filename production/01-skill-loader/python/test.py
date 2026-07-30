@@ -7,7 +7,6 @@ from pathlib import Path
 from loader import load_skills, load_skills_cached
 from router import _extract_array, compose, route_keyword
 
-
 SAMPLE_SKILL = """---
 name: test-skill
 description: A test skill for translation

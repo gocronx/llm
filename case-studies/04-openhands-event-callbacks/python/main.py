@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import os
 import shutil
 import sys
@@ -16,11 +17,8 @@ import time
 import uuid
 from pathlib import Path
 
-import httpx
-from dotenv import load_dotenv
-from openai import OpenAI
-
 import events
+import httpx
 from callbacks import (
     FailingProcessor,
     LoggingProcessor,
@@ -28,6 +26,8 @@ from callbacks import (
     WebhookProcessor,
 )
 from dispatcher import CallbackDispatcher
+from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -126,7 +126,6 @@ async def scenario_per_conversation() -> None:
     files = sorted(WEBHOOK_SINK.iterdir()) if WEBHOOK_SINK.exists() else []
     payloads = []
     for f in files:
-        import json
         if f.is_file():
             payloads.append(json.loads(f.read_text())["conversation_id"])
     print(f"\nwebhook 收到的事件来自: {payloads}")

@@ -4,9 +4,10 @@
 """
 
 import hashlib
-import jwt
 from datetime import datetime, timedelta
-from typing import Optional, Dict
+from typing import Dict, Optional
+
+import jwt
 
 
 class AuthenticationError(Exception):

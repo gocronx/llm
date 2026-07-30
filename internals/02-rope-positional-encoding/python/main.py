@@ -5,7 +5,6 @@ RoPE 不像绝对衰减 (cos 振荡), 但相关性会随距离而震荡-衰减."
 from __future__ import annotations
 
 import numpy as np
-
 from rope import apply_rope, apply_rope_yarn, dot_product
 
 

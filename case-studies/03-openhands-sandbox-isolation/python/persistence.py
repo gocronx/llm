@@ -18,7 +18,6 @@ from typing import Optional
 
 from sandbox import SandboxInfo, SandboxStatus
 
-
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS sandboxes (
     id              TEXT PRIMARY KEY,

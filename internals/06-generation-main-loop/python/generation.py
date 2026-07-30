@@ -52,12 +52,12 @@ attention 算 softmax(Q · K^T) · V 时, 第 t 个 token 的 K, V 用到所有 
 """
 from __future__ import annotations
 
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Protocol
 
 import numpy as np
-
 
 # ----- 接口定义 -----
 
@@ -142,8 +142,6 @@ def generate(
          c. forward(token, pos++) → 新 logits
       4. 返回生成 list + stats
     """
-    import time
-
     if not prompt:
         raise ValueError("prompt must be non-empty")
     if len(prompt) > model.ctx_size:

@@ -15,8 +15,14 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable
 
-from openai import APIConnectionError, APIError, APIStatusError, APITimeoutError, OpenAI, RateLimitError
-
+from openai import (
+    APIConnectionError,
+    APIError,
+    APIStatusError,
+    APITimeoutError,
+    OpenAI,
+    RateLimitError,
+)
 
 # ---- circuit breaker：闭合 / 打开 / 半开 ----
 

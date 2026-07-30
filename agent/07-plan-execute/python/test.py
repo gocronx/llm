@@ -6,8 +6,9 @@ import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from agent import PlanExecuteAgent
 from planner import _parse
+
+from agent import PlanExecuteAgent
 
 
 def _resp(content: str):

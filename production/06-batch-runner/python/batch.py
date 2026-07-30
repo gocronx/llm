@@ -16,10 +16,19 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    OpenAI,
+    RateLimitError,
+)
 from tenacity import (
-    RetryError, Retrying, retry_if_exception_type,
-    stop_after_attempt, wait_exponential,
+    RetryError,
+    Retrying,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
 )
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -59,7 +68,6 @@ class Result:
 def _single_call(prompt: str) -> tuple[str, int]:
     """一次 LLM 调用。SDK 的 APIConnectionError / APITimeoutError / RateLimitError
     都翻译成 TransientError；其它（400/401）让 tenacity 不重试地往外抛。"""
-    from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimitError
     try:
         resp = _client.chat.completions.create(
             model=MODEL_ID,

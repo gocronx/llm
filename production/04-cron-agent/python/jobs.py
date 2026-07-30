@@ -11,10 +11,9 @@ from datetime import datetime
 from pathlib import Path
 
 import httpx
+import state
 from dotenv import load_dotenv
 from openai import OpenAI
-
-import state
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 

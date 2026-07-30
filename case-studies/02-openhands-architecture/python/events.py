@@ -8,6 +8,7 @@ OpenHands 的事件存储有 Filesystem / AWS / GoogleCloud 三种实现, 接口
 from __future__ import annotations
 
 import json
+import shutil
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -77,7 +78,6 @@ def list_conversations() -> list[str]:
 
 def clear(conversation_id: str | None = None) -> None:
     """删除某个对话 (或全部) 的事件. demo 重置用."""
-    import shutil
     if conversation_id is None:
         if EVENTS_DIR.exists():
             shutil.rmtree(EVENTS_DIR)

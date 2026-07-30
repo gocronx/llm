@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Callable
 
 import httpx
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 from openai import OpenAI
@@ -85,7 +86,6 @@ def make_app(card: AgentCard, handlers: dict[str, Callable[[dict], dict]]) -> Fa
 
 def serve(app: FastAPI, port: int, name: str) -> None:
     """启动 uvicorn，log level 可被环境变量压低（launcher 给子进程压成 warning）。"""
-    import uvicorn
     auth = "bearer auth" if AGENT_TOKEN else "open"
     print(f"[{name}] http://127.0.0.1:{port}  ({auth})")
     uvicorn.run(app, host="127.0.0.1", port=port,

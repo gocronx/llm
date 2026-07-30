@@ -34,7 +34,6 @@ from typing import Optional
 
 import psutil
 
-
 # ── 命令安全检查 (upgrade #6, 仅 ProcessSandbox 用; Docker 不需要) ──────
 # 诚实声明: 这是 best-effort 字符串匹配, NOT 真正的安全沙盒.
 # 真实的 LLM 能通过 base64 / 变量 / shell 替换绕过它. 这是 fig leaf, 不是城墙.
@@ -201,8 +200,8 @@ class ProcessSandbox(SandboxService):
         # upgrade #3: 可选持久化
         self._db = None
         if db_path is not None:
-            # 延迟导入避免循环
-            from persistence import SandboxRegistry
+            # Circular dependency: persistence imports SandboxInfo from this module.
+            from persistence import SandboxRegistry  # noqa: PLC0415
             self._db = SandboxRegistry(db_path)
             self._reload_from_db()
 

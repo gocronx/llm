@@ -10,10 +10,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
-from openai import OpenAI
-
 from judge import binary as judge_binary
 from metrics import evaluate
+from openai import OpenAI
 
 
 @dataclass

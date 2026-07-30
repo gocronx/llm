@@ -7,7 +7,6 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from runner import load_jsonl, print_report, run
 
 load_dotenv()

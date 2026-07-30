@@ -4,9 +4,8 @@ from __future__ import annotations
 import time
 
 import httpx
-from openai import OpenAI
-
 from fakesrv import FakeServer
+from openai import OpenAI
 from resilient import Breaker, Endpoint, Resilient
 
 

@@ -53,7 +53,8 @@ def cmd_train() -> None:
 
 
 def cmd_compare() -> None:
-    from compare import main as compare_main
+    # Optional MLX dependency is loaded only for the compare subcommand.
+    from compare import main as compare_main  # noqa: PLC0415
     compare_main(DEFAULT_MODEL, str(ADAPTERS), DATA / "test.jsonl",
                  HERE / "compare_results.json")
 

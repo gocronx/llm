@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from rope import apply_rope, apply_rope_yarn, dot_product, precompute_freqs
 
 

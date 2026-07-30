@@ -86,11 +86,11 @@ results = await asyncio.gather(
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
-
 
 # ---------------- 数据结构 ----------------
 
@@ -178,7 +178,6 @@ class SubAgent:
                     result = f"[tool '{name}' not allowed for {self.agent_type} subagent]"
                 else:
                     try:
-                        import json
                         args = json.loads(tc["function"]["arguments"] or "{}")
                         result = str(self.tools[name](**args))
                     except Exception as e:

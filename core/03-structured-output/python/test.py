@@ -7,10 +7,9 @@ from __future__ import annotations
 import os
 
 import httpx
+from client import extract
 from dotenv import load_dotenv
 from openai import OpenAI
-
-from client import extract
 from schemas import PRODUCT, RESUME, SENTIMENT
 
 load_dotenv()

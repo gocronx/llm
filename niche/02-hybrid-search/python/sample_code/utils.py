@@ -3,12 +3,13 @@
 提供常用的辅助函数、数据验证、格式化等功能
 """
 
-import re
-import hashlib
 import base64
-from typing import Any, Dict, List, Optional
-from datetime import datetime, timedelta
+import hashlib
 import json
+import re
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 
 def validate_email(email: str) -> bool:
@@ -252,5 +253,4 @@ if __name__ == "__main__":
     
     # 计时器
     with Timer("测试操作"):
-        import time
         time.sleep(0.1)

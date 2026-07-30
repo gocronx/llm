@@ -1,6 +1,7 @@
 """test.py —— state 模块 + 不依赖 LLM 的 job 逻辑测试。"""
 from __future__ import annotations
 
+import tempfile
 import time
 from pathlib import Path
 from unittest.mock import patch
@@ -15,7 +16,6 @@ def t(label: str, cond: bool) -> bool:
 
 def setup() -> None:
     # 把 state 文件指向临时位置
-    import tempfile
     tmpdir = Path(tempfile.mkdtemp())
     state.STATE_FILE = tmpdir / "state.json"
 

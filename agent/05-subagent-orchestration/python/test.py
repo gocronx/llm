@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import time
 
 from orchestrator import Orchestrator, SubAgent, SubAgentResult
 
@@ -33,7 +35,6 @@ def mock_llm_one_tool_then_done(tool_name: str, tool_args: dict, final: str):
     def llm(messages, schemas):
         state["step"] += 1
         if state["step"] == 1:
-            import json
             return {
                 "tool_calls": [{"id": "c1", "function": {"name": tool_name, "arguments": json.dumps(tool_args)}}],
                 "content": "",
@@ -124,15 +125,13 @@ def test_orchestrator_unknown_type() -> bool:
 
 def test_orchestrator_parallel() -> bool:
     """并行发起 3 个 subagent, 总时间 ≈ max(单个), 不是 sum."""
-    import time as _t
-
     def slow_llm(delay):
         async def real(messages, schemas):
             await asyncio.sleep(delay)
             return {"tool_calls": [], "content": f"done after {delay}s"}
         # async llm: 我们 SubAgent.run 期望同步 llm_call... 简化: 用同步 sleep 模拟
         def sync_llm(messages, schemas):
-            _t.sleep(delay)
+            time.sleep(delay)
             return {"tool_calls": [], "content": f"done after {delay}s"}
         return sync_llm
 

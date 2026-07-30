@@ -14,9 +14,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from openai import OpenAI
-
 from tools import call, schemas
-
 
 SYSTEM = """你是一个会用工具的助手。
 - 需要外部信息时调用工具，工具返回后再决定下一步

@@ -8,11 +8,9 @@ import json
 from dataclasses import dataclass, field
 from typing import Callable
 
-from openai import OpenAI
-
 from governance import estimate_total_tokens, govern
+from openai import OpenAI
 from tools import call, schemas
-
 
 SYSTEM = """你是会用工具的助手. 工具结果可能很长, 你要善用它们但别复述."""
 

@@ -4,9 +4,12 @@ import argparse
 
 from models import REGISTRY
 from router import (
-    RouteResult, route_always, route_cascade, route_classifier, route_rules,
+    RouteResult,
+    route_always,
+    route_cascade,
+    route_classifier,
+    route_rules,
 )
-
 
 QUERIES = [
     "你好",

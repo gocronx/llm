@@ -9,6 +9,7 @@ import time
 from pathlib import Path
 
 import httpx
+from coordinator import run_coordinator
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
@@ -80,7 +81,6 @@ def main():
             print(f"  - {card['name']:<12} caps={card['capabilities']}")
 
         # 跑 demo queries
-        from coordinator import run_coordinator
         for i, q in enumerate(DEMO_QUERIES, 1):
             print(f"\n--- Query [{i}] {q[:60]}{'...' if len(q) > 60 else ''}")
             started = time.time()

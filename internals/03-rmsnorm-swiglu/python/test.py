@@ -1,8 +1,9 @@
 """test.py —— RMSNorm + SiLU + SwiGLU 的数学性质验证."""
 from __future__ import annotations
 
-import numpy as np
+import time
 
+import numpy as np
 from layers import layer_norm, rms_norm, sigmoid_stable, silu, swiglu
 
 
@@ -100,7 +101,6 @@ def test_swiglu_shape_and_gating() -> bool:
 
 def test_rmsnorm_speed_advantage() -> bool:
     """验证 RMSNorm 比 LayerNorm 操作数少 (一次 mean vs 两次)."""
-    import time
     np.random.seed(3)
     x = np.random.randn(32, 4096).astype(np.float32)
 

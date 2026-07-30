@@ -1,9 +1,8 @@
 """chat.py —— 一个 Memory + LLM 客户端 = 一个会话。整文件 cp 进项目即可。"""
 from __future__ import annotations
 
-from openai import OpenAI
-
 from memory import Memory
+from openai import OpenAI
 
 
 class Chat:

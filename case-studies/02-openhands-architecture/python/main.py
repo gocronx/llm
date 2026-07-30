@@ -29,11 +29,10 @@ import sys
 import time
 from datetime import datetime
 
+import events
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
-import events
 from replay import replay_to_messages, summarize
 
 load_dotenv()

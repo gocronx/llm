@@ -8,7 +8,6 @@ import os
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from techniques import baseline, chain_of_thought, few_shot, structured, system_prompt
 
 load_dotenv()

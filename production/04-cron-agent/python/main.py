@@ -10,10 +10,9 @@ import signal
 import time
 from datetime import datetime, timedelta
 
+import state
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
-
-import state
 from jobs import check_api, heartbeat, summarize_recent
 
 logging.getLogger("apscheduler").setLevel(logging.WARNING)

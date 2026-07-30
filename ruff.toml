@@ -1,0 +1,5 @@
+[lint]
+select = [
+    "I",       # imports must be sorted and grouped
+    "PLC0415", # imports must be at module top level
+]

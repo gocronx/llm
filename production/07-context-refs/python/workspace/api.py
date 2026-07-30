@@ -2,7 +2,6 @@
 
 from user import User, find_user
 
-
 _users: list[User] = []
 
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from orchestrator import Step, run_parallel, run_sequential
+from orchestrator import Step, _context, run_parallel, run_sequential
 
 
 @dataclass
@@ -44,7 +44,6 @@ def test_context_truncation() -> bool:
     res1 = a["w"].execute("step1")
     # 直接造一个超长的依赖输出
     results = {"draft": "x" * 1000}
-    from orchestrator import _context
     ctx = _context(results, ["draft"], max_chars=100)
     ok = len(ctx) < 200 and "已截断" in ctx
     print(f"{'✓' if ok else '✗'} context truncation kicks in")

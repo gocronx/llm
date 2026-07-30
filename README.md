@@ -1,6 +1,6 @@
 # LLM 开发实战项目集
 
-30 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
+32 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
 
 ![五个抽屉按目的分，每件拿来即跑、拆开能学](assets/readme-illustrations/01-five-drawers.png)
 
@@ -9,7 +9,7 @@
 ```
 llm/
 ├── core/           # 核心 LLM 工程能力 (8 个)
-├── agent/          # Agent 范式 + 长跑治理 (6 个)
+├── agent/          # Agent 范式 + 长跑治理 (8 个)
 ├── production/     # 生产工程化 (7 个)
 ├── niche/          # 价值评估两极的话题 (3 个)
 ├── case-studies/   # 真实开源项目源码拆解 + 最小复刻
@@ -68,6 +68,7 @@ cp .env.example .env
 | 05 | [subagent-orchestration](agent/05-subagent-orchestration) | ⭐⭐⭐⭐ | 主 agent 并行 fan-out subagent + isolated context + 真 LLM 实测 |
 | 06 | [tool-call-recovery](agent/06-tool-call-recovery) | ⭐⭐⭐⭐ | 4 类死循环检测 + 错误喂回 LLM 自修；真 DuckDuckGo 联网 |
 | 07 | [plan-execute](agent/07-plan-execute) | ⭐⭐⭐⭐ | Plan-and-Execute：先规划再执行 + replan，跟 01 的 ReAct 对照 |
+| 08 | [langgraph-error-recovery](agent/08-langgraph-error-recovery) | ⭐⭐⭐⭐⭐ | LangGraph 多步任务恢复：FailureContext + AI 修复 + 护栏 + 断点续跑 |
 
 ### production · 生产工程化
 
@@ -129,7 +130,7 @@ cp .env.example .env
 - **想降本**：`core/07-caching` + `production/03-model-router`，两层正交叠加
 - **跑评测 / 数据生成**：`core/08-evaluation` + `production/06-batch-runner`，配合用
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
-- **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（错误恢复）；多 agent 并行上 `05-subagent-orchestration`
+- **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（单轮自修）→ `08-langgraph-error-recovery`（多步持久恢复）；多 agent 并行上 `05-subagent-orchestration`
 - **想懂 LLM 内部**：去 [`internals/`](internals/) 看采样 / RoPE / RMSNorm+SwiGLU / FP8 量化 / 投机解码 / 生成主循环（6 个 numpy 单测 demo，建议从 06 主循环入手）
 - **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04) / 三种 skill 哲学对照 (05)
 
@@ -170,6 +171,7 @@ python python/demo.py
   - `production/04-cron-agent`：`apscheduler`
   - `production/06-batch-runner`：`tenacity`
   - `agent/06-tool-call-recovery`：`ddgs`（真联网搜索）
+  - `agent/08-langgraph-error-recovery`：`langgraph`
 
 ## 测试
 
@@ -182,6 +184,7 @@ cd production/03-model-router/python && python -m unittest test_failover.py -v
 # agent 长跑治理 4 个 demo 都有完整 test.py
 cd agent/03-context-governance/python && python test.py    # 7/7
 cd agent/06-tool-call-recovery/python && python test.py    # 11/11
+cd agent/08-langgraph-error-recovery/python && python test.py  # 2/2
 ```
 
 凡是覆盖了 mock-based 单测的都不依赖真实 LLM，秒级返回。

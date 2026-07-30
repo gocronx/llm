@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from layers import layer_norm, rms_norm, sigmoid_stable, silu, swiglu
 
 

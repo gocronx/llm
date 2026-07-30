@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from agents._base import AgentCard, call_llm, make_app
 from util import extract_json_array
+
+from agents._base import AgentCard, call_llm, make_app, serve
 
 PORT = int(os.getenv("REVIEWER_PORT", "8102"))
 
@@ -37,5 +38,4 @@ def review_code(payload: dict) -> dict:
 app = make_app(card, handlers={"review-code": review_code})
 
 if __name__ == "__main__":
-    from agents._base import serve
     serve(app, PORT, card.name)

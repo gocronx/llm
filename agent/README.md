@@ -18,6 +18,7 @@ flowchart TD
     S --> S4["Tree of Thoughts ❌"]
     S --> S5["ReWOO ❌"]
     S --> S6["LATS ❌"]
+    S --> S7["Durable Recovery ✅ 08"]
 
     M --> M1["Supervisor / 主管 ✅ 05"]
     M --> M2["Hierarchical / 分层 ❌"]
@@ -38,6 +39,7 @@ flowchart TD
 | ReAct | 思考、调工具、看结果，交替着走一步看一步 | 通用工具调用，最常见 | ✅ [01-simple](01-simple) |
 | Plan-and-Execute | 先把整件事拆成计划，再照着执行 | 步骤多、前后有依赖 | ✅ [07-plan-execute](07-plan-execute) |
 | Reflexion / 自我修正 | 失败了把错误喂回去，让模型自己改 | 容易出错、需要试错的任务 | ✅ [06-tool-call-recovery](06-tool-call-recovery) |
+| Durable Recovery | 保存多步任务状态，失败后修复并从检查点继续 | 有副作用、不能整单重跑 | ✅ [08-langgraph-error-recovery](08-langgraph-error-recovery) |
 | Tree of Thoughts | 把下一步展开成多个分支，打分加回溯 | 解谜、需要探索的推理 | ❌ |
 | ReWOO | 推理和取证分开，先列全所有要查的，再批量查 | 想省 token、能并行 | ❌ |
 | LATS | ReAct 上面套蒙特卡洛树搜索 | 追求决策质量、不在乎慢 | ❌ |
@@ -85,6 +87,22 @@ flowchart LR
 ```
 
 [06-tool-call-recovery](06-tool-call-recovery) 实现了四类死循环的检测和错误回灌，算 Reflexion 思路落到工程上的最小版本。
+
+### Durable Recovery ✅ 08
+
+06 解决“这一轮工具报错后，怎样让模型换个做法”；08 解决“多步任务已经做完一半，怎样保存进度、修复失败步骤并安全续跑”。
+
+```mermaid
+flowchart LR
+    E["执行步骤"] -->|失败| C["FailureContext"]
+    C --> P["AI 恢复规划"]
+    P --> G{"校验 + 护栏"}
+    G -->|通过| E
+    G -->|拒绝| H["人工接管"]
+    E -->|成功| K["提交检查点"]
+```
+
+[08-langgraph-error-recovery](08-langgraph-error-recovery) 用 LangGraph 的 `StateGraph`、`Command` 和 checkpointer 实现这个闭环。重点不是框架 API，而是 AI 只提出结构化恢复方案，确定性护栏决定能不能执行。
 
 ### ToT / ReWOO / LATS ❌
 
@@ -164,6 +182,7 @@ flowchart LR
 - 通用工具调用，先上 ReAct（[01](01-simple)）
 - 步数多、前后有依赖，用 Plan-Execute（[07](07-plan-execute)）
 - 任务容易失败、要能自愈，参考 Reflexion 思路（[06](06-tool-call-recovery)）
+- 多步任务有副作用、失败后不能从头跑，用持久恢复（[08](08-langgraph-error-recovery)）
 - 任务可拆、想并行又想 context 干净，用主管式 fan-out（[05](05-subagent-orchestration)）
 - 固定流水线、角色接力，用 Pipeline（[02](02-multi-agent)）
 - Agent 跑长了崩，先补长跑治理（[03](03-context-governance) → [04](04-summary-compression)），这跟选哪种架构没冲突
@@ -174,7 +193,7 @@ flowchart LR
 
 | | 已实现 | 仅文档提到 |
 |--|--------|-----------|
-| 单 Agent | ReAct(01)、Plan-Execute(07)、Reflexion(06) | ToT、ReWOO、LATS |
+| 单 Agent | ReAct(01)、Plan-Execute(07)、Reflexion(06)、Durable Recovery(08) | ToT、ReWOO、LATS |
 | 多 Agent | Supervisor(05)、Pipeline+Parallel(02) | Hierarchical、Network |
 | 横切 | 长跑治理(03/04) | — |
 

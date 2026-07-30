@@ -6,7 +6,6 @@ import os
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from tools import schemas
 
 load_dotenv()

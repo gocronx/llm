@@ -14,7 +14,9 @@ import sys
 import time
 from pathlib import Path
 
+from docker_sandbox import RESOURCE_LIMITS, DockerSandbox
 from sandbox import ProcessSandbox, SandboxStatus
+
 import agent
 
 
@@ -178,7 +180,6 @@ def scenario_workspace_persistence(svc: ProcessSandbox) -> None:
 # ── 场景 5: 资源限制 (Docker only, upgrade #2) ─────────────────────────
 def scenario_resource_limits(svc) -> None:
     _print_section("场景 5 · 资源限制: fork-bomb 被 pids_limit 拦 (仅 Docker)")
-    from docker_sandbox import DockerSandbox, RESOURCE_LIMITS
     if not isinstance(svc, DockerSandbox):
         print("此场景只在 Docker 后端生效 (Process 后端无资源限制).")
         print("跑: python main.py --backend docker --scenario 5")
@@ -246,7 +247,6 @@ def scenario_idle_timeout(svc) -> None:
 def scenario_path_blacklist(svc) -> None:
     _print_section("场景 7 · ProcessSandbox 拒访问 /etc /usr 等 (best-effort)")
 
-    from sandbox import ProcessSandbox
     if not isinstance(svc, ProcessSandbox):
         print("此场景演示 ProcessSandbox 的字符串黑名单.")
         print("Docker 后端不需要 — 它有真隔离. 跑: python main.py --backend process --scenario 7")
@@ -285,7 +285,6 @@ def scenario_path_blacklist(svc) -> None:
 def scenario_persistence(svc) -> None:
     _print_section("场景 8 · SQLite 持久化 + 跨进程恢复 (仅 ProcessSandbox)")
 
-    from sandbox import ProcessSandbox
     if not isinstance(svc, ProcessSandbox):
         print("此场景演示 ProcessSandbox 跨进程恢复. 跑:")
         print("  python main.py --backend process --scenario 8")
@@ -384,7 +383,6 @@ def main() -> None:
 
     # 多后端抽象的实际威力: 这里只换一行, 下面的 scenarios 全部不动.
     if args.backend == "docker":
-        from docker_sandbox import DockerSandbox
         try:
             svc = DockerSandbox(base_dir=base)
             print(f"[使用 Docker 后端, 镜像 = {svc.image}]")

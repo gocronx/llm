@@ -6,9 +6,9 @@ import os
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
+from orchestrator import Step, run_parallel, run_sequential
 
 from agent import Agent
-from orchestrator import Step, run_parallel, run_sequential
 
 load_dotenv()
 

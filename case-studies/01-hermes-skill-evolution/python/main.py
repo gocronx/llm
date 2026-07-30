@@ -20,11 +20,10 @@ import os
 import sys
 
 import httpx
+import reviewer
+import skills
 from dotenv import load_dotenv
 from openai import OpenAI
-
-import skills
-import reviewer
 
 load_dotenv()
 

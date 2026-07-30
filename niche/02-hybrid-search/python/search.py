@@ -15,7 +15,6 @@ from pathlib import Path
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 CODE_EXT = (".py", ".js", ".ts", ".go", ".rs", ".java", ".c", ".cpp", ".h")
 
 

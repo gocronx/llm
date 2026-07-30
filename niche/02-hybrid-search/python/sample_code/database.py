@@ -4,9 +4,9 @@
 """
 
 import sqlite3
-from typing import List, Dict, Optional, Any
-from contextlib import contextmanager
 import threading
+from contextlib import contextmanager
+from typing import Any, Dict, List, Optional
 
 
 class DatabaseError(Exception):

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from quant import (
     FP8_MAX,
     build_fp8_table,

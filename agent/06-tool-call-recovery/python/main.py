@@ -16,9 +16,7 @@ from collections.abc import Callable
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from recovery import RecoveryConfig, ToolCallRecovery
-
 
 # ----- Inline tool_call XML parser (兼容 Qwen 等不走 standard API 的模型) -----
 
@@ -77,7 +75,8 @@ def web_search(query: str) -> str:
 
     网络问题时返回 {"error": ...} JSON, recovery 的 wrap_tool_error 路径仍会 fed back."""
     try:
-        from ddgs import DDGS
+        # Optional dependency: keep the rest of the demo usable without DDGS.
+        from ddgs import DDGS  # noqa: PLC0415
         results = list(DDGS().text(query, max_results=5, region="wt-wt"))
         hits = [
             {"title": r.get("title", "")[:120],

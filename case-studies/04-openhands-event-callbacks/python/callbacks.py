@@ -5,6 +5,7 @@ set_title_callback_processor.py (业务实现) + event_callback_models.py:51-70 
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -97,7 +98,6 @@ class TitleSetterProcessor(EventCallbackProcessor):
             return CallbackResult(status=ResultStatus.SUCCESS, detail="not a user_message, skipped")
 
         # 把 OpenAI 调用包成 sync (我们 demo 用 asyncio.to_thread 走子线程, 避免阻塞 event loop)
-        import asyncio
         user_text = event.payload.get("text", "")
         if not user_text:
             return None  # 未就绪, 下次再来

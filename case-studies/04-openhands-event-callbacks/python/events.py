@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import time
 import uuid
 from dataclasses import asdict, dataclass, field
@@ -51,6 +52,5 @@ def load_all(conversation_id: str) -> list[Event]:
 
 
 def clear() -> None:
-    import shutil
     if EVENTS_DIR.exists():
         shutil.rmtree(EVENTS_DIR)

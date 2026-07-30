@@ -11,9 +11,7 @@ from pathlib import Path
 from typing import Optional
 
 from openai import OpenAI
-
 from skills import Skill, SkillRegistry, format_skill_md, parse_skill_md
-
 
 # 这段 prompt 是这个模式的灵魂. 缩短版的 hermes _SKILL_REVIEW_PROMPT.
 REVIEW_PROMPT = """\

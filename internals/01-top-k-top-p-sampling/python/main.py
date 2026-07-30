@@ -11,7 +11,6 @@ from __future__ import annotations
 from collections import Counter
 
 import numpy as np
-
 from sampling import sample, softmax
 
 VOCAB = ["the", "a", "of", "to", "and", "in", "is", "that", "for", "rare"]

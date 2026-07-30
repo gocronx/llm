@@ -61,7 +61,6 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
-
 # ---------------- 结构化模板 ----------------
 
 _SUMMARY_PREAMBLE = """You are a summarization agent creating a context checkpoint. \

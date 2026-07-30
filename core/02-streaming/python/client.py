@@ -13,7 +13,6 @@ import json
 from typing import Iterator
 
 from openai import OpenAI
-
 from tools import call, schemas
 
 

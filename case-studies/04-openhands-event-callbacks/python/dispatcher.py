@@ -18,6 +18,7 @@ import asyncio
 import json
 import logging
 import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -81,7 +82,6 @@ class CallbackDispatcher:
         conv_id: Optional[str] = None,
         event_kind: Optional[str] = None,
     ) -> str:
-        import uuid
         cb_id = uuid.uuid4().hex[:12]
         self._registry[cb_id] = CallbackRegistration(
             callback_id=cb_id,

@@ -3,10 +3,10 @@ RESTful API 模块
 提供 HTTP 接口、路由、中间件等功能
 """
 
-from typing import Callable, Dict, Any, Optional
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
+from typing import Any, Callable, Dict, Optional
+from urllib.parse import parse_qs, urlparse
 
 
 class Request:

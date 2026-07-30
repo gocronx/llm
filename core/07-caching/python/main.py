@@ -5,11 +5,10 @@ import os
 import time
 
 import httpx
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from cache import Exact, Semantic
 from client import Cached
+from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 

@@ -6,9 +6,8 @@ from pathlib import Path
 
 import httpx
 from dotenv import load_dotenv
-from openai import OpenAI
-
 from loader import load_skills_cached
+from openai import OpenAI
 from router import compose, route_keyword, route_llm, run_implicit
 
 load_dotenv()

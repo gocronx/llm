@@ -26,7 +26,6 @@ from typing import Optional
 
 from sandbox import SandboxInfo, SandboxService, SandboxStatus
 
-
 # 默认用社区最广的 python slim 镜像. 真 OpenHands 用自家镜像 (内置 agent server).
 # Demo 不需要 agent server, 只需要一个能跑 bash + python 的环境.
 DEFAULT_IMAGE = "python:3.11-slim"
@@ -55,7 +54,8 @@ class DockerSandbox(SandboxService):
     ) -> None:
         # Lazy import: 没装 docker 也不影响 ProcessSandbox 用户.
         try:
-            import docker  # type: ignore
+            # Optional dependency: ProcessSandbox must work without docker-py.
+            import docker  # type: ignore  # noqa: PLC0415
         except ImportError as e:
             raise RuntimeError(
                 "DockerSandbox 需要 docker-py: pip install 'docker>=6.0.0'"
@@ -82,7 +82,8 @@ class DockerSandbox(SandboxService):
 
     # ── 镜像准备 (OpenHands 也会做) ────────────────────────────────────
     def _ensure_image(self) -> None:
-        import docker
+        # Optional dependency: see the guarded import in __init__.
+        import docker  # noqa: PLC0415
         try:
             self._docker.images.get(self.image)
         except docker.errors.ImageNotFound:

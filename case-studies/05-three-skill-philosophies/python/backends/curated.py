@@ -7,11 +7,11 @@ ironclaw/wit/tool.wit (host capability 白名单).
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Optional
 
 from skills import Skill, SkillRegistry, format_skill_md, parse_skill_md
-
 
 # ironclaw WIT 接口里的能力清单 (wit/tool.wit:18-106) 缩略版.
 # 装载 skill 时, skill 在 body 里申请的能力如果不在这白名单里, 拒装.
@@ -86,7 +86,6 @@ class CuratedRegistry(SkillRegistry):
         """从 skill body 里抓 'capabilities: [...]' 行的简单格式.
         真 ironclaw 是 WIT 编译时验证 imports.
         """
-        import re
         m = re.search(r"capabilities:\s*\[([^\]]*)\]", body)
         if not m:
             return set()

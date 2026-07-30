@@ -4,11 +4,10 @@ from __future__ import annotations
 import os
 
 import httpx
-from dotenv import load_dotenv
-from openai import OpenAI
-
 from chat import Chat, make_summarizer
+from dotenv import load_dotenv
 from memory import Full, Memory, Summary, Tokens, Window, estimate_tokens
+from openai import OpenAI
 
 load_dotenv()
 

@@ -5,9 +5,10 @@ from __future__ import annotations
 import os
 
 import httpx
-from agent import PlanExecuteAgent
 from dotenv import load_dotenv
 from openai import OpenAI
+
+from agent import PlanExecuteAgent
 
 load_dotenv()
 

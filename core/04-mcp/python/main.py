@@ -5,10 +5,9 @@ import os
 import sys
 
 import httpx
+from client import run_sync
 from dotenv import load_dotenv
 from openai import OpenAI
-
-from client import run_sync
 
 load_dotenv()
 

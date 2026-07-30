@@ -2,7 +2,14 @@
 from __future__ import annotations
 
 from metrics import (
-    contains, evaluate, exact, json_equal, keywords, levenshtein, regex, rouge_l,
+    contains,
+    evaluate,
+    exact,
+    json_equal,
+    keywords,
+    levenshtein,
+    regex,
+    rouge_l,
 )
 
 

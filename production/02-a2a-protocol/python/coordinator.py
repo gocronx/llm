@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+import argparse
+import json
 import os
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -141,8 +143,6 @@ def run_coordinator(user_request: str) -> dict:
 
 
 if __name__ == "__main__":
-    import argparse
-    import json
     p = argparse.ArgumentParser()
     p.add_argument("request")
     args = p.parse_args()

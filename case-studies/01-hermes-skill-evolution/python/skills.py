@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -91,7 +92,6 @@ def save(name: str, description: str, body: str) -> Path:
 
 def clear() -> None:
     """demo 用. 把整个 skill 库删干净, 模拟首次启动."""
-    import shutil
     if SKILLS_DIR.exists():
         shutil.rmtree(SKILLS_DIR)
 

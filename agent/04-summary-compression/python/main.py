@@ -5,10 +5,9 @@ import os
 from dataclasses import asdict
 
 import httpx
+from compressor import CompactConfig, LLMCompactor
 from dotenv import load_dotenv
 from openai import OpenAI
-
-from compressor import CompactConfig, LLMCompactor
 
 load_dotenv()
 

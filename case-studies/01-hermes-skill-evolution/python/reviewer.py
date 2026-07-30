@@ -13,8 +13,8 @@ from __future__ import annotations
 
 import json
 import re
-from openai import OpenAI
 
+from openai import OpenAI
 
 # 这段 prompt 是整个机制最关键的一段. hermes 的版本更长, 但精神在这.
 SKILL_REVIEW_PROMPT = """\

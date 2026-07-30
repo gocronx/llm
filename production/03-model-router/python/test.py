@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import unittest
 from unittest.mock import patch
 
 import requests
-
 import router
 from models import BY_TIER
 
@@ -15,7 +15,6 @@ def _make_response(status_code: int, body: dict | None = None) -> requests.Respo
     resp = requests.Response()
     resp.status_code = status_code
     if body is not None:
-        import json
         resp._content = json.dumps(body).encode("utf-8")
     return resp
 

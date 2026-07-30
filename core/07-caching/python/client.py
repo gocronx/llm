@@ -7,9 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from openai import OpenAI
-
 from cache import Cache
+from openai import OpenAI
 
 
 @dataclass

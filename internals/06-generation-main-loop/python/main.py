@@ -7,7 +7,6 @@ import sys
 import time
 
 import numpy as np
-
 from generation import MockModel, generate
 
 

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 from quant import build_fp8_table, fp8_quantize_block_inplace, q8_roundtrip
 
 

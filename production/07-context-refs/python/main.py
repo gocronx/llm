@@ -7,7 +7,6 @@ from pathlib import Path
 import httpx
 from dotenv import load_dotenv
 from openai import OpenAI
-
 from refs import WORKSPACE, render_for_llm, resolve_refs
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")

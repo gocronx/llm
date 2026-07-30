@@ -1,6 +1,7 @@
 """A2A protocol data structures, modeled after Google A2A / Anthropic peer-agent designs."""
 
 from typing import Literal
+
 from pydantic import BaseModel
 
 

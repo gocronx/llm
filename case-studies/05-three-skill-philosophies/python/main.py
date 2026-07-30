@@ -12,14 +12,14 @@ import sys
 from pathlib import Path
 
 import httpx
+from backends.auto_evolve import AutoEvolveRegistry
+from backends.curated import CuratedRegistry
+from backends.forage import ForageConfig, ForageRegistry
 from dotenv import load_dotenv
 from openai import OpenAI
 
 # python/ 在 sys.path 头部, 直接 import 没问题
 from skills import SkillRegistry
-from backends.auto_evolve import AutoEvolveRegistry
-from backends.forage import ForageRegistry
-from backends.curated import CuratedRegistry
 
 load_dotenv()
 
@@ -90,8 +90,6 @@ def scenario_forage_threshold() -> None:
     _print_section("场景 2 · forage 评分阈值过滤")
 
     _reset()
-    from backends.forage import ForageConfig
-
     # 默认阈值 0.6, catalog 里有一个 0.32 分的烂 skill, 应该被刷掉
     reg = ForageRegistry(CATALOG_DIR, FORAGE_INSTALLED, ForageConfig(score_threshold=0.6))
     print(f"score_threshold = 0.6")

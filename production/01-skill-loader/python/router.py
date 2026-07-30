@@ -14,10 +14,8 @@ import re
 from dataclasses import dataclass
 from typing import Literal
 
-from openai import OpenAI
-
 from loader import Skill
-
+from openai import OpenAI
 
 # ---- 关键词路由 ----
 

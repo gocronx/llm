@@ -4,7 +4,6 @@ from __future__ import annotations
 from checks import check, summarize, syntax_ok
 from dataset import build_samples, stratified_split, to_chat
 
-
 GOOD_CODE = """from saber.web import handler, Response
 from saber.db import Q
 
