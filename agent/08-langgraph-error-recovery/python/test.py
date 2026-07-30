@@ -57,10 +57,67 @@ def test_unsafe_proposal_is_rejected() -> bool:
     return True
 
 
+def test_invalid_tool_args_are_rejected() -> bool:
+    class InvalidArgsPlanner:
+        def propose(self, context):
+            return {
+                "strategy": "patch_step",
+                "reason": "提交了 schema 未声明的参数",
+                "replacement_step": {
+                    "id": context["failed_step"]["id"],
+                    "tool": "file.upload",
+                    "args": {"url": "https://example.com/report.pdf"},
+                },
+                "resume_from": context["failed_step"]["id"],
+            }
+
+    sandbox = ToolSandbox()
+    graph = build_graph(sandbox, InvalidArgsPlanner())
+    result = graph.invoke(
+        initial_state(),
+        config={"configurable": {"thread_id": "test-invalid-args"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("invalid tool args" in event for event in result["events"])
+    print("✓ Tool Schema 拒绝缺失 path 的恢复提案")
+    return True
+
+
+def test_recovery_budget_stops_failure_loop() -> bool:
+    class StillBrokenPlanner:
+        def propose(self, context):
+            return {
+                "strategy": "patch_step",
+                "reason": "仍然使用不存在的路径",
+                "replacement_step": {
+                    "id": context["failed_step"]["id"],
+                    "tool": "file.upload",
+                    "args": {"path": "output/still-missing.pdf"},
+                },
+                "resume_from": context["failed_step"]["id"],
+            }
+
+    sandbox = ToolSandbox()
+    graph = build_graph(sandbox, StillBrokenPlanner())
+    result = graph.invoke(
+        initial_state(),
+        config={"configurable": {"thread_id": "test-budget"}},
+    )
+
+    assert result["status"] == "human_review"
+    assert any("BUDGET exhausted" in event for event in result["events"])
+    assert result["committed_steps"] == ["generate_report"]
+    print("✓ 连续恢复失败达到预算后暂停人工处理")
+    return True
+
+
 def main() -> None:
     tests = [
         test_file_error_is_repaired,
         test_unsafe_proposal_is_rejected,
+        test_invalid_tool_args_are_rejected,
+        test_recovery_budget_stops_failure_loop,
     ]
     passed = sum(test() for test in tests)
     print(f"\n{passed}/{len(tests)} passed")

@@ -14,17 +14,20 @@ from models import (
 from planner import RecoveryPlanner
 from tools import ToolExecutionError, ToolSandbox, redact_args
 
+MAX_RECOVERY_ATTEMPTS = 2
+
 
 def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
     """Build the recovery graph around injected tool and planner adapters."""
 
     def execute_step(
         state: AgentState,
-    ) -> Command[Literal["commit_step", "plan_recovery"]]:
+    ) -> Command[Literal["commit_step", "plan_recovery", "human_review"]]:
         step = state["plan"][state["current_step"]]
         try:
             result = sandbox.execute(step)
         except ToolExecutionError as error:
+            recovery_attempts = state["recovery_attempts"] + 1
             context: FailureContext = {
                 "goal": state["goal"],
                 "committed_steps": state["committed_steps"],
@@ -38,19 +41,32 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
                     "retryable": error.retryable,
                 },
                 "observed_state": sandbox.observable_state(),
+                "available_tools": sandbox.tool_definitions(),
                 "constraints": {
                     "allowed_tools": [
-                        "report.generate",
-                        "file.upload",
-                        "link.create",
-                        "email.send",
+                        definition["name"]
+                        for definition in sandbox.tool_definitions()
                     ],
-                    "max_recovery_steps": 2,
+                    "max_recovery_attempts": MAX_RECOVERY_ATTEMPTS,
+                    "remaining_recovery_attempts": max(
+                        0,
+                        MAX_RECOVERY_ATTEMPTS - recovery_attempts,
+                    ),
                 },
             }
+            if recovery_attempts > MAX_RECOVERY_ATTEMPTS:
+                return Command(
+                    update={
+                        "failure_context": context,
+                        "recovery_attempts": recovery_attempts,
+                        "events": ["RECOVERY BUDGET exhausted"],
+                    },
+                    goto="human_review",
+                )
             return Command(
                 update={
                     "failure_context": context,
+                    "recovery_attempts": recovery_attempts,
                     "status": "recovering",
                     "events": [
                         f"FAILED {step['id']}: {error.code} — route to AI planner"
@@ -93,6 +109,23 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
         if proposal["strategy"] == "human":
             return Command(goto="human_review")
 
+        if proposal["resume_from"] != context["failed_step"]["id"]:
+            return Command(
+                update={"events": ["GUARDRAIL rejected invalid resume_from"]},
+                goto="human_review",
+            )
+
+        if proposal["strategy"] == "retry":
+            if not context["error"]["retryable"]:
+                return Command(
+                    update={"events": ["GUARDRAIL rejected non-retryable error"]},
+                    goto="human_review",
+                )
+            return Command(
+                update={"failure_context": None},
+                goto="execute_step",
+            )
+
         replacement = proposal.get("replacement_step")
         allowed = context["constraints"]["allowed_tools"]
         if (
@@ -103,6 +136,17 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
         ):
             return Command(
                 update={"events": ["GUARDRAIL rejected unsafe proposal"]},
+                goto="human_review",
+            )
+
+        validation_error = sandbox.validate_step(replacement)
+        if validation_error is not None:
+            return Command(
+                update={
+                    "events": [
+                        f"GUARDRAIL rejected invalid tool args: {validation_error}"
+                    ]
+                },
                 goto="human_review",
             )
 
@@ -130,6 +174,7 @@ def build_graph(sandbox: ToolSandbox, planner: RecoveryPlanner):
                 "current_step": next_index,
                 "committed_steps": [*state["committed_steps"], step["id"]],
                 "status": "running",
+                "recovery_attempts": 0,
             },
             goto=goto,
         )
@@ -191,6 +236,7 @@ def initial_state() -> AgentState:
         "goal": "生成项目周报、上传、创建分享链接并发送邮件",
         "plan": plan,
         "current_step": 0,
+        "recovery_attempts": 0,
         "committed_steps": [],
         "failure_context": None,
         "recovery_proposal": None,

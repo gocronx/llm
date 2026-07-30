@@ -47,8 +47,13 @@ FailureContext
 ├── failed_step        当前失败步骤
 ├── error              错误码、错误信息、是否可重试
 ├── observed_state     当前真实文件和外部状态
+├── available_tools    工具用途和 JSON input_schema
 └── constraints        工具白名单、恢复预算
 ```
+
+`available_tools` 不是只有工具名称。每个工具都提供 `description`、必填参数、
+参数类型以及是否允许额外参数。AI 据此生成调用；提案返回后，执行端再使用同一份
+Schema 机械校验，避免模型猜错参数或偷偷加入未声明字段。
 
 AI 返回结构化 `RecoveryProposal`：
 
@@ -112,13 +117,15 @@ DONE all steps committed
 | `Command` | 同时更新状态并决定下一个节点 |
 | Checkpointer | 按 `thread_id` 保存任务进度 |
 | 节点重入 | 修正计划后重新进入失败步骤 |
+| Tool Schema | 同时约束 AI 规划和执行端参数校验 |
+| 恢复预算 | 连续失败超过 2 次后暂停并转人工处理 |
 
 LangGraph 解决的是**状态与流程编排**，不会自动理解业务错误。以下内容仍需应用定义：
 
 - 哪些错误可以重试，哪些必须修正计划
 - 如何采集外部真实状态
 - 工具是否幂等
-- 恢复提案如何校验
+- 恢复提案如何校验（工具、参数 Schema、步骤 ID、`resume_from`）
 - 哪些操作必须人工审批
 
 ## 与单次工具报错恢复的区别

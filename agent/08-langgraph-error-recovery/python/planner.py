@@ -14,9 +14,9 @@ SYSTEM_PROMPT = """\
 
 规则：
 1. 不修改已经提交的步骤。
-2. 只能使用 constraints.allowed_tools 中的工具。
+2. 只能使用 available_tools 中的工具，并严格遵守对应 input_schema。
 3. 不得绕过权限、审批或预算限制。
-4. 优先修正当前步骤；只有当前计划不可行时才重新规划。
+4. replacement_step 必须保留失败步骤的 id，resume_from 必须等于失败步骤 id。
 5. 只返回 JSON RecoveryProposal，不执行任何工具。
 
 RecoveryProposal:

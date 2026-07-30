@@ -10,6 +10,12 @@ class Step(TypedDict):
     args: dict[str, str]
 
 
+class ToolDefinition(TypedDict):
+    name: str
+    description: str
+    input_schema: dict[str, object]
+
+
 class ToolErrorInfo(TypedDict):
     code: str
     message: str
@@ -22,6 +28,7 @@ class FailureContext(TypedDict):
     failed_step: Step
     error: ToolErrorInfo
     observed_state: dict[str, list[str]]
+    available_tools: list[ToolDefinition]
     constraints: dict[str, object]
 
 
@@ -36,6 +43,7 @@ class AgentState(TypedDict):
     goal: str
     plan: list[Step]
     current_step: int
+    recovery_attempts: int
     committed_steps: list[str]
     failure_context: FailureContext | None
     recovery_proposal: RecoveryProposal | None
