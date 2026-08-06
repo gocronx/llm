@@ -1,6 +1,6 @@
 # LLM 开发实战项目集
 
-32 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
+33 个独立 demo + 源码拆解，按"目的"分到 6 个父级目录，每个分类下从 01 开始编号。每个用 Python（部分附 Go / Rust）实现，配合本地 MLX 模型或任意 OpenAI 兼容 API。
 
 ![五个抽屉按目的分，每件拿来即跑、拆开能学](assets/readme-illustrations/01-five-drawers.png)
 
@@ -9,7 +9,8 @@
 ```
 llm/
 ├── core/           # 核心 LLM 工程能力 (8 个)
-├── agent/          # Agent 范式 + 长跑治理 (8 个)
+├── agent/          # Agent 范式 + 长跑治理 (9 个)
+├── rag/            # 检索增强生成与对比 (1 个)
 ├── production/     # 生产工程化 (7 个)
 ├── niche/          # 价值评估两极的话题 (3 个)
 ├── case-studies/   # 真实开源项目源码拆解 + 最小复刻
@@ -69,6 +70,13 @@ cp .env.example .env
 | 06 | [tool-call-recovery](agent/06-tool-call-recovery) | ⭐⭐⭐⭐ | 4 类死循环检测 + 错误喂回 LLM 自修；真 DuckDuckGo 联网 |
 | 07 | [plan-execute](agent/07-plan-execute) | ⭐⭐⭐⭐ | Plan-and-Execute：先规划再执行 + replan，跟 01 的 ReAct 对照 |
 | 08 | [langgraph-error-recovery](agent/08-langgraph-error-recovery) | ⭐⭐⭐⭐⭐ | LangGraph 多步任务恢复：FailureContext + AI 修复 + 护栏 + 断点续跑 |
+| 09 | [langgraph-human-approval](agent/09-langgraph-human-approval) | ⭐⭐⭐⭐⭐ | LangGraph 人工审批：interrupt + SQLite checkpoint + 跨进程批准/修改/拒绝 |
+
+### rag · 检索增强生成
+
+| # | demo | 价值 | 说明 |
+|---|------|------|------|
+| 01 | [bm25-vs-vector-search](rag/01-bm25-vs-vector-search) | ⭐⭐⭐⭐⭐ | BM25 稀疏关键词检索 vs 稠密向量检索对照与置信度标定分析 |
 
 ### production · 生产工程化
 
@@ -103,6 +111,7 @@ cp .env.example .env
 | 03 | [openhands-sandbox-isolation](case-studies/03-openhands-sandbox-isolation) | OpenHands | sandbox 子系统的抽象+状态机+多后端怎么实现+能不能抄? |
 | 04 | [openhands-event-callbacks](case-studies/04-openhands-event-callbacks) | OpenHands | 事件后挂副作用怎么不耦合? 可插拔 processor + 双维度过滤 |
 | 05 | [three-skill-philosophies](case-studies/05-three-skill-philosophies) | hermes/zeroclaw/ironclaw | "AI 写 skill" 三种哲学 (自产/采集/策展) 选哪个? |
+| 06 | [ragflow-hybrid-search](case-studies/06-ragflow-hybrid-search) | RAGFlow | RAG 检索为什么不能只靠向量? BM25 + 向量双路召回怎么融合? |
 
 进一步说明见 [`case-studies/README.md`](case-studies/README.md).
 
@@ -131,8 +140,9 @@ cp .env.example .env
 - **跑评测 / 数据生成**：`core/08-evaluation` + `production/06-batch-runner`，配合用
 - **写 IDE / 编辑器集成**：`production/07-context-refs` + `production/01-skill-loader` + `core/04-mcp`
 - **Agent 跑长了崩了**：`agent/03-context-governance`（5 步治理）→ `04-summary-compression`（LLM 总结）→ `06-tool-call-recovery`（单轮自修）→ `08-langgraph-error-recovery`（多步持久恢复）；多 agent 并行上 `05-subagent-orchestration`
+- **高风险操作需要人批**：`production/05-tool-guardrails`（风险围栏）→ `agent/09-langgraph-human-approval`（暂停、跨进程恢复与审计轨迹）
 - **想懂 LLM 内部**：去 [`internals/`](internals/) 看采样 / RoPE / RMSNorm+SwiGLU / FP8 量化 / 投机解码 / 生成主循环（6 个 numpy 单测 demo，建议从 06 主循环入手）
-- **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04) / 三种 skill 哲学对照 (05)
+- **想抄某个开源 agent 的招**：去 `case-studies/`，已拆: hermes "越用越聪明" (01) / OpenHands 平台架构 + event sourcing (02) / OpenHands sandbox 隔离 (03) / OpenHands event callback (04) / 三种 skill 哲学对照 (05) / RAGFlow BM25 + 向量混合检索 (06)
 
 ## 快速开始
 
@@ -172,6 +182,7 @@ python python/demo.py
   - `production/06-batch-runner`：`tenacity`
   - `agent/06-tool-call-recovery`：`ddgs`（真联网搜索）
   - `agent/08-langgraph-error-recovery`：`langgraph`
+  - `agent/09-langgraph-human-approval`：`langgraph`、`langgraph-checkpoint-sqlite`
 
 ## 测试
 
@@ -185,6 +196,7 @@ cd production/03-model-router/python && python -m unittest test_failover.py -v
 cd agent/03-context-governance/python && python test.py    # 7/7
 cd agent/06-tool-call-recovery/python && python test.py    # 11/11
 cd agent/08-langgraph-error-recovery/python && python test.py  # 2/2
+cd agent/09-langgraph-human-approval/python && python test.py  # 10/10
 ```
 
 凡是覆盖了 mock-based 单测的都不依赖真实 LLM，秒级返回。

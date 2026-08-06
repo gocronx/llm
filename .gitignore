@@ -58,6 +58,7 @@ vendor/
 18-tool-guardrails-demo/python/data/
 18-tool-guardrails-demo/python/logs/
 19-batch-runner-demo/python/results/
+agent/09-langgraph-human-approval/python/data/
 
 # Misc Python build / profile / notebook artifacts
 *.pkl

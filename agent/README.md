@@ -19,6 +19,7 @@ flowchart TD
     S --> S5["ReWOO ❌"]
     S --> S6["LATS ❌"]
     S --> S7["Durable Recovery ✅ 08"]
+    S --> S8["Human-in-the-loop ✅ 09"]
 
     M --> M1["Supervisor / 主管 ✅ 05"]
     M --> M2["Hierarchical / 分层 ❌"]
@@ -40,6 +41,7 @@ flowchart TD
 | Plan-and-Execute | 先把整件事拆成计划，再照着执行 | 步骤多、前后有依赖 | ✅ [07-plan-execute](07-plan-execute) |
 | Reflexion / 自我修正 | 失败了把错误喂回去，让模型自己改 | 容易出错、需要试错的任务 | ✅ [06-tool-call-recovery](06-tool-call-recovery) |
 | Durable Recovery | 保存多步任务状态，失败后修复并从检查点继续 | 有副作用、不能整单重跑 | ✅ [08-langgraph-error-recovery](08-langgraph-error-recovery) |
+| Human-in-the-loop | 高风险步骤暂停，等待人批准、修改或拒绝 | 生产变更、支付、删除等受控操作 | ✅ [09-langgraph-human-approval](09-langgraph-human-approval) |
 | Tree of Thoughts | 把下一步展开成多个分支，打分加回溯 | 解谜、需要探索的推理 | ❌ |
 | ReWOO | 推理和取证分开，先列全所有要查的，再批量查 | 想省 token、能并行 | ❌ |
 | LATS | ReAct 上面套蒙特卡洛树搜索 | 追求决策质量、不在乎慢 | ❌ |
@@ -103,6 +105,22 @@ flowchart LR
 ```
 
 [08-langgraph-error-recovery](08-langgraph-error-recovery) 用 LangGraph 的 `StateGraph`、`Command` 和 checkpointer 实现这个闭环。重点不是框架 API，而是 AI 只提出结构化恢复方案，确定性护栏决定能不能执行。
+
+### Human-in-the-loop ✅ 09
+
+高风险操作不能依赖 Agent “自觉停手”。09 先用确定性策略判断风险，高风险路径调用 `interrupt()` 保存状态并退出；审批者之后用同一个 `thread_id` 批准、修改或拒绝，新进程通过 SQLite checkpoint 从暂停点恢复。
+
+```mermaid
+flowchart LR
+    P["变更计划"] --> R{"风险策略"}
+    R -->|低风险| E["执行"]
+    R -->|高风险| I["interrupt"]
+    I -->|批准| E
+    I -->|修改| R
+    I -->|拒绝| X["终止"]
+```
+
+实现和安全边界见 [09-langgraph-human-approval](09-langgraph-human-approval)。它与 08 正交：09 管执行前授权，08 管执行中失败恢复。
 
 ### ToT / ReWOO / LATS ❌
 
@@ -183,6 +201,7 @@ flowchart LR
 - 步数多、前后有依赖，用 Plan-Execute（[07](07-plan-execute)）
 - 任务容易失败、要能自愈，参考 Reflexion 思路（[06](06-tool-call-recovery)）
 - 多步任务有副作用、失败后不能从头跑，用持久恢复（[08](08-langgraph-error-recovery)）
+- 高风险操作执行前必须让人确认，用持久审批（[09](09-langgraph-human-approval)）
 - 任务可拆、想并行又想 context 干净，用主管式 fan-out（[05](05-subagent-orchestration)）
 - 固定流水线、角色接力，用 Pipeline（[02](02-multi-agent)）
 - Agent 跑长了崩，先补长跑治理（[03](03-context-governance) → [04](04-summary-compression)），这跟选哪种架构没冲突
@@ -193,7 +212,7 @@ flowchart LR
 
 | | 已实现 | 仅文档提到 |
 |--|--------|-----------|
-| 单 Agent | ReAct(01)、Plan-Execute(07)、Reflexion(06)、Durable Recovery(08) | ToT、ReWOO、LATS |
+| 单 Agent | ReAct(01)、Plan-Execute(07)、Reflexion(06)、Durable Recovery(08)、Human-in-the-loop(09) | ToT、ReWOO、LATS |
 | 多 Agent | Supervisor(05)、Pipeline+Parallel(02) | Hierarchical、Network |
 | 横切 | 长跑治理(03/04) | — |
 
